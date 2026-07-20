@@ -10,5 +10,6 @@ Dokumen ini ditulis **seiring pembangunan** agar setiap keputusan tercatat.
 | 04 | [Keamanan](04-keamanan.md) | Lapisan pertahanan, checklist, tools audit |
 | 05 | [Panduan Fitur](05-panduan-fitur.md) | Alur tiap fitur (tumbuh seiring build) |
 | 06 | [Langkah Selanjutnya](06-langkah-selanjutnya.md) | Roadmap sisa fitur, alur kerja, checklist deploy |
+| 07 | [Animasi & Transisi](07-animasi-transisi.md) | Guideline menambah animasi transisi konsisten |
 
 Riwayat perubahan: [../CHANGELOG.md](../CHANGELOG.md)

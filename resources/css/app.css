@@ -123,3 +123,51 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); -webk
   .rl-side { position: static; height: auto; flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--line); }
   .rl-side__foot { display: none; }
 }
+
+/* ============================================================
+   Motion & Transitions
+   Lapisan animasi global. transform/opacity saja (GPU, 60fps).
+   ============================================================ */
+:root {
+  --ease: cubic-bezier(.4, 0, .2, 1);
+  --dur-fast: .12s;
+  --dur: .2s;
+  --dur-slow: .35s;
+}
+
+/* Layer 1 — transisi antar halaman (View Transitions API).
+   Membuat navigasi & submit form (yang redirect) menjadi cross-fade,
+   bukan "kedip refresh". Browser tanpa dukungan: navigasi normal. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: rl-vt-out var(--dur) var(--ease) both; }
+::view-transition-new(root) { animation: rl-vt-in var(--dur-slow) var(--ease) both; }
+@keyframes rl-vt-out { to { opacity: 0; } }
+@keyframes rl-vt-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* Shell tetap diam saat pindah halaman; hanya konten yang beralih. */
+.rl-side { view-transition-name: rl-sidebar; }
+.rl-topbar { view-transition-name: rl-topbar; }
+
+/* Layer 2 — transisi mikro pada elemen interaktif. */
+.btn-redline, .btn-ghost, .rl-nav-item, .rl-card, .rl-pill,
+input, select, textarea, a {
+  transition:
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+.btn-redline:hover, .btn-ghost:hover { transform: translateY(-1px); }
+.btn-redline:active, .btn-ghost:active { transform: translateY(0) scale(.985); }
+.rl-card { transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.rl-nav-item, .rl-table tbody tr { transition: background-color var(--dur) var(--ease); }
+
+/* Layer 3 — helper untuk Alpine x-transition (modal, dropdown, toast). */
+[x-cloak] { display: none !important; }
+
+/* Aksesibilitas — hormati preferensi kurangi gerak. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
