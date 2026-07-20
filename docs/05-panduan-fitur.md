@@ -9,7 +9,7 @@ Dokumen ini tumbuh seiring fitur diselesaikan. Tiap fitur: alur normal + alur al
 | Dashboard | Internal | ✅ |
 | POS / Pengkasiran | Internal | ✅ |
 | Manajemen Produk | Internal | ✅ |
-| Manajemen Servis + status | Internal | ⏳ |
+| Manajemen Servis + status | Internal | ✅ |
 | Manajemen Promo | Internal (Owner) | ⏳ |
 | Laporan Penjualan | Internal (Owner) | ⏳ |
 | Akun Pegawai | Internal (Owner) | ⏳ |

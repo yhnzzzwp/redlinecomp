@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Internal\DashboardController;
 use App\Http\Controllers\Internal\PosController;
 use App\Http\Controllers\Internal\ProdukController;
+use App\Http\Controllers\Internal\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'public.landing')->name('landing');
@@ -29,7 +30,13 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('produk', ProdukController::class)->except(['show']);
     Route::view('/customers', 'internal.soon', ['judul' => 'Customer Directory', 'aktif' => 'customers'])->name('customers');
-    Route::view('/service', 'internal.soon', ['judul' => 'Service Management', 'aktif' => 'service'])->name('service');
+
+    Route::get('/service', [ServiceController::class, 'index'])->name('service');
+    Route::get('/service/create', [ServiceController::class, 'create'])->name('service.create');
+    Route::post('/service', [ServiceController::class, 'store'])->name('service.store');
+    Route::get('/service/{service}', [ServiceController::class, 'show'])->name('service.show');
+    Route::post('/service/{service}/status', [ServiceController::class, 'updateStatus'])->name('service.status');
+    Route::post('/service/{service}/part', [ServiceController::class, 'storePart'])->name('service.part');
 
     Route::middleware('owner')->group(function () {
         Route::view('/analytics', 'internal.soon', ['judul' => 'Sales Analytics', 'aktif' => 'analytics'])->name('analytics');

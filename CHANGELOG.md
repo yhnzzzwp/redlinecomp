@@ -31,3 +31,12 @@
 - Flash message sukses/error di layout admin. storage:link untuk foto produk.
 - phpMyAdmin ditambahkan ke Docker stack (port 8082) untuk inspeksi database.
 - Uji: 5 feature test CRUD (validasi, unik, upload, update, hapus). Larastan level 5 tetap 0 error.
+
+## [Servis] — Manajemen Servis
+### Ditambahkan
+- Fitur servis penuh: ServiceTicketService (buat tiket + resi otomatis, update status, tambah sparepart) — semua via DB transaction.
+- Nomor resi otomatis anti-duplikat (KodeGenerator::resi, format PK-YYYY-NNNN).
+- Riwayat status disimpan (service_status), tidak ditimpa — sesuai SRS §2.5.
+- View index (tabel + filter status + cari), form tambah, dan Detail Servis (stepper 5 tahap, timeline riwayat, sparepart) — melengkapi layar yang hilang di Figma.
+- Requests: StoreServiceRequest, UpdateStatusServiceRequest, StorePartServiceRequest.
+- Hapus ExampleTest bawaan. Uji: 5 feature test servis. Total 15 test lulus, Larastan 0 error.
