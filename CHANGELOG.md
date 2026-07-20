@@ -22,3 +22,12 @@
 - Nota digital PDF via laravel-dompdf (resources/views/pdf/nota.blade.php).
 - Halaman POS fungsional (Alpine: keranjang, filter kategori, promo, checkout).
 - Uji: 5 feature test lulus. Kualitas: Larastan level 5 (0 error) + phpstan.neon.
+
+## [Produk] — Manajemen Produk (CRUD)
+### Ditambahkan
+- CRUD Produk penuh: ProdukController (resource), ProductService (persist + simpan/hapus foto).
+- StoreProdukRequest & UpdateProdukRequest (validasi + validasi upload gambar mimes/max, SKU unik).
+- View index (tabel + cari + pagination Bootstrap + badge stok) & form (create/edit) + konfirmasi hapus.
+- Flash message sukses/error di layout admin. storage:link untuk foto produk.
+- phpMyAdmin ditambahkan ke Docker stack (port 8082) untuk inspeksi database.
+- Uji: 5 feature test CRUD (validasi, unik, upload, update, hapus). Larastan level 5 tetap 0 error.

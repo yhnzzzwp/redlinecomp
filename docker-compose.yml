@@ -11,9 +11,11 @@ services:
     restart: unless-stopped
     working_dir: /var/www
     environment:
-      # override konteks host → container berbicara ke service "db"
       DB_HOST: db
       DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-redline}
+      DB_USERNAME: ${DB_USERNAME:-redline}
+      DB_PASSWORD: ${DB_PASSWORD:-redline_secret}
     volumes:
       - ./:/var/www
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/redline.ini:ro
@@ -64,6 +66,22 @@ services:
     ports:
       - "8081:8080"
     depends_on: [db]
+    networks: [redline]
+
+  # ---- phpMyAdmin: GUI database ala XAMPP/Laragon ----
+  phpmyadmin:
+    image: phpmyadmin:5
+    container_name: redline-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8082:80"
+    depends_on:
+      db:
+        condition: service_healthy
     networks: [redline]
 
   # ---- Node: build asset (Vite: Bootstrap 5 + Alpine). Sekali jalan lalu berhenti. ----

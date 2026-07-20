@@ -12,6 +12,7 @@ docker compose exec app php artisan migrate --seed
 |---------|-----|
 | Aplikasi | http://localhost:8080 |
 | Adminer (GUI DB) | http://localhost:8081 |
+| phpMyAdmin (GUI DB ala XAMPP) | http://localhost:8082 |
 | MySQL (host) | 127.0.0.1:3307 |
 
 Build asset (Bootstrap 5 + Alpine via Vite):

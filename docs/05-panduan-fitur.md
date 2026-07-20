@@ -8,7 +8,7 @@ Dokumen ini tumbuh seiring fitur diselesaikan. Tiap fitur: alur normal + alur al
 | Login + role gate | Internal | ✅ |
 | Dashboard | Internal | ✅ |
 | POS / Pengkasiran | Internal | ✅ |
-| Manajemen Produk | Internal | ⏳ |
+| Manajemen Produk | Internal | ✅ |
 | Manajemen Servis + status | Internal | ⏳ |
 | Manajemen Promo | Internal (Owner) | ⏳ |
 | Laporan Penjualan | Internal (Owner) | ⏳ |

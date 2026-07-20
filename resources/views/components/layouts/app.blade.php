@@ -24,6 +24,16 @@
                 <div class="rl-avatar">{{ \Illuminate\Support\Str::of(auth()->user()->nama_pegawai)->explode(' ')->map(fn($w)=>$w[0]??'')->take(2)->implode('') }}</div>
             </div>
             <div class="rl-body">
+                @if (session('success'))
+                    <div class="rl-card p-3 d-flex align-items-center gap-2" style="border-left:4px solid var(--green);color:#15803d">
+                        <b>✓</b> {{ session('success') }}
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div class="rl-card p-3 d-flex align-items-center gap-2" style="border-left:4px solid var(--red);color:var(--red-strong)">
+                        <b>!</b> {{ session('error') }}
+                    </div>
+                @endif
                 {{ $slot }}
             </div>
         </div>
