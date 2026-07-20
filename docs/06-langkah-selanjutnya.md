@@ -65,11 +65,10 @@ Semua mengikuti **pola yang sama** (lihat fitur Produk/Promo sebagai contoh):
 - **Cek Nota Transaksi**: input kode → tampilkan detail nota (data `Transaksi` by `kode_nota`).
 - **About Us** & **404**: statis.
 
-### Keputusan yang perlu diambil: menu "Customers"
-SRS menyatakan manajemen data pelanggan **di luar cakupan** (tidak ada entitas pelanggan).
-Pilih salah satu:
-- (a) **Hapus** menu Customers dari sidebar (paling sesuai SRS), atau
-- (b) Tambah entitas `pelanggan` ke ERD + migrasi (perubahan cakupan, perlu revisi SRS).
+### Keputusan: menu "Customers" — SUDAH DIHAPUS
+SRS menyatakan manajemen data pelanggan **di luar cakupan**. Menu Customers telah dihapus
+dari sidebar & route. Data pembeli tetap tersimpan menempel di `transaksi` (nama/nomor HP)
+dan `service` (nama/nomor HP customer), sesuai ERD.
 
 ## D. Sebelum deploy (checklist keamanan & produksi)
 - [ ] `.env` produksi: `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY` baru & rahasia.

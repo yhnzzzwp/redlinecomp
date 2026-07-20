@@ -30,7 +30,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/pos/nota/{transaksi}', [PosController::class, 'nota'])->name('pos.nota');
 
     Route::resource('produk', ProdukController::class)->except(['show']);
-    Route::view('/customers', 'internal.soon', ['judul' => 'Customer Directory', 'aktif' => 'customers'])->name('customers');
 
     Route::get('/service', [ServiceController::class, 'index'])->name('service');
     Route::get('/service/create', [ServiceController::class, 'create'])->name('service.create');
