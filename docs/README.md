@@ -9,5 +9,6 @@ Dokumen ini ditulis **seiring pembangunan** agar setiap keputusan tercatat.
 | 03 | [Setup & Docker](03-setup.md) | Menjalankan via Docker maupun lokal |
 | 04 | [Keamanan](04-keamanan.md) | Lapisan pertahanan, checklist, tools audit |
 | 05 | [Panduan Fitur](05-panduan-fitur.md) | Alur tiap fitur (tumbuh seiring build) |
+| 06 | [Langkah Selanjutnya](06-langkah-selanjutnya.md) | Roadmap sisa fitur, alur kerja, checklist deploy |
 
 Riwayat perubahan: [../CHANGELOG.md](../CHANGELOG.md)
