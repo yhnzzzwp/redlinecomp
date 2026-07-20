@@ -40,3 +40,10 @@
 - View index (tabel + filter status + cari), form tambah, dan Detail Servis (stepper 5 tahap, timeline riwayat, sparepart) — melengkapi layar yang hilang di Figma.
 - Requests: StoreServiceRequest, UpdateStatusServiceRequest, StorePartServiceRequest.
 - Hapus ExampleTest bawaan. Uji: 5 feature test servis. Total 15 test lulus, Larastan 0 error.
+
+## [Promo] — Manajemen Promo (Owner)
+### Ditambahkan
+- CRUD Promo khusus Owner (enforcement ganda: middleware 'owner' + FormRequest::authorize isOwner).
+- StorePromoRequest & UpdatePromoRequest: kode unik + auto-kapital, tipe enum, batas persen 1–100, validasi periode.
+- View index (kartu promo gradient + status berlaku) & form create/edit.
+- Uji: 6 feature test termasuk Karyawan ditolak (403). Total 21 test lulus, Larastan 0 error.

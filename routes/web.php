@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Internal\DashboardController;
 use App\Http\Controllers\Internal\PosController;
 use App\Http\Controllers\Internal\ProdukController;
+use App\Http\Controllers\Internal\PromoController;
 use App\Http\Controllers\Internal\ServiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -40,7 +41,7 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('owner')->group(function () {
         Route::view('/analytics', 'internal.soon', ['judul' => 'Sales Analytics', 'aktif' => 'analytics'])->name('analytics');
-        Route::view('/promo', 'internal.soon', ['judul' => 'Manajemen Promo', 'aktif' => 'promo'])->name('promo');
+        Route::resource('promo', PromoController::class)->except(['show']);
         Route::view('/pegawai', 'internal.soon', ['judul' => 'Akun Pegawai', 'aktif' => 'pegawai'])->name('pegawai');
     });
 });
