@@ -1,0 +1,9 @@
+.git
+node_modules
+vendor
+storage/*.key
+.env
+npm-debug.log
+yarn-error.log
+/docs
+tests

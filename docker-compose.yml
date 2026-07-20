@@ -1,0 +1,86 @@
+# Redline Komputer (SIRC) — Docker stack untuk development & pra-deployment.
+# Jalankan:  docker compose up -d --build
+# Lihat app: http://localhost:8080   ·   Adminer (DB GUI): http://localhost:8081
+services:
+  # ---- PHP-FPM: menjalankan kode Laravel ----
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: redline-app
+    restart: unless-stopped
+    working_dir: /var/www
+    environment:
+      # override konteks host → container berbicara ke service "db"
+      DB_HOST: db
+      DB_PORT: 3306
+    volumes:
+      - ./:/var/www
+      - ./docker/php/php.ini:/usr/local/etc/php/conf.d/redline.ini:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [redline]
+
+  # ---- Nginx: web server / reverse proxy ke PHP-FPM ----
+  web:
+    image: nginx:1.27-alpine
+    container_name: redline-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [app]
+    networks: [redline]
+
+  # ---- MySQL 8: basis data (wajib per SRS §3.4) ----
+  db:
+    image: mysql:8.0
+    container_name: redline-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-redline}
+      MYSQL_USER: ${DB_USERNAME:-redline}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-redline_secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+    ports:
+      - "3307:3306"        # host 3307 → hindari bentrok MySQL lokal
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_ROOT_PASSWORD:-root_secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [redline]
+
+  # ---- Adminer: GUI ringan untuk inspeksi database ----
+  adminer:
+    image: adminer:4
+    container_name: redline-adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    depends_on: [db]
+    networks: [redline]
+
+  # ---- Node: build asset (Vite: Bootstrap 5 + Alpine). Sekali jalan lalu berhenti. ----
+  node:
+    image: node:22-alpine
+    container_name: redline-node
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    profiles: [assets]       # aktif hanya dengan: docker compose --profile assets up node
+    command: sh -c "npm install && npm run build"
+    networks: [redline]
+
+networks:
+  redline:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
