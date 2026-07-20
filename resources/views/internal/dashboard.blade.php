@@ -8,7 +8,7 @@
             <h1 class="fw-bold mb-1" style="font-size:23px;letter-spacing:-.4px">Dashboard Overview</h1>
             <p class="text-muted mb-0" style="font-size:13.5px">Real-time performance metrics untuk Redline Komputer.</p>
         </div>
-        <button class="btn-redline">⭳ Export Report</button>
+        <a href="{{ route('analytics.cetak') }}" target="_blank" class="btn-redline text-decoration-none">⭳ Export Report</a>
     </div>
 
     {{-- KPI bento --}}
@@ -105,7 +105,7 @@
     <div class="rl-card p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h3 class="fw-bold mb-0" style="font-size:16px">Critical Stock Levels</h3>
-            <span class="fw-semibold" style="font-size:12.5px;color:var(--red-strong)">Inventory Management →</span>
+            <a href="{{ route('produk.index') }}" class="fw-semibold text-decoration-none" style="font-size:12.5px;color:var(--red-strong)">Inventory Management &rarr;</a>
         </div>
         <div class="row g-3">
             @forelse ($criticalStock as $p)
