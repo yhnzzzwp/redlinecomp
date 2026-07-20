@@ -79,7 +79,7 @@
             <div class="rl-card h-100">
                 <div class="d-flex justify-content-between align-items-center p-3 pb-2">
                     <h3 class="fw-bold mb-0" style="font-size:16px">Recent Transactions</h3>
-                    <span class="fw-semibold" style="font-size:12px;color:var(--red-strong)">View All</span>
+                    <a href="{{ route('transaksi.index') }}" class="fw-semibold text-decoration-none" style="font-size:12px;color:var(--red-strong)">View All &rarr;</a>
                 </div>
                 <div class="px-2 pb-2">
                     @forelse ($recent as $t)

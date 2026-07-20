@@ -42,6 +42,12 @@ final class ServiceTicketService
 
     public function updateStatus(Service $service, StatusService $status, ?string $catatan, Pegawai $pegawai): Service
     {
+        if (! $service->status->canTransitionTo($status)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => "Tidak bisa mengubah status dari \"{$service->status->value}\" ke \"{$status->value}\".",
+            ]);
+        }
+
         return DB::transaction(function () use ($service, $status, $catatan, $pegawai): Service {
             $service->update(['status' => $status]);
 

@@ -3,19 +3,23 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Public\PublicController;
+use App\Http\Controllers\Internal\AnalyticsController;
 use App\Http\Controllers\Internal\DashboardController;
 use App\Http\Controllers\Internal\PegawaiController;
 use App\Http\Controllers\Internal\PosController;
 use App\Http\Controllers\Internal\ProdukController;
 use App\Http\Controllers\Internal\PromoController;
 use App\Http\Controllers\Internal\ServiceController;
+use App\Http\Controllers\Internal\TransaksiController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'public.landing')->name('landing');
-Route::view('/about', 'public.soon', ['judul' => 'About Us', 'aktif' => 'About Us'])->name('about');
-Route::view('/catalogue', 'public.soon', ['judul' => 'Catalogue', 'aktif' => 'Catalogue'])->name('catalogue');
-Route::view('/cek-servis', 'public.soon', ['judul' => 'Cek Status Servis', 'aktif' => 'Service'])->name('cek.servis');
-Route::view('/cek-nota', 'public.soon', ['judul' => 'Cek Nota Transaksi', 'aktif' => 'Service'])->name('cek.nota');
+Route::get('/about', [PublicController::class, 'about'])->name('about');
+Route::get('/catalogue', [PublicController::class, 'catalogue'])->name('catalogue');
+Route::get('/catalogue/{produk}', [PublicController::class, 'detailProduk'])->name('catalogue.show');
+Route::get('/cek-servis', [PublicController::class, 'cekServis'])->name('cek.servis');
+Route::get('/cek-nota', [PublicController::class, 'cekNota'])->name('cek.nota');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -29,6 +33,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/pos', [PosController::class, 'index'])->name('pos');
     Route::post('/pos/checkout', [PosController::class, 'store'])->name('pos.checkout');
     Route::get('/pos/nota/{transaksi}', [PosController::class, 'nota'])->name('pos.nota');
+    
+    Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
 
     Route::resource('produk', ProdukController::class)->except(['show']);
 
@@ -40,7 +46,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/service/{service}/part', [ServiceController::class, 'storePart'])->name('service.part');
 
     Route::middleware('owner')->group(function () {
-        Route::view('/analytics', 'internal.soon', ['judul' => 'Sales Analytics', 'aktif' => 'analytics'])->name('analytics');
+        Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
+        Route::get('/analytics/cetak', [AnalyticsController::class, 'cetak'])->name('analytics.cetak');
         Route::resource('promo', PromoController::class)->except(['show']);
         Route::resource('pegawai', PegawaiController::class)->except(['show']);
     });

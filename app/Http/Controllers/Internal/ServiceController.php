@@ -64,7 +64,6 @@ final class ServiceController extends Controller
 
         return view('internal.service.show', [
             'service' => $service,
-            'statusList' => StatusService::cases(),
         ]);
     }
 

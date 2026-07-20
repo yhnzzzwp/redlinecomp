@@ -27,4 +27,32 @@ enum StatusService: string
     {
         return array_map(fn ($c) => $c->value, self::cases());
     }
+
+    /**
+     * Status yang diizinkan dari status saat ini.
+     *
+     * Aturan:
+     * - Diterima → Dikerjakan
+     * - Dikerjakan → MenungguSparepart, Selesai
+     * - MenungguSparepart → Dikerjakan (mundur), Selesai (lompat)
+     * - Selesai → SudahDiambil (tidak bisa mundur)
+     * - SudahDiambil → (final, tidak bisa berubah)
+     *
+     * @return self[]
+     */
+    public function allowedTransitions(): array
+    {
+        return match ($this) {
+            self::Diterima => [self::Dikerjakan],
+            self::Dikerjakan => [self::MenungguSparepart, self::Selesai],
+            self::MenungguSparepart => [self::Dikerjakan, self::Selesai],
+            self::Selesai => [self::SudahDiambil],
+            self::SudahDiambil => [],
+        };
+    }
+
+    public function canTransitionTo(self $target): bool
+    {
+        return in_array($target, $this->allowedTransitions(), true);
+    }
 }

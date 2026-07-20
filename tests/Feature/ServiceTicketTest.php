@@ -47,6 +47,7 @@ final class ServiceTicketTest extends TestCase
             'nama_customer' => 'Budi', 'nama_barang' => 'Laptop', 'masalah' => 'Rusak',
         ], $this->staff);
 
+        // Diterima → Dikerjakan (transisi valid)
         $this->actingAs($this->staff)->post(route('service.status', $service), [
             'status' => StatusService::Dikerjakan->value, 'catatan' => 'Mulai diperbaiki.',
         ])->assertRedirect(route('service.show', $service));
@@ -81,4 +82,109 @@ final class ServiceTicketTest extends TestCase
     {
         $this->get(route('service'))->assertRedirect(route('login'));
     }
+
+    // ── Transition Tests ──────────────────────────────────────────
+
+    public function test_menunggu_sparepart_bisa_mundur_ke_dikerjakan(): void
+    {
+        $svc = $this->buatDanMajuKe(StatusService::MenungguSparepart);
+
+        $this->actingAs($this->staff)->post(route('service.status', $svc), [
+            'status' => StatusService::Dikerjakan->value, 'catatan' => 'Sparepart sudah datang, lanjut kerjakan.',
+        ])->assertRedirect();
+
+        $this->assertSame(StatusService::Dikerjakan, $svc->fresh()->status);
+    }
+
+    public function test_menunggu_sparepart_bisa_lompat_ke_selesai(): void
+    {
+        $svc = $this->buatDanMajuKe(StatusService::MenungguSparepart);
+
+        $this->actingAs($this->staff)->post(route('service.status', $svc), [
+            'status' => StatusService::Selesai->value, 'catatan' => 'Ternyata tidak perlu part, langsung selesai.',
+        ])->assertRedirect();
+
+        $this->assertSame(StatusService::Selesai, $svc->fresh()->status);
+    }
+
+    public function test_selesai_tidak_bisa_mundur_ke_diterima(): void
+    {
+        $svc = $this->buatDanMajuKe(StatusService::Selesai);
+
+        $this->actingAs($this->staff)->post(route('service.status', $svc), [
+            'status' => StatusService::Diterima->value,
+        ])->assertSessionHasErrors('status');
+
+        $this->assertSame(StatusService::Selesai, $svc->fresh()->status);
+    }
+
+    public function test_selesai_tidak_bisa_mundur_ke_dikerjakan(): void
+    {
+        $svc = $this->buatDanMajuKe(StatusService::Selesai);
+
+        $this->actingAs($this->staff)->post(route('service.status', $svc), [
+            'status' => StatusService::Dikerjakan->value,
+        ])->assertSessionHasErrors('status');
+
+        $this->assertSame(StatusService::Selesai, $svc->fresh()->status);
+    }
+
+    public function test_sudah_diambil_tidak_bisa_diubah(): void
+    {
+        $svc = $this->buatDanMajuKe(StatusService::SudahDiambil);
+
+        $this->actingAs($this->staff)->post(route('service.status', $svc), [
+            'status' => StatusService::Selesai->value,
+        ])->assertSessionHasErrors('status');
+
+        $this->assertSame(StatusService::SudahDiambil, $svc->fresh()->status);
+    }
+
+    public function test_diterima_tidak_bisa_langsung_ke_selesai(): void
+    {
+        $svc = app(ServiceTicketService::class)->buat([
+            'nama_customer' => 'X', 'nama_barang' => 'Y', 'masalah' => 'Z',
+        ], $this->staff);
+
+        $this->actingAs($this->staff)->post(route('service.status', $svc), [
+            'status' => StatusService::Selesai->value,
+        ])->assertSessionHasErrors('status');
+
+        $this->assertSame(StatusService::Diterima, $svc->fresh()->status);
+    }
+
+    /**
+     * Helper: buat tiket lalu majukan ke status tertentu via alur valid.
+     */
+    private function buatDanMajuKe(StatusService $target): Service
+    {
+        $ticketService = app(ServiceTicketService::class);
+        $svc = $ticketService->buat([
+            'nama_customer' => 'Test', 'nama_barang' => 'Laptop', 'masalah' => 'Rusak',
+        ], $this->staff);
+
+        // Alur valid: Diterima → Dikerjakan → MenungguSparepart → Dikerjakan → Selesai → SudahDiambil
+        $chain = [
+            StatusService::Dikerjakan,
+            StatusService::MenungguSparepart,
+            StatusService::Selesai,
+            StatusService::SudahDiambil,
+        ];
+
+        // Khusus untuk Selesai via MenungguSparepart, kita lompat
+        $path = match ($target) {
+            StatusService::Diterima => [],
+            StatusService::Dikerjakan => [StatusService::Dikerjakan],
+            StatusService::MenungguSparepart => [StatusService::Dikerjakan, StatusService::MenungguSparepart],
+            StatusService::Selesai => [StatusService::Dikerjakan, StatusService::Selesai],
+            StatusService::SudahDiambil => [StatusService::Dikerjakan, StatusService::Selesai, StatusService::SudahDiambil],
+        };
+
+        foreach ($path as $step) {
+            $ticketService->updateStatus($svc, $step, null, $this->staff);
+        }
+
+        return $svc->fresh();
+    }
 }
+

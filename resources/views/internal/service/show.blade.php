@@ -45,15 +45,20 @@
                 </div>
             </div>
 
+            @php $allowed = $service->status->allowedTransitions(); @endphp
+            @if (count($allowed) > 0)
             <div class="rl-card p-4">
                 <h3 class="fw-bold mb-3" style="font-size:15px">Update Status</h3>
+                @if ($errors->has('status'))
+                    <div class="mb-2" style="font-size:12.5px;color:var(--red-strong)">{{ $errors->first('status') }}</div>
+                @endif
                 <form method="POST" action="{{ route('service.status', $service) }}">
                     @csrf
                     <div class="mb-2">
                         <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Status baru</label>
                         <select name="status" class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px">
-                            @foreach ($statusList as $st)
-                                <option value="{{ $st->value }}" @selected($service->status === $st)>{{ $st->value }}</option>
+                            @foreach ($allowed as $st)
+                                <option value="{{ $st->value }}">{{ $st->value }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -65,6 +70,11 @@
                     <button type="submit" class="btn-redline">Simpan Status</button>
                 </form>
             </div>
+            @else
+            <div class="rl-card p-4 text-center">
+                <span class="rl-pill gray" style="font-size:12px">Status sudah final — tidak dapat diubah lagi.</span>
+            </div>
+            @endif
 
             <div class="rl-card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">

@@ -13,14 +13,14 @@
         <div class="row g-3">
             @foreach (\App\Models\Produk::where('show_katalog', true)->limit(8)->get() as $p)
                 <div class="col-6 col-md-3">
-                    <div class="rl-card h-100 overflow-hidden">
+                    <a href="{{ route('catalogue.show', $p) }}" class="rl-card h-100 overflow-hidden d-block text-decoration-none" style="color:inherit">
                         <div style="height:120px;background:linear-gradient(135deg,#1b1e23,#3a3e45)"></div>
                         <div class="p-3">
                             <div class="fw-semibold" style="font-size:13.5px">{{ $p->nama_produk }}</div>
                             <div class="fw-bold mt-1" style="color:var(--red-strong)">Rp {{ number_format($p->harga, 0, ',', '.') }}</div>
                             <span class="rl-pill {{ $p->jumlah_produk == 0 ? 'red' : ($p->jumlah_produk <= 5 ? 'amber' : 'green') }} mt-2" style="font-size:9px">{{ $p->statusStok() }}</span>
                         </div>
-                    </div>
+                    </a>
                 </div>
             @endforeach
         </div>
