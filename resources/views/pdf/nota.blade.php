@@ -4,72 +4,120 @@
 <head>
 <meta charset="utf-8">
 <style>
-    * { font-family: DejaVu Sans, sans-serif; }
-    body { margin: 0; color: #1b1e23; font-size: 12px; }
-    .wrap { width: 320px; margin: 0 auto; }
-    .head { background: #0b1c30; color: #fff; text-align: center; padding: 16px; }
-    .head .logo { font-size: 20px; font-weight: bold; font-style: italic; }
-    .head .logo i { color: #ff5b5b; font-style: normal; }
-    .head p { margin: 4px 0 0; font-size: 9px; color: #9fb0c4; }
-    .meta { padding: 12px 16px; border-bottom: 1px dashed #cfcfcf; }
-    .row { width: 100%; }
-    .row td { padding: 2px 0; font-size: 11px; }
-    .row td.r { text-align: right; }
-    .items { padding: 10px 16px; }
-    .items td { padding: 3px 0; font-size: 11px; vertical-align: top; }
-    .items .sub { color: #8a8f98; font-size: 9px; }
-    .tot { padding: 10px 16px; border-top: 1px dashed #cfcfcf; }
-    .grand td { font-size: 15px; font-weight: bold; color: #af101a; padding-top: 4px; }
-    .foot { text-align: center; padding: 14px 16px; font-size: 9px; color: #8a8f98; border-top: 1px dashed #cfcfcf; }
+    * { font-family: DejaVu Sans, sans-serif; box-sizing: border-box; }
+    body { margin: 0; color: #1b1e23; font-size: 13px; }
+    .wrap { width: 100%; margin: 0 auto; padding: 30px; }
+    .header { width: 100%; border-bottom: 3px solid #0b1c30; padding-bottom: 16px; margin-bottom: 24px; }
+    .header td { vertical-align: top; }
+    .header-logo { font-size: 28px; font-weight: 800; font-style: italic; color: #0b1c30; }
+    .stripe { display: inline-block; width: 18px; height: 18px; background: #c1272c; margin: 0 6px; position: relative; top: 2px; }
+    .subtitle { font-size: 14px; color: #6b7280; font-weight: bold; margin-top: 6px; }
+    .contact { font-size: 12px; color: #6b7280; margin-top: 4px; }
+    .title-box { text-align: right; }
+    .title-text { font-size: 24px; font-weight: bold; color: #0b1c30; letter-spacing: 1px; }
+    .nota-number { font-size: 14px; color: #6b7280; margin-top: 4px; }
+    
+    .meta-table { width: 100%; margin-bottom: 24px; }
+    .meta-table td { font-size: 12px; vertical-align: top; padding: 4px 0; }
+    .meta-label { color: #6b7280; width: 90px; display: inline-block; font-weight: bold; }
+    
+    .items-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+    .items-table th { text-align: left; background: #f4f5f7; padding: 12px; font-size: 11px; color: #6b7280; text-transform: uppercase; border-bottom: 1px solid #e9e9ec; border-top: 1px solid #e9e9ec; }
+    .items-table td { padding: 12px; border-bottom: 1px solid #e9e9ec; font-size: 12px; }
+    .items-table th.r, .items-table td.r { text-align: right; }
+    
+    .bottom-section { width: 100%; }
+    .bottom-section td { vertical-align: top; }
+    
+    .totals-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .totals-table td { padding: 6px 12px; text-align: right; font-size: 13px; }
+    .totals-table td:first-child { width: 60%; color: #6b7280; font-weight: bold; }
+    .grand td { font-size: 18px; font-weight: bold; color: #af101a; border-top: 2px solid #0b1c30; padding-top: 12px; padding-bottom: 12px; }
+    
+    .qr-container { text-align: right; }
+    .qr-container img { width: 90px; height: 90px; border: 1px solid #e9e9ec; padding: 6px; background: #fff; border-radius: 6px; }
+    .qr-text { font-size: 10px; color: #8a8f98; margin-top: 8px; }
+    
+    .footer-notes { font-size: 11px; color: #8a8f98; line-height: 1.5; margin-top: 40px; }
 </style>
 </head>
 <body>
 <div class="wrap">
-    <div class="head">
-        <div class="logo">{{ config('redline.store_name', 'Redline Komputer') }}</div>
-        <p>Jl. Diponegoro No. 52, Salatiga &middot; (0298) 321212</p>
-    </div>
+    <table class="header">
+        <tr>
+            <td>
+                <div class="header-logo">REDLINE<span class="stripe"></span>KOMPUTER</div>
+                <div class="subtitle">Spesialis Servis &amp; Hardware Komputer</div>
+                <div class="contact">Jl. Diponegoro No. 52, Salatiga &middot; WA: {{ config('redline.wa_number', '08123456789') }}</div>
+            </td>
+            <td class="title-box">
+                <div class="title-text">INVOICE</div>
+                <div class="nota-number">#{{ $t->kode_nota }}</div>
+            </td>
+        </tr>
+    </table>
 
-    <div class="meta">
-        <table class="row">
-            <tr><td>No. Nota</td><td class="r"><b>#{{ $t->kode_nota }}</b></td></tr>
-            <tr><td>Tanggal</td><td class="r">{{ $t->created_at->format('d M Y H:i') }}</td></tr>
-            <tr><td>Kasir</td><td class="r">{{ $t->pegawai?->nama_pegawai }}</td></tr>
-            <tr><td>Pelanggan</td><td class="r">{{ $t->nama_pembeli ?? 'Umum' }}</td></tr>
-            <tr><td>Metode</td><td class="r">{{ $t->metode_bayar }}</td></tr>
-        </table>
-    </div>
+    <table class="meta-table">
+        <tr>
+            <td style="width: 50%;">
+                <div><span class="meta-label">Tanggal</span> : {{ $t->created_at->format('d M Y H:i') }}</div>
+                <div><span class="meta-label">Kasir</span> : {{ $t->pegawai?->nama_pegawai }}</div>
+            </td>
+            <td style="width: 50%;">
+                <div><span class="meta-label">Pelanggan</span> : {{ $t->nama_pembeli ?? 'Umum' }}</div>
+                <div><span class="meta-label">Metode</span> : {{ $t->metode_bayar }}</div>
+            </td>
+        </tr>
+    </table>
 
-    <div class="items">
-        <table class="row">
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Item / Deskripsi</th>
+                <th class="r">Harga</th>
+                <th class="r">Qty</th>
+                <th class="r">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
             @foreach ($t->items as $item)
                 <tr>
-                    <td>{{ $item->nama_item }}<div class="sub">{{ $item->jumlah }} &times; {{ $rp($item->harga) }}</div></td>
+                    <td><strong>{{ $item->nama_item }}</strong></td>
+                    <td class="r">{{ $rp($item->harga) }}</td>
+                    <td class="r">{{ $item->jumlah }}</td>
                     <td class="r">{{ $rp($item->subtotal) }}</td>
                 </tr>
             @endforeach
-        </table>
-    </div>
+        </tbody>
+    </table>
 
-    <div class="tot">
-        <table class="row">
-            <tr><td>Subtotal</td><td class="r">{{ $rp($t->subtotal) }}</td></tr>
-            @if ($t->diskon > 0)
-                <tr><td>Diskon{{ $t->promo ? ' ('.$t->promo->kode_promo.')' : '' }}</td><td class="r">&ndash; {{ $rp($t->diskon) }}</td></tr>
-            @endif
-            <tr class="grand"><td>TOTAL</td><td class="r">{{ $rp($t->total) }}</td></tr>
-            <tr><td>Terbayar</td><td class="r">{{ $rp($t->bayar) }}</td></tr>
-            <tr><td>Kembali</td><td class="r">{{ $rp($t->kembalian) }}</td></tr>
-        </table>
-    </div>
-
-    <div class="foot">
-        <div style="margin-bottom: 8px">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ urlencode(url('/cek-nota?nota='.$t->kode_nota)) }}" width="60" height="60" alt="QR Code">
-        </div>
-        Terima kasih telah berbelanja di Redline Komputer.<br>
-        Dokumen digital &middot; cek keaslian dengan scan QR Code di atas.
-    </div>
+    <table class="bottom-section">
+        <tr>
+            <td style="width: 55%;">
+                <div class="footer-notes">
+                    <strong>Catatan:</strong><br>
+                    1. Barang yang sudah dibeli tidak dapat ditukar/dikembalikan.<br>
+                    2. Garansi berlaku sesuai dengan ketentuan masing-masing produk.<br><br>
+                    Terima kasih telah mempercayakan kebutuhan IT Anda<br>kepada Redline Komputer.
+                </div>
+            </td>
+            <td style="width: 45%;">
+                <table class="totals-table">
+                    <tr><td>Subtotal</td><td>{{ $rp($t->subtotal) }}</td></tr>
+                    @if ($t->diskon > 0)
+                        <tr><td>Diskon{{ $t->promo ? ' ('.$t->promo->kode_promo.')' : '' }}</td><td>&ndash; {{ $rp($t->diskon) }}</td></tr>
+                    @endif
+                    <tr class="grand"><td>TOTAL</td><td>{{ $rp($t->total) }}</td></tr>
+                    <tr><td>Terbayar</td><td>{{ $rp($t->bayar) }}</td></tr>
+                    <tr><td>Kembali</td><td>{{ $rp($t->kembalian) }}</td></tr>
+                </table>
+                <div class="qr-container">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ urlencode(url('/cek-nota?nota='.$t->kode_nota)) }}" alt="QR Code">
+                    <div class="qr-text">Scan untuk verifikasi keaslian dokumen</div>
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>
 </body>
 </html>

@@ -55,13 +55,13 @@
             <div class="col-lg-9">
                 <div class="row g-4">
                     @forelse ($produk as $p)
-                        <div class="col-md-6 col-xl-4">
+                        <div class="col-md-6 col-xl-4" data-reveal style="--reveal-d: {{ ($loop->index % 3) * 80 }}ms">
                             <div class="rl-card h-100 overflow-hidden d-flex flex-column">
                                 <div class="rl-catalogue-img-wrap">
                                     @if ($p->foto_produk)
                                         <img src="{{ Storage::url($p->foto_produk) }}" alt="{{ $p->nama_produk }}" class="rl-catalogue-img">
                                     @else
-                                        <div class="rl-catalogue-placeholder">📷</div>
+                                        <x-ui.hardware-thumb :kategori="$p->kategori?->nama_kategori" />
                                     @endif
                                 </div>
                                 <div class="p-3 d-flex flex-column flex-fill">

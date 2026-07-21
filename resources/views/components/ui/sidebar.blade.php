@@ -19,7 +19,7 @@
 
     @foreach ($nav as [$key, $label, $url, $ownerOnly, $path])
         @if (! $ownerOnly || ($user && $user->isOwner()))
-            <a href="{{ $url }}" class="rl-nav-item {{ $active === $key ? 'active' : '' }}">
+            <a href="{{ $url }}" @click="mobileNav = false" class="rl-nav-item {{ $active === $key ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $path }}"/></svg>
                 <span>{{ $label }}</span>
                 @if ($ownerOnly) <span class="rl-nav-owner">Owner</span> @endif

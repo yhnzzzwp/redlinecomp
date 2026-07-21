@@ -12,7 +12,7 @@
                     @if ($produk->foto_produk)
                         <img src="{{ Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}" class="rl-catalogue-img">
                     @else
-                        <div class="rl-icon-xl">📷</div>
+                        <x-ui.hardware-thumb :kategori="$produk->kategori?->nama_kategori" />
                     @endif
                 </div>
             </div>

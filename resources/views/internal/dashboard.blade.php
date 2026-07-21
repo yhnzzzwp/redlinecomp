@@ -6,14 +6,14 @@
     <div class="rl-page-header d-flex align-items-start justify-content-between flex-wrap gap-2">
         <div>
             <h1 class="rl-page-title mb-1">Ringkasan Dashboard</h1>
-            <p class="rl-page-desc mb-0">Real-time performance metrics untuk Redline Komputer.</p>
+            <p class="rl-page-desc mb-0">Metrik kinerja real-time Redline Komputer.</p>
         </div>
         <a href="{{ route('analytics.cetak') }}" target="_blank" class="btn-redline text-decoration-none">⭳ Ekspor Laporan</a>
     </div>
 
     {{-- KPI bento --}}
     <div class="row g-3">
-        <div class="col-6 col-lg-3">
+        <div class="col-6 col-lg-3" data-reveal>
             <div class="rl-card rl-kpi h-100">
                 <div class="rl-kpi__ico mb-4 bg-danger bg-opacity-10 text-danger">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -22,7 +22,7 @@
                 <div class="rl-kpi__val tnum">{{ rl_rp($totalSales) }}</div>
             </div>
         </div>
-        <div class="col-6 col-lg-3">
+        <div class="col-6 col-lg-3" data-reveal>
             <div class="rl-card rl-kpi h-100">
                 <div class="rl-kpi__ico mb-4 bg-primary bg-opacity-10 text-primary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M14 6a4 4 0 005 5l-8 8-3-3 6-6a4 4 0 010-4z"/></svg>
@@ -31,7 +31,7 @@
                 <div class="rl-kpi__val tnum">{{ $activeServices }} <span class="fs-6 fw-normal text-muted">Servis</span></div>
             </div>
         </div>
-        <div class="col-6 col-lg-3">
+        <div class="col-6 col-lg-3" data-reveal>
             <div class="rl-card rl-kpi h-100">
                 <div class="rl-kpi__ico mb-4 bg-warning bg-opacity-10 text-warning">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg>
@@ -40,7 +40,7 @@
                 <div class="rl-kpi__val tnum">{{ number_format($totalProducts,0,',','.') }} <span class="fs-6 fw-normal text-muted">Item</span></div>
             </div>
         </div>
-        <div class="col-6 col-lg-3">
+        <div class="col-6 col-lg-3" data-reveal>
             <div class="rl-card rl-kpi h-100">
                 <div class="rl-kpi__ico mb-4 bg-success bg-opacity-10 text-success">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/></svg>
@@ -90,7 +90,7 @@
                             </div>
                             <div class="text-end">
                                 <div class="fw-bold tnum rl-text-sm">{{ rl_rp($t->total) }}</div>
-                                <span class="rl-pill green rl-text-xs">PAID</span>
+                                <span class="rl-pill green rl-text-xs">LUNAS</span>
                             </div>
                         </div>
                     @empty

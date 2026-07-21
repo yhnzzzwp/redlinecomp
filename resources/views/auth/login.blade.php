@@ -45,7 +45,7 @@
                 <label class="d-flex align-items-center gap-2 text-muted rl-text-sm">
                     <input type="checkbox" name="remember" value="1"> Ingat perangkat
                 </label>
-                <a href="#" class="text-decoration-none fw-semibold rl-text-sm rl-text-red">Lupa Password?</a>
+                <a href="#" @click.prevent="alert('Silakan hubungi Owner / Administrator toko untuk me-reset password Anda.')" class="text-decoration-none fw-semibold rl-text-sm rl-text-red">Lupa Password?</a>
             </div>
             <button type="submit" class="btn-redline w-100 d-flex align-items-center justify-content-center gap-2">
                 Masuk

@@ -9,7 +9,7 @@
 
     @if($lowStockCount > 0)
         <div class="rl-alert rl-alert--error mb-3 d-flex align-items-center gap-3">
-            <div class="fw-bold fs-4">!</div>
+            <div class="fw-bold fs-4"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-label="Perhatian"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
             <div>
                 <h3 class="fw-bold m-0 rl-text-sm">Peringatan Stok Tipis</h3>
                 <p class="m-0 rl-text-xs">Ada {{ $lowStockCount }} produk yang stoknya menipis atau habis. Segera lakukan restock.</p>
@@ -20,11 +20,12 @@
     <div class="rl-card">
         <form method="GET" class="d-flex align-items-center gap-2 p-3 flex-wrap">
             <div class="d-flex align-items-center gap-2 flex-grow-1">
-                <input type="text" name="cari" value="{{ $cari }}" placeholder="Cari nama atau SKU…"
+                <label for="cari" class="visually-hidden">Cari produk</label>
+                <input type="text" id="cari" name="cari" value="{{ $cari }}" placeholder="Cari nama atau SKU…"
                        class="rl-input rl-input--sm rl-input--search flex-grow-1">
             </div>
             <button class="btn-ghost btn-sm" type="submit">Cari</button>
-            @if ($cari !== '')
+            @if ($cari <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-label="Perhatian"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>== '')
                 <a href="{{ route('produk.index') }}" class="text-muted text-decoration-none rl-text-xs">Reset</a>
             @endif
         </form>
@@ -44,7 +45,7 @@
                                 @if ($p->foto_produk)
                                     <img src="{{ asset('storage/'.$p->foto_produk) }}" alt="" class="rl-product-thumb">
                                 @else
-                                    <div class="rl-product-thumb"></div>
+                                    <x-ui.hardware-thumb :kategori="$p->kategori?->nama_kategori" :isPos="true" />
                                 @endif
                                 <div>
                                     <div class="fw-semibold rl-text-sm">{{ $p->nama_produk }}</div>
@@ -63,18 +64,25 @@
                             <span class="rl-pill {{ $isRed ? 'red' : ($s === 'Low Stock' ? 'amber' : 'green') }}">{{ $s }} ({{ $p->jumlah_produk }})</span>
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('produk.edit', $p) }}" class="btn-ghost btn-sm">Edit</a>
+                            <a href="{{ route('produk.edit', $p) }}" class="btn-ghost btn-sm" aria-label="Edit produk {{ $p->nama_produk }}">Edit</a>
                             <form method="POST" action="{{ route('produk.destroy', $p) }}" class="d-inline"
                                   onsubmit="return confirm('Hapus produk &quot;{{ $p->nama_produk }}&quot;? Tindakan ini permanen.')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn-ghost btn-sm text-danger">Hapus</button>
+                                <button type="submit" class="btn-ghost btn-sm text-danger" aria-label="Hapus produk {{ $p->nama_produk }}">Hapus</button>
                             </form>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="text-center rl-text-muted py-5">
-                        {{ $cari !== '' ? 'Tidak ada produk cocok dengan pencarian.' : 'Belum ada produk.' }}
+                    <tr><td colspan="5" class="text-center py-5">
+                        <div class="d-flex flex-column align-items-center justify-content-center text-muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3" style="color: #E9E9EC;">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                            <span class="rl-text-sm">{{ $cari !== '' ? 'Tidak ada produk cocok dengan pencarian.' : 'Belum Ada Produk' }}</span>
+                        </div>
                     </td></tr>
                 @endforelse
             </tbody>

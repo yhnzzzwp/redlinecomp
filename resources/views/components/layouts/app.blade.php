@@ -8,10 +8,22 @@
     <title>{{ $title ? $title.' · ' : '' }}Redline Komputer</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
+<body x-data="{ mobileNav: false }">
+    <div class="rl-drawer-overlay" :class="mobileNav ? 'open' : ''" @click="mobileNav = false"></div>
     <div class="rl-app">
-        <x-ui.sidebar :active="$active" />
+        <div class="rl-side-wrapper" :class="mobileNav ? 'open' : ''">
+            <x-ui.sidebar :active="$active" />
+        </div>
         <div class="rl-main">
+            <div class="rl-mobile-topbar">
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-ghost p-1" @click="mobileNav = true" aria-label="Buka Menu">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+                    </button>
+                    <span class="rl-logo fs-6 m-0">REDL<i>INE</i></span>
+                </div>
+                <div class="rl-avatar" style="width:34px;height:34px;font-size:12px;">{{ \Illuminate\Support\Str::of(auth()->user()->nama_pegawai)->explode(' ')->map(fn($w)=>$w[0]??'')->take(2)->implode('') }}</div>
+            </div>
             <div class="rl-topbar">
                 <div x-data="{ 
                         query: '{{ request('cari') }}', 
@@ -36,11 +48,11 @@
                         <a :href="'{{ route('transaksi.index') }}?cari=' + query" class="d-block px-3 py-2 text-decoration-none text-dark">Cari "<b><span x-text="query"></span></b>" di Transaksi</a>
                     </div>
                 </div>
-                <div class="ms-auto text-end lh-sm">
+                <div class="ms-auto text-end lh-sm d-none d-lg-block">
                     <div class="fw-semibold">{{ auth()->user()->nama_pegawai }}</div>
                     <div class="text-muted small">{{ auth()->user()->role->value }} · {{ now()->translatedFormat('l, d M Y') }}</div>
                 </div>
-                <div class="rl-avatar">{{ \Illuminate\Support\Str::of(auth()->user()->nama_pegawai)->explode(' ')->map(fn($w)=>$w[0]??'')->take(2)->implode('') }}</div>
+                <div class="rl-avatar d-none d-lg-inline-flex">{{ \Illuminate\Support\Str::of(auth()->user()->nama_pegawai)->explode(' ')->map(fn($w)=>$w[0]??'')->take(2)->implode('') }}</div>
             </div>
             <div class="rl-body" role="main">
                 <x-ui.toast />

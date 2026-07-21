@@ -24,7 +24,7 @@
         <div class="rl-step-wrap">
             @foreach ($urutan as $i => $st)
                 <div class="rl-step {{ $i < $now ? 'done' : ($i === $now ? 'now' : '') }}">
-                    <div class="rl-step__dot">{{ $i < $now ? '✓' : ($i === $now ? '●' : '') }}</div>
+                    <div class="rl-step__dot">{!! $i < $now ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-label="Selesai"><polyline points="20 6 9 17 4 12"/></svg>' : ($i === $now ? '●' : '') !!}</div>
                     {{ $st->value }}
                 </div>
             @endforeach
@@ -66,16 +66,16 @@
                 <form method="POST" action="{{ route('service.status', $service) }}">
                     @csrf
                     <div class="mb-2">
-                        <label class="rl-label d-block mb-1">Status Baru</label>
-                        <select name="status" class="rl-select w-100">
+                        <label for="status" class="rl-label d-block mb-1">Status Baru</label>
+                        <select id="status" name="status" class="rl-select w-100">
                             @foreach ($allowed as $st)
                                 <option value="{{ $st->value }}">{{ $st->value }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="rl-label d-block mb-1">Catatan</label>
-                        <textarea name="catatan" rows="2" placeholder="Catatan pengerjaan…" class="rl-textarea w-100"></textarea>
+                        <label for="catatan" class="rl-label d-block mb-1">Catatan</label>
+                        <textarea id="catatan" name="catatan" rows="2" placeholder="Catatan pengerjaan…" class="rl-textarea w-100"></textarea>
                     </div>
                     <button type="submit" class="btn-redline">Simpan Status</button>
                 </form>
@@ -102,10 +102,19 @@
                 @endforelse
                 <form method="POST" action="{{ route('service.part', $service) }}" class="row g-2 mt-2">
                     @csrf
-                    <div class="col-5"><input type="text" name="nama_part" placeholder="Nama suku cadang" class="rl-input w-100" required></div>
-                    <div class="col-2"><input type="number" name="jumlah" placeholder="Qty" value="1" min="1" class="rl-input w-100" required></div>
-                    <div class="col-3"><input type="number" name="harga" placeholder="Harga" min="0" class="rl-input w-100" required></div>
-                    <div class="col-2"><button type="submit" class="btn-ghost btn-sm w-100">+ Tambah</button></div>
+                    <div class="col-5">
+                        <label for="nama_part" class="visually-hidden">Nama suku cadang</label>
+                        <input type="text" id="nama_part" name="nama_part" placeholder="Nama suku cadang" class="rl-input w-100" required>
+                    </div>
+                    <div class="col-2">
+                        <label for="jumlah" class="visually-hidden">Qty</label>
+                        <input type="number" id="jumlah" name="jumlah" placeholder="Qty" value="1" min="1" class="rl-input w-100" required>
+                    </div>
+                    <div class="col-3">
+                        <label for="harga" class="visually-hidden">Harga</label>
+                        <input type="number" id="harga" name="harga" placeholder="Harga" min="0" class="rl-input w-100" required>
+                    </div>
+                    <div class="col-2"><button type="submit" class="btn-ghost btn-sm w-100" aria-label="Tambah suku cadang">+ Tambah</button></div>
                 </form>
             </div>
         </div>

@@ -17,13 +17,16 @@
     <div class="rl-card p-3 mb-3">
         <form method="GET" action="{{ route('transaksi.index') }}" class="row g-2">
             <div class="col-md-4">
-                <input type="text" name="cari" value="{{ $cari }}" placeholder="Cari kode nota..." class="rl-input w-100">
+                <label for="cari" class="visually-hidden">Cari kode nota</label>
+                <input type="text" id="cari" name="cari" value="{{ $cari }}" placeholder="Cari kode nota..." class="rl-input w-100">
             </div>
             <div class="col-md-3">
-                <input type="date" name="tanggal" value="{{ $tanggal }}" class="rl-input w-100">
+                <label for="tanggal" class="visually-hidden">Tanggal</label>
+                <input type="date" id="tanggal" name="tanggal" value="{{ $tanggal }}" class="rl-input w-100">
             </div>
             <div class="col-md-3">
-                <select name="jenis" class="rl-select w-100">
+                <label for="jenis" class="visually-hidden">Jenis Item</label>
+                <select id="jenis" name="jenis" class="rl-select w-100">
                     <option value="">Semua Jenis Item</option>
                     @foreach (\App\Enums\TipeItem::cases() as $t)
                         <option value="{{ $t->value }}" @selected($jenis === $t->value)>{{ $t->value }}</option>
@@ -78,18 +81,27 @@
                             <span class="rl-pill {{ $t->metode_bayar === 'Tunai' ? 'green' : 'blue' }} rl-text-xs">{{ $t->metode_bayar }}</span>
                         </td>
                         <td class="text-end">
-                            <a href="{{ route('pos.nota', $t) }}" target="_blank" class="btn-ghost btn-sm">Lihat Nota</a>
+                            <a href="{{ route('pos.nota', $t) }}" target="_blank" class="btn-ghost btn-sm" aria-label="Lihat atau print nota #{{ $t->kode_nota }}">Lihat Nota</a>
                             @if($t->status === 'Normal')
                                 <form method="POST" action="{{ route('transaksi.void', $t) }}" class="d-inline"
                                       onsubmit="return confirm('Apakah Anda yakin ingin melakukan Void transaksi ini? Stok produk akan dikembalikan.');">
                                     @csrf
-                                    <button type="submit" class="btn-ghost btn-sm text-danger">Void</button>
+                                    <button type="submit" class="btn-ghost btn-sm text-danger" aria-label="Void transaksi #{{ $t->kode_nota }}">Void</button>
                                 </form>
                             @endif
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="text-center p-4 rl-text-muted">Data transaksi tidak ditemukan.</td></tr>
+                    <tr><td colspan="5" class="text-center py-5">
+                        <div class="d-flex flex-column align-items-center justify-content-center text-muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3" style="color: #E9E9EC;">
+                                <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"></path>
+                                <path d="M16 14h-4"></path>
+                                <path d="M16 10H8"></path>
+                            </svg>
+                            <span class="rl-text-sm">Belum Ada Transaksi</span>
+                        </div>
+                    </td></tr>
                 @endforelse
             </tbody>
         </table>

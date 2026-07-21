@@ -65,16 +65,40 @@
         <div class="col-lg-8">
             <div class="rl-card p-4 h-100">
                 <h3 class="rl-section-title mb-4">Tren 7 Hari Terakhir</h3>
-                @php $max = max(1, collect($trend)->max('total')); @endphp
-                <div class="rl-chart-bar-wrap">
-                    @foreach ($trend as $t)
-                        <div class="rl-chart-bar">
-                            <div class="rl-chart-bar__fill rounded-top" title="{{ $rp($t['total']) }}"
-                                 style="height:{{ max(4, (int)($t['total']/$max*100)) }}%;"></div>
-                            <small class="rl-chart-bar__label">{{ $t['label'] }}</small>
-                        </div>
-                    @endforeach
+                @php $max = max(1, collect($trend)->max('total')); $hasData = collect($trend)->sum('total') > 0; @endphp
+                @if($hasData)
+                <div x-data="{ activeTooltip: null }" class="position-relative mt-4" style="height: 220px; margin-left: 40px;">
+                    <!-- Gridlines & Y-Axis Labels -->
+                    <div class="position-absolute w-100 h-100 d-flex flex-column justify-content-between pb-4" style="z-index: 1; pointer-events: none;">
+                        @foreach([100, 75, 50, 25, 0] as $pct)
+                            <div class="w-100 border-top" style="border-top-style: dashed !important; border-top-color: #E9E9EC !important; position: relative;">
+                                <span class="position-absolute text-muted text-end pe-2" style="right: 100%; top: -8px; font-size: 10px; width: 40px;">{{ $pct == 0 ? 0 : ($max * $pct / 100 >= 1000000 ? round($max * $pct / 100 / 1000000, 1).'M' : ($max * $pct / 100 >= 1000 ? round($max * $pct / 100 / 1000, 1).'k' : number_format($max * $pct / 100, 0))) }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="rl-chart-bar-wrap h-100 position-relative d-flex align-items-end justify-content-between" style="z-index: 2;">
+                        @foreach ($trend as $i => $t)
+                            <div class="rl-chart-bar position-relative d-flex flex-column justify-content-end h-100" style="flex: 1; padding: 0 4px;">
+                                <div x-show="activeTooltip === {{ $i }}" x-transition class="position-absolute bg-dark text-white rounded px-2 py-1 shadow-sm" style="bottom: {{ max(4, (int)($t['total']/$max*100)) }}%; left: 50%; transform: translate(-50%, -8px); font-size: 11px; white-space: nowrap; z-index: 10; margin-bottom: 4px;">
+                                    Rp {{ number_format($t['total'], 0, ',', '.') }}
+                                </div>
+                                <div class="rl-chart-bar__fill rounded-top w-100" style="height:{{ max(4, (int)($t['total']/$max*100)) }}%; transition: opacity 0.2s, background-color 0.2s; cursor: pointer;" :style="activeTooltip !== null && activeTooltip !== {{ $i }} ? 'opacity: 0.6' : 'opacity: 1'" @mouseenter="activeTooltip = {{ $i }}" @mouseleave="activeTooltip = null" @touchstart="activeTooltip = {{ $i }}"></div>
+                                <small class="rl-chart-bar__label mt-2 text-center d-block">{{ $t['label'] }}</small>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
+                @else
+                <div class="text-center py-5 d-flex flex-column align-items-center justify-content-center text-muted h-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3" style="color: #E9E9EC;">
+                        <path d="M3 3v18h18"></path>
+                        <path d="M18 17V9"></path>
+                        <path d="M13 17V5"></path>
+                        <path d="M8 17v-3"></path>
+                    </svg>
+                    <span class="rl-text-sm">Belum Ada Data Penjualan Periode Ini</span>
+                </div>
+                @endif
             </div>
         </div>
 
@@ -125,7 +149,16 @@
                         <td class="text-end tnum fw-bold">{{ $rp($p->total_pendapatan) }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="3" class="text-center p-4 rl-text-muted">Belum ada produk terjual periode ini.</td></tr>
+                    <tr><td colspan="3" class="text-center py-5">
+                        <div class="d-flex flex-column align-items-center justify-content-center text-muted">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3" style="color: #E9E9EC;">
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                                <polyline points="2 17 12 22 22 17"></polyline>
+                                <polyline points="2 12 12 17 22 12"></polyline>
+                            </svg>
+                            <span class="rl-text-sm">Belum ada produk terjual periode ini.</span>
+                        </div>
+                    </td></tr>
                 @endforelse
             </tbody>
         </table>
