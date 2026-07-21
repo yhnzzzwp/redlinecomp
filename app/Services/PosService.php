@@ -90,6 +90,10 @@ final class PosService
                 }
             }
 
+            if ($promo !== null) {
+                \App\Models\Promo::where('id', $promo->promoId)->increment('terpakai');
+            }
+
             return $transaksi->load(['items', 'promo', 'pegawai']);
         });
     }

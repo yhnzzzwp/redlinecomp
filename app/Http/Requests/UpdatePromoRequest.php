@@ -32,6 +32,7 @@ class UpdatePromoRequest extends FormRequest
             'besar_promo' => ['required', 'integer', 'min:1', $this->input('tipe_promo') === TipePromo::Persen->value ? 'max:100' : 'max:100000000000'],
             'minimal_transaksi' => ['nullable', 'integer', 'min:0', 'max:100000000000'],
             'maksimal_diskon' => ['nullable', 'integer', 'min:0', 'max:100000000000'],
+            'kuota' => ['nullable', 'integer', 'min:1'],
             'waktu_mulai' => ['required', 'date'],
             'waktu_berakhir' => ['required', 'date', 'after_or_equal:waktu_mulai'],
             'aktif' => ['boolean'],

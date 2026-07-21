@@ -14,13 +14,14 @@
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         .total-row th { background-color: #ffeaea; color: #c1272c; }
+        .footer { margin-top: 50px; text-align: right; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>REDLINE KOMPUTER</h1>
-        <p>Laporan Penjualan Bulan Ini ({{ now()->translatedFormat('F Y') }})</p>
+        <p>Laporan Penjualan (Periode: {{ $dari->format('d M Y') }} - {{ $sampai->format('d M Y') }})</p>
     </div>
 
     <h3>Pendapatan Berdasarkan Kategori</h3>
@@ -76,7 +77,7 @@
         </tbody>
     </table>
 
-    <div style="margin-top: 50px; text-align: right;">
+    <div class="footer">
         <p>Dicetak oleh: {{ auth()->user()->nama_pegawai ?? 'Sistem' }}</p>
         <p>Tanggal: {{ now()->translatedFormat('d F Y, H:i') }}</p>
     </div>

@@ -8,16 +8,16 @@
         <p class="rl-page-desc">Pantau perkembangan perbaikan perangkat Anda secara real-time.</p>
     </div>
 
-    <div class="rl-body mx-auto" style="max-width:700px">
+    <div class="rl-body rl-container-700">
         <div class="rl-card p-4 mb-4 text-center">
             <h3 class="rl-section-title">Masukkan Nomor Resi</h3>
-            <form method="GET" action="{{ route('cek.servis') }}" class="d-flex justify-content-center gap-2 max-w-md mx-auto" style="max-width:400px">
+            <form method="GET" action="{{ route('cek.servis') }}" class="d-flex justify-content-center gap-2 mx-auto rl-w-400px">
                 <input type="text" name="resi" value="{{ $resi }}" placeholder="Contoh: PK-1234-5678" required
-                       class="rl-input w-100 text-center" style="letter-spacing:1px;font-family:monospace">
-                <button type="submit" class="btn-redline" style="padding:12px 24px">Lacak</button>
+                       class="rl-input w-100 text-center rl-input-mono">
+                <button type="submit" class="btn-redline rl-btn-lg">Lacak</button>
             </form>
             @if(session('error'))
-                <div class="mt-3 text-danger" style="font-size:13px">{{ session('error') }}</div>
+                <div class="mt-3 text-danger rl-text-sm">{{ session('error') }}</div>
             @endif
         </div>
 
@@ -25,12 +25,12 @@
             <div class="rl-card p-4 mb-4">
                 <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
                     <div>
-                        <h2 class="fw-bold mb-1" style="font-size:20px">{{ $service->nama_barang }}</h2>
-                        <div class="text-muted" style="font-size:13px">
-                            <b class="tnum" style="color:var(--red-strong)">{{ $service->nomor_resi }}</b> &middot; {{ $service->nama_customer }}
+                        <h2 class="rl-title-md mb-1">{{ $service->nama_barang }}</h2>
+                        <div class="text-muted rl-text-sm">
+                            <b class="tnum rl-text-red">{{ $service->nomor_resi }}</b> &middot; {{ $service->nama_customer }}
                         </div>
                     </div>
-                    <span class="rl-pill {{ $service->status->warna() }}" style="font-size:13px">{{ $service->status->value }}</span>
+                    <span class="rl-pill {{ $service->status->warna() }} rl-text-sm">{{ $service->status->value }}</span>
                 </div>
 
                 @php
@@ -50,28 +50,28 @@
 
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <h4 class="fw-bold mb-3" style="font-size:15px">Informasi Perbaikan</h4>
-                        <table style="width:100%;font-size:13px">
-                            <tr><td class="text-muted py-2" style="width:40%">Tanggal Masuk</td><td class="fw-semibold">{{ $service->tanggal_masuk?->format('d M Y') ?? '—' }}</td></tr>
+                        <h4 class="rl-section-title mb-3">Informasi Perbaikan</h4>
+                        <table class="w-100 rl-text-sm">
+                            <tr><td class="text-muted py-2 rl-w-40">Tanggal Masuk</td><td class="fw-semibold">{{ $service->tanggal_masuk?->format('d M Y') ?? '—' }}</td></tr>
                             <tr><td class="text-muted py-2">Estimasi Selesai</td><td class="fw-semibold">{{ $service->estimasi_selesai?->format('d M Y') ?? '—' }}</td></tr>
                             <tr><td class="text-muted py-2">Estimasi Biaya</td><td class="fw-bold tnum">{{ $rp($service->biaya_service) }}</td></tr>
                             <tr>
                                 <td class="text-muted py-2 align-top">Keluhan</td>
-                                <td class="py-2" style="white-space:pre-wrap">{{ $service->masalah }}</td>
+                                <td class="py-2 rl-text-wrap">{{ $service->masalah }}</td>
                             </tr>
                         </table>
                     </div>
                     
                     <div class="col-md-6">
-                        <h4 class="fw-bold mb-3" style="font-size:15px">Riwayat Status</h4>
+                        <h4 class="rl-section-title mb-3">Riwayat Status</h4>
                         <div class="rl-timeline">
                             @foreach ($service->riwayat()->latest()->get() as $r)
                                 <div class="rl-timeline__item">
                                     <div class="d-flex justify-content-between mb-1">
-                                        <b style="font-size:13px">{{ $r->status->value }}</b>
-                                        <span class="text-muted tnum" style="font-size:11px">{{ $r->created_at->format('d M, H:i') }}</span>
+                                        <b class="rl-text-sm">{{ $r->status->value }}</b>
+                                        <span class="text-muted tnum rl-text-xs">{{ $r->created_at->format('d M, H:i') }}</span>
                                     </div>
-                                    @if ($r->catatan)<div class="text-muted" style="font-size:12px">{{ $r->catatan }}</div>@endif
+                                    @if ($r->catatan)<div class="text-muted rl-text-sm">{{ $r->catatan }}</div>@endif
                                 </div>
                             @endforeach
                         </div>
@@ -79,7 +79,7 @@
                 </div>
             </div>
             
-            <div class="text-center text-muted" style="font-size:12px">
+            <div class="text-center text-muted rl-text-sm">
                 Bawa nota/resi asli saat mengambil perangkat. Pertanyaan lebih lanjut hubungi <a href="https://wa.me/{{ config('redline.wa_number') }}" target="_blank" class="text-decoration-none">WhatsApp Kami</a>.
             </div>
         @endif

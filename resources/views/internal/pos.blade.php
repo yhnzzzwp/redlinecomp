@@ -47,7 +47,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h2 class="rl-section-title mb-0">Pilih Produk</h2>
                     <div class="d-flex align-items-center gap-3">
-                        <input type="text" x-model="cariProduk" placeholder="Cari menu..." class="rl-input-sm" style="width:200px">
+                        <input type="text" x-model="cariProduk" placeholder="Cari menu..." class="rl-input rl-input--sm rl-input--search w-auto">
                         <span class="rl-text-muted rl-text-xs" x-text="`Menampilkan ${produkTampil.length} item`"></span>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                 @csrf
                 <h2 class="rl-section-title mb-3">Detail Tagihan</h2>
 
-                <div class="flex-fill" style="min-height:120px">
+                <div class="flex-fill">
                     <template x-if="Object.keys(cart).length === 0">
                         <div class="text-center rl-text-muted py-4 rl-text-sm">
                             <div class="fs-1">🛒</div>Belum ada item

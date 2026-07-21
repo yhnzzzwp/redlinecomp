@@ -11,7 +11,7 @@
             <div>
                 <h1 class="rl-page-title mb-1">{{ $service->nama_barang }}</h1>
                 <p class="rl-page-desc mb-0">
-                    <b class="tnum" style="color:var(--red-strong)">{{ $service->nomor_resi }}</b>
+                    <b class="tnum text-danger">{{ $service->nomor_resi }}</b>
                     &middot; {{ $service->nama_customer }} @if ($service->nomor_hp_customer) &middot; {{ $service->nomor_hp_customer }} @endif
                 </p>
             </div>
@@ -35,12 +35,12 @@
         {{-- Kiri: info + update status --}}
         <div class="col-lg-7 d-flex flex-column gap-3">
             @if(session('wa_link'))
-                <div class="rl-card p-3 d-flex align-items-center justify-content-between" style="border-left: 4px solid #25D366; background-color: #f6fdf9;">
+                <div class="rl-alert rl-alert--success p-3 d-flex align-items-center justify-content-between">
                     <div>
-                        <b style="color: #128C7E; font-size: 14px;">Status Berhasil Diperbarui</b>
-                        <p class="mb-0 text-muted" style="font-size: 13px;">Kirim notifikasi WhatsApp ke pelanggan.</p>
+                        <b class="fs-6">Status Berhasil Diperbarui</b>
+                        <p class="mb-0 rl-text-muted rl-text-sm">Kirim notifikasi WhatsApp ke pelanggan.</p>
                     </div>
-                    <a href="{{ session('wa_link') }}" target="_blank" class="btn btn-sm text-white" style="background-color: #25D366; font-weight: 500; text-decoration: none; padding: 6px 12px; border-radius: 6px;">Kirim Notifikasi WA</a>
+                    <a href="{{ session('wa_link') }}" target="_blank" class="btn btn-sm btn-success">Kirim Notifikasi WA</a>
                 </div>
             @endif
 
@@ -61,7 +61,7 @@
             <div class="rl-card p-4">
                 <h3 class="rl-section-title mb-3">Update Status</h3>
                 @if ($errors->has('status'))
-                    <div class="rl-form-errors mb-2 rl-text-sm" style="color:var(--red-strong)">{{ $errors->first('status') }}</div>
+                    <div class="rl-form-errors mb-2 rl-text-sm text-danger">{{ $errors->first('status') }}</div>
                 @endif
                 <form method="POST" action="{{ route('service.status', $service) }}">
                     @csrf

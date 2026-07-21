@@ -138,6 +138,33 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); -webk
 /* ---- Product / POS cards ---- */
 .rl-product-thumb { height: 90px; background: linear-gradient(135deg, #1b1e23, #3a3e45); border-radius: 8px; margin-bottom: 8px; }
 .rl-pos-bill { position: sticky; top: 20px; }
+.rl-catalogue-img-wrap { height: 180px; background: var(--bg); display: flex; align-items: center; justify-content: center; }
+.rl-catalogue-img-lg { height: 400px; background: var(--bg); display: flex; align-items: center; justify-content: center; }
+.rl-catalogue-img { max-height: 100%; max-width: 100%; object-fit: contain; }
+.rl-catalogue-placeholder { font-size: 32px; color: var(--muted); }
+.rl-catalogue-title { font-size: 15px; line-height: 1.4; font-weight: 700; }
+.rl-container-lg { max-width: 1200px; margin: 0 auto; }
+.rl-container-md { max-width: 1000px; margin: 0 auto; }
+.rl-container-sm { max-width: 600px; margin: 0 auto; }
+.rl-btn-sm { font-size: 12px !important; padding: 4px 12px !important; border-radius: 6px !important; }
+.rl-btn-lg { padding: 12px 24px !important; }
+.rl-icon-lg { font-size: 48px; color: var(--red); }
+.rl-icon-xl { font-size: 64px; color: var(--muted); }
+.rl-text-total-lg { font-size: 24px; font-weight: 800; color: var(--red-strong); }
+.rl-text-desc { font-size: 14px; line-height: 1.6; white-space: pre-wrap; }
+.rl-text-md { font-size: 14px; }
+.rl-title-md { font-size: 20px; letter-spacing: -.4px; font-weight: 700; }
+.rl-input-mono { letter-spacing: 1px; font-family: monospace; }
+.rl-border-light { border-color: var(--line-2) !important; }
+.rl-w-100px { width: 100px; }
+.rl-w-400px { max-width: 400px; }
+.rl-hero-sm { background: var(--navy); color: #fff; padding: 40px 34px; text-align: center; }
+.rl-about-section { padding: 60px 0; border-bottom: 1px solid var(--line-2); }
+.rl-empty-state { padding: 60px 20px; text-align: center; color: var(--muted); }
+.rl-empty-state h4 { font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+.rl-text-red { color: var(--red-strong); }
+.rl-w-40 { width: 40%; }
+.rl-text-wrap { white-space: pre-wrap; }
 
 /* ---- Promo gradient header ---- */
 .rl-promo-header { background: linear-gradient(120deg, #c1272c, #7c0c12); color: #fff; padding: 16px 18px; position: relative; }

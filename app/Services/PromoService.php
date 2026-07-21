@@ -19,6 +19,10 @@ final class PromoService
             throw new PromoTidakValidException($kode);
         }
 
+        if (!$promo->masihAdaKuota()) {
+            throw new PromoTidakValidException($kode, 'Kuota promo sudah habis.');
+        }
+
         if ($subtotal < (int) $promo->minimal_transaksi) {
             throw new PromoTidakValidException($kode, 'Minimal transaksi belum terpenuhi.');
         }

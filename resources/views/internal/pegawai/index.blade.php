@@ -29,7 +29,7 @@
                     <tr>
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <div class="rl-avatar" style="width:32px;height:32px;font-size:11px">{{ \Illuminate\Support\Str::of($p->nama_pegawai)->explode(' ')->map(fn($w)=>$w[0]??'')->take(2)->implode('') }}</div>
+                                <div class="rl-avatar rl-avatar--sm">{{ \Illuminate\Support\Str::of($p->nama_pegawai)->explode(' ')->map(fn($w)=>$w[0]??'')->take(2)->implode('') }}</div>
                                 <div>
                                     <div class="fw-semibold">{{ $p->nama_pegawai }}</div>
                                     @if ($p->tanggal_masuk)
@@ -70,4 +70,8 @@
     @if ($pegawai->hasPages())
         <div>{{ $pegawai->links() }}</div>
     @endif
+
+    <style>
+        .rl-avatar--sm { width: 32px; height: 32px; font-size: 11px; }
+    </style>
 </x-layouts.app>

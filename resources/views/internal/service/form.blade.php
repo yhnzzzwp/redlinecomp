@@ -13,7 +13,9 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('service.store') }}" class="rl-form-card rl-card p-4" style="max-width:720px">
+    <div class="row">
+        <div class="col-lg-8">
+            <form method="POST" action="{{ route('service.store') }}" class="rl-form-card rl-card p-4">
         @csrf
         <div class="row g-3 mb-3">
             <div class="col-md-6">
@@ -53,5 +55,7 @@
             <button type="submit" class="btn-redline">Simpan &amp; Buat Resi</button>
             <a href="{{ route('service') }}" class="btn-ghost">Batal</a>
         </div>
-    </form>
+            </form>
+        </div>
+    </div>
 </x-layouts.app>

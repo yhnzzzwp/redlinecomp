@@ -7,31 +7,55 @@
         <div>
             <h1 class="rl-page-title mb-1">Analisis Penjualan</h1>
             <p class="rl-page-desc mb-0">
-                Laporan penjualan dan statistik bulan ini.
+                Laporan penjualan dan statistik periode ini.
                 <span class="rl-badge-owner ms-1">Khusus Owner</span>
             </p>
         </div>
-        <a href="{{ route('analytics.cetak') }}" class="btn-redline" target="_blank">⭳ Cetak Laporan (PDF)</a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('analytics.cetak', ['dari' => request('dari'), 'sampai' => request('sampai')]) }}" class="btn-ghost" target="_blank">⭳ PDF</a>
+            <a href="{{ route('analytics.export', ['dari' => request('dari'), 'sampai' => request('sampai')]) }}" class="btn-redline">⭳ Export CSV</a>
+        </div>
     </div>
+
+    <form method="GET" class="rl-card p-3 mb-3 d-flex align-items-end gap-3 flex-wrap">
+        <div>
+            <label class="rl-label mb-1">Dari Tanggal</label>
+            <input type="date" name="dari" value="{{ $dari->format('Y-m-d') }}" class="rl-input rl-input--sm">
+        </div>
+        <div>
+            <label class="rl-label mb-1">Sampai Tanggal</label>
+            <input type="date" name="sampai" value="{{ $sampai->format('Y-m-d') }}" class="rl-input rl-input--sm">
+        </div>
+        <button type="submit" class="btn-ghost btn-sm">Filter</button>
+        @if(request()->filled('dari'))
+            <a href="{{ route('analytics') }}" class="text-muted rl-text-xs">Reset</a>
+        @endif
+    </form>
 
     {{-- KPI --}}
     <div class="row g-3 mb-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="rl-card rl-kpi h-100">
                 <div class="rl-kpi__label">Pendapatan Hari Ini</div>
                 <div class="rl-kpi__val tnum">{{ $rp($pendapatanHariIni) }}</div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="rl-card rl-kpi h-100">
-                <div class="rl-kpi__label">Pendapatan Bulan Ini</div>
-                <div class="rl-kpi__val tnum text-primary">{{ $rp($pendapatanBulanIni) }}</div>
+                <div class="rl-kpi__label">Pendapatan Periode Ini</div>
+                <div class="rl-kpi__val tnum text-primary">{{ $rp($pendapatanPeriode) }}</div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <div class="rl-card rl-kpi h-100 border-start border-success border-3">
+                <div class="rl-kpi__label">Estimasi Profit Periode Ini</div>
+                <div class="rl-kpi__val tnum text-success">{{ $rp($profitPeriode) }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
             <div class="rl-card rl-kpi h-100">
-                <div class="rl-kpi__label">Transaksi Bulan Ini</div>
-                <div class="rl-kpi__val tnum">{{ number_format($transaksiBulanIni, 0, ',', '.') }} <span class="rl-text-muted rl-text-sm fw-normal">Nota</span></div>
+                <div class="rl-kpi__label">Transaksi Periode Ini</div>
+                <div class="rl-kpi__val tnum">{{ number_format($transaksiPeriode, 0, ',', '.') }} <span class="rl-text-muted rl-text-sm fw-normal">Nota</span></div>
             </div>
         </div>
     </div>
@@ -57,7 +81,7 @@
         {{-- Pendapatan by Kategori --}}
         <div class="col-lg-4">
             <div class="rl-card p-4 h-100">
-                <h3 class="rl-section-title mb-4">Berdasarkan Jenis (Bulan Ini)</h3>
+                <h3 class="rl-section-title mb-4">Berdasarkan Jenis (Periode Ini)</h3>
                 <div class="d-flex flex-column gap-3">
                     @php $totalSemua = max(1, $pendapatanKategori->sum('total_pendapatan')); @endphp
                     @foreach ($pendapatanKategori as $kat)
@@ -83,7 +107,7 @@
     {{-- Top Products --}}
     <div class="rl-card mt-3 overflow-hidden">
         <div class="p-4 border-bottom rl-divider-light">
-            <h3 class="rl-section-title mb-0">Produk Terlaris Bulan Ini</h3>
+            <h3 class="rl-section-title mb-0">Produk Terlaris Periode Ini</h3>
         </div>
         <table class="rl-table">
             <thead>
@@ -101,7 +125,7 @@
                         <td class="text-end tnum fw-bold">{{ $rp($p->total_pendapatan) }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="3" class="text-center p-4 rl-text-muted">Belum ada produk terjual bulan ini.</td></tr>
+                    <tr><td colspan="3" class="text-center p-4 rl-text-muted">Belum ada produk terjual periode ini.</td></tr>
                 @endforelse
             </tbody>
         </table>

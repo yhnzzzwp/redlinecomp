@@ -10,6 +10,7 @@
                 <h1 class="rl-page-title mb-1">Daftar Transaksi</h1>
                 <p class="rl-page-desc mb-0">Riwayat seluruh transaksi di Redline Komputer.</p>
             </div>
+            <a href="{{ route('transaksi.export', ['cari' => $cari, 'tanggal' => $tanggal, 'jenis' => $jenis]) }}" class="btn-redline">⭳ Export CSV</a>
         </div>
     </div>
 
@@ -54,7 +55,12 @@
                     <tr>
                         <td>
                             <div class="fw-semibold tnum">#{{ $t->kode_nota }}</div>
-                            <div class="rl-text-muted rl-text-xs">{{ $t->created_at->format('d M Y, H:i') }}</div>
+                            <div class="rl-text-muted rl-text-xs mb-1">{{ $t->created_at->format('d M Y, H:i') }}</div>
+                            @if($t->status === 'Normal')
+                                <span class="rl-pill green rl-text-xs">{{ $t->status }}</span>
+                            @else
+                                <span class="rl-pill red rl-text-xs">{{ $t->status }}</span>
+                            @endif
                         </td>
                         <td>{{ $t->pegawai?->nama_pegawai ?? '—' }}</td>
                         <td>
@@ -73,6 +79,13 @@
                         </td>
                         <td class="text-end">
                             <a href="{{ route('pos.nota', $t) }}" target="_blank" class="btn-ghost btn-sm">Lihat Nota</a>
+                            @if($t->status === 'Normal')
+                                <form method="POST" action="{{ route('transaksi.void', $t) }}" class="d-inline"
+                                      onsubmit="return confirm('Apakah Anda yakin ingin melakukan Void transaksi ini? Stok produk akan dikembalikan.');">
+                                    @csrf
+                                    <button type="submit" class="btn-ghost btn-sm text-danger">Void</button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                 @empty
