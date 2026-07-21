@@ -46,7 +46,7 @@
                                 Pesan via WhatsApp
                             </a>
                         @else
-                            <button class="btn-ghost d-inline-flex align-items-center justify-content-center gap-2 w-100 py-3" style="cursor:not-allowed" disabled>
+                            <button class="btn-ghost d-inline-flex align-items-center justify-content-center gap-2 w-100 py-3 rl-cursor-not-allowed" disabled>
                                 Pesan via WhatsApp (Stok Habis)
                             </button>
                         @endif
