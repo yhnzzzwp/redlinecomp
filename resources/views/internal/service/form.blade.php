@@ -1,55 +1,51 @@
 <x-layouts.app active="service" title="Tambah Servis">
-    <div class="d-flex align-items-center gap-2">
-        <a href="{{ route('service') }}" class="text-muted text-decoration-none" style="font-size:13px">&larr; Kembali</a>
+    <div class="rl-page-header">
+        <a href="{{ route('service') }}" class="rl-back-link text-decoration-none rl-text-sm">&larr; Kembali</a>
+        <h1 class="rl-page-title mb-1 mt-2">Tambah Servis Baru</h1>
+        <p class="rl-page-desc">Nomor resi akan dibuat otomatis oleh sistem.</p>
     </div>
-    <h1 class="fw-bold" style="font-size:23px;letter-spacing:-.4px">Tambah Servis Baru</h1>
-    <p class="text-muted" style="font-size:13px;margin-top:-8px">Nomor resi akan dibuat otomatis oleh sistem.</p>
 
     @if ($errors->any())
-        <div class="rl-card p-3" style="border-left:4px solid var(--red)">
-            <ul class="mb-0" style="font-size:12.5px;color:var(--red-strong)">
+        <div class="rl-alert rl-alert--error mb-3">
+            <ul class="mb-0 rl-text-sm">
                 @foreach ($errors->all() as $e) <li>{{ $e }}</li> @endforeach
             </ul>
         </div>
     @endif
 
-    <form method="POST" action="{{ route('service.store') }}" class="rl-card p-4" style="max-width:720px">
+    <form method="POST" action="{{ route('service.store') }}" class="rl-form-card rl-card p-4" style="max-width:720px">
         @csrf
         <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Nama Pelanggan <span style="color:var(--red)">*</span></label>
-                <input type="text" name="nama_customer" value="{{ old('nama_customer') }}" placeholder="Nama pelanggan"
-                       class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px" required>
+                <x-form.input name="nama_customer" label="Nama Pelanggan" required />
             </div>
             <div class="col-md-6">
-                <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Nomor HP</label>
-                <input type="text" name="nomor_hp_customer" value="{{ old('nomor_hp_customer') }}" placeholder="0812xxxxxxxx"
-                       class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px">
+                <x-form.input name="nomor_hp_customer" label="Nomor HP" placeholder="0812xxxxxxxx" />
             </div>
         </div>
 
         <div class="mb-3">
-            <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Nama Barang <span style="color:var(--red)">*</span></label>
-            <input type="text" name="nama_barang" value="{{ old('nama_barang') }}" placeholder="Contoh: Laptop ASUS ROG Zephyrus G14"
-                   class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px" required>
+            <x-form.input name="nama_barang" label="Nama Barang" required />
         </div>
 
         <div class="mb-3">
-            <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Deskripsi Masalah <span style="color:var(--red)">*</span></label>
-            <textarea name="masalah" rows="3" placeholder="Jelaskan kerusakan atau keluhan pelanggan…"
-                      class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px" required>{{ old('masalah') }}</textarea>
+            <x-form.textarea name="masalah" label="Deskripsi Masalah" rows="3" required />
         </div>
 
         <div class="row g-3 mb-4">
-            <div class="col-md-6">
-                <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Estimasi Biaya (Rp)</label>
-                <input type="number" name="biaya_service" value="{{ old('biaya_service', 0) }}" min="0"
-                       class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px">
+            <div class="col-md-4">
+                <x-form.input type="number" name="biaya_service" label="Estimasi Biaya (Rp)" value="0" min="0" />
             </div>
-            <div class="col-md-6">
-                <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Estimasi Selesai</label>
-                <input type="date" name="estimasi_selesai" value="{{ old('estimasi_selesai') }}"
-                       class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px">
+            <div class="col-md-4">
+                <x-form.input type="date" name="estimasi_selesai" label="Estimasi Selesai" />
+            </div>
+            <div class="col-md-4">
+                <x-form.select name="teknisi_id" label="Teknisi" :options="[]" placeholder="-- Pilih Teknisi --">
+                    <option value="">-- Pilih Teknisi --</option>
+                    @foreach($teknisi as $t)
+                        <option value="{{ $t->id }}" @selected(old('teknisi_id') == $t->id)>{{ $t->nama_pegawai }}</option>
+                    @endforeach
+                </x-form.select>
             </div>
         </div>
 

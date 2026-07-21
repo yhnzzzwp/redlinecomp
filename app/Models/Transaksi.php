@@ -15,12 +15,13 @@ class Transaksi extends Model
     protected $fillable = [
         'kode_nota', 'pegawai_id', 'promo_id', 'metode_bayar',
         'subtotal', 'diskon', 'total', 'bayar', 'kembalian',
-        'nama_pembeli', 'nomor_hp_pembeli',
+        'nama_pembeli', 'nomor_hp_pembeli', 'status',
     ];
 
     protected $casts = [
         'subtotal' => 'integer', 'diskon' => 'integer', 'total' => 'integer',
         'bayar' => 'integer', 'kembalian' => 'integer',
+        'status' => \App\Enums\TransaksiStatus::class,
     ];
 
     public function pegawai(): BelongsTo { return $this->belongsTo(Pegawai::class, 'pegawai_id'); }

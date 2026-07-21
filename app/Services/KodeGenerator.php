@@ -22,11 +22,10 @@ final class KodeGenerator
     {
         $tahun = (int) now()->year;
         $prefix = (string) config('redline.prefix_resi');
-        $urutan = Service::query()->whereYear('created_at', $tahun)->count() + 1;
 
         do {
-            $kode = sprintf('%s-%d-%04d', $prefix, $tahun, $urutan);
-            $urutan++;
+            $random = strtoupper(\Illuminate\Support\Str::random(6));
+            $kode = sprintf('%s-%d-%s', $prefix, $tahun, $random);
         } while (Service::query()->where('nomor_resi', $kode)->exists());
 
         return $kode;

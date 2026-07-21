@@ -22,6 +22,7 @@ class StoreServiceRequest extends FormRequest
             'masalah' => ['required', 'string', 'max:5000'],
             'biaya_service' => ['nullable', 'integer', 'min:0', 'max:1000000000'],
             'estimasi_selesai' => ['nullable', 'date', 'after_or_equal:today'],
+            'teknisi_id' => ['nullable', 'integer', 'exists:pegawai,id'],
         ];
     }
 

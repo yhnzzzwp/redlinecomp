@@ -15,7 +15,7 @@ class Promo extends Model
     protected $fillable = [
         'nama_promo', 'kode_promo', 'tipe_promo', 'besar_promo',
         'minimal_transaksi', 'maksimal_diskon', 'waktu_mulai',
-        'waktu_berakhir', 'aktif', 'foto_promo',
+        'waktu_berakhir', 'aktif', 'foto_promo', 'kuota', 'terpakai',
     ];
 
     protected $casts = [
@@ -23,6 +23,8 @@ class Promo extends Model
         'aktif' => 'boolean',
         'waktu_mulai' => 'date',
         'waktu_berakhir' => 'date',
+        'kuota' => 'integer',
+        'terpakai' => 'integer',
     ];
 
     public function transaksi(): HasMany
@@ -35,6 +37,16 @@ class Promo extends Model
         $today = now()->startOfDay();
         return $this->aktif
             && $this->waktu_mulai->lte($today)
-            && $this->waktu_berakhir->gte($today);
+            && $this->waktu_berakhir->gte($today)
+            && $this->masihAdaKuota();
+    }
+
+    public function masihAdaKuota(): bool
+    {
+        if (is_null($this->kuota)) {
+            return true;
+        }
+
+        return $this->terpakai < $this->kuota;
     }
 }

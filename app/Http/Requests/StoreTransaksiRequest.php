@@ -21,7 +21,9 @@ final class StoreTransaksiRequest extends FormRequest
     {
         return [
             'items' => ['required', 'array', 'min:1'],
-            'items.*.produk_id' => ['required', 'integer', 'exists:produk,id'],
+            'items.*.tipe' => ['required', 'string', 'in:produk,service'],
+            'items.*.produk_id' => ['nullable', 'integer', 'exists:produk,id'],
+            'items.*.service_id' => ['nullable', 'integer', 'exists:service,id'],
             'items.*.jumlah' => ['required', 'integer', 'min:1', 'max:9999'],
             'metode_bayar' => ['required', Rule::enum(MetodeBayar::class)],
             'bayar' => ['required', 'integer', 'min:0'],
@@ -34,7 +36,11 @@ final class StoreTransaksiRequest extends FormRequest
     public function toCheckoutData(): CheckoutData
     {
         $items = array_map(
-            static fn (array $r): CartLine => new CartLine((int) $r['produk_id'], (int) $r['jumlah']),
+            static fn (array $r): CartLine => new CartLine(
+                $r['tipe'],
+                (int) ($r['tipe'] === 'service' ? $r['service_id'] : $r['produk_id']),
+                (int) $r['jumlah']
+            ),
             $this->validated('items'),
         );
 

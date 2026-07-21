@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            \Illuminate\Support\Facades\RateLimiter::for('web', function (Request $request) {
+                return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->ip());
+            });
+        }
     )
     ->withMiddleware(function (Middleware $middleware): void {
 

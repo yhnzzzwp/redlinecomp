@@ -25,6 +25,7 @@ class UpdateProdukRequest extends FormRequest
             'nama_produk' => ['required', 'string', 'max:255'],
             'sku' => ['nullable', 'string', 'max:100', Rule::unique('produk', 'sku')->ignore($this->route('produk'))],
             'kategori_id' => ['nullable', 'integer', 'exists:kategori_produk,id'],
+            'harga_modal' => ['nullable', 'integer', 'min:0', 'max:100000000000'],
             'harga' => ['required', 'integer', 'min:0', 'max:100000000000'],
             'jumlah_produk' => ['required', 'integer', 'min:0', 'max:1000000'],
             'deskripsi_produk' => ['nullable', 'string', 'max:5000'],

@@ -1,6 +1,8 @@
 # Redline Komputer (SIRC) — Docker stack untuk development & pra-deployment.
 # Jalankan:  docker compose up -d --build
 # Lihat app: http://localhost:8080   ·   Adminer (DB GUI): http://localhost:8081
+# INFO BACKUP: Skrip backup tersedia di docker/backup.sh. Jadwalkan via cron di server host:
+# 0 2 * * * cd /path/to/redline && docker compose exec -T app bash docker/backup.sh
 services:
   # ---- PHP-FPM: menjalankan kode Laravel ----
   app:

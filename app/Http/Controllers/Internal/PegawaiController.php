@@ -42,6 +42,18 @@ final class PegawaiController extends Controller
     {
         $data = $request->validated();
 
+        // Guard last owner
+        if ($pegawai->isOwner() && $pegawai->masih_bekerja) {
+            $isChangingRole = isset($data['role']) && $data['role'] !== \App\Enums\RolePegawai::Owner->value;
+            $isBecomingInactive = isset($data['masih_bekerja']) && ! $data['masih_bekerja'];
+            if ($isChangingRole || $isBecomingInactive) {
+                $ownerCount = \App\Models\Pegawai::where('role', \App\Enums\RolePegawai::Owner)->where('masih_bekerja', true)->count();
+                if ($ownerCount <= 1) {
+                    return redirect()->back()->with('error', 'Tidak dapat mengubah role atau status Owner terakhir yang aktif.');
+                }
+            }
+        }
+
         // Hanya ubah password bila diisi
         if (empty($data['password'])) {
             unset($data['password']);
@@ -57,6 +69,14 @@ final class PegawaiController extends Controller
         // Owner tidak boleh menghapus dirinya sendiri
         if ($pegawai->id === auth()->id()) {
             return redirect()->route('pegawai.index')->with('error', 'Anda tidak dapat menghapus akun sendiri.');
+        }
+
+        // Guard last owner
+        if ($pegawai->isOwner() && $pegawai->masih_bekerja) {
+            $ownerCount = \App\Models\Pegawai::where('role', \App\Enums\RolePegawai::Owner)->where('masih_bekerja', true)->count();
+            if ($ownerCount <= 1) {
+                return redirect()->back()->with('error', 'Tidak dapat menghapus Owner terakhir yang aktif.');
+            }
         }
 
         $pegawai->delete();

@@ -28,6 +28,7 @@ final class ServiceTicketService
                 'status' => StatusService::Diterima,
                 'tanggal_masuk' => now(),
                 'estimasi_selesai' => $data['estimasi_selesai'] ?? null,
+                'teknisi_id' => $data['teknisi_id'] ?? null,
             ]);
 
             $service->riwayat()->create([
@@ -40,7 +41,7 @@ final class ServiceTicketService
         });
     }
 
-    public function updateStatus(Service $service, StatusService $status, ?string $catatan, Pegawai $pegawai): Service
+    public function updateStatus(Service $service, StatusService $status, ?string $catatan, Pegawai $pegawai): array
     {
         if (! $service->status->canTransitionTo($status)) {
             throw \Illuminate\Validation\ValidationException::withMessages([
@@ -48,7 +49,7 @@ final class ServiceTicketService
             ]);
         }
 
-        return DB::transaction(function () use ($service, $status, $catatan, $pegawai): Service {
+        return DB::transaction(function () use ($service, $status, $catatan, $pegawai): array {
             $service->update(['status' => $status]);
 
             $service->riwayat()->create([
@@ -57,7 +58,17 @@ final class ServiceTicketService
                 'catatan' => $catatan,
             ]);
 
-            return $service;
+            $waLink = null;
+            if ($service->nomor_hp_customer) {
+                $nomor = $service->nomor_hp_customer;
+                if (str_starts_with($nomor, '0')) {
+                    $nomor = '62' . substr($nomor, 1);
+                }
+                $pesan = "Halo {$service->nama_customer}, status servis Anda ({$service->nomor_resi}) telah diperbarui menjadi: {$status->value}. - Redline Komputer";
+                $waLink = "https://wa.me/{$nomor}?text=" . urlencode($pesan);
+            }
+
+            return [$service, $waLink];
         });
     }
 

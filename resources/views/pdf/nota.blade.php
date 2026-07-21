@@ -26,7 +26,7 @@
 <body>
 <div class="wrap">
     <div class="head">
-        <div class="logo">REDL<i>INE</i></div>
+        <div class="logo">{{ config('redline.store_name', 'Redline Komputer') }}</div>
         <p>Jl. Diponegoro No. 52, Salatiga &middot; (0298) 321212</p>
     </div>
 
@@ -64,8 +64,11 @@
     </div>
 
     <div class="foot">
+        <div style="margin-bottom: 8px">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ urlencode(url('/cek-nota?nota='.$t->kode_nota)) }}" width="60" height="60" alt="QR Code">
+        </div>
         Terima kasih telah berbelanja di Redline Komputer.<br>
-        Dokumen digital &middot; cek keaslian di redline.co.id/nota
+        Dokumen digital &middot; cek keaslian dengan scan QR Code di atas.
     </div>
 </div>
 </body>

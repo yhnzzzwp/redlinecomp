@@ -29,6 +29,7 @@
             <tr>
                 <th>Kategori</th>
                 <th class="text-right">Total Pendapatan</th>
+                <th class="text-right">Total Profit</th>
             </tr>
         </thead>
         <tbody>
@@ -36,15 +37,17 @@
                 <tr>
                     <td>{{ $kat->tipe->value ?? $kat->tipe }}</td>
                     <td class="text-right">Rp {{ number_format((int)$kat->total_pendapatan, 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format((int)$kat->total_profit, 0, ',', '.') }}</td>
                 </tr>
             @empty
-                <tr><td colspan="2" class="text-center">Belum ada data</td></tr>
+                <tr><td colspan="3" class="text-center">Belum ada data</td></tr>
             @endforelse
         </tbody>
         <tfoot>
             <tr class="total-row">
                 <th>Total Keseluruhan</th>
                 <th class="text-right">Rp {{ number_format((int)$totalPendapatan, 0, ',', '.') }}</th>
+                <th class="text-right">Rp {{ number_format((int)$totalProfit, 0, ',', '.') }}</th>
             </tr>
         </tfoot>
     </table>

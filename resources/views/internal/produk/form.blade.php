@@ -20,45 +20,37 @@
         @if ($produk->exists) @method('PUT') @endif
 
         <div class="mb-3">
-            <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Nama Produk <span style="color:var(--red)">*</span></label>
-            <input type="text" name="nama_produk" value="{{ old('nama_produk', $produk->nama_produk) }}"
-                   class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px" required>
+            <x-form.input name="nama_produk" value="{{ $produk->nama_produk }}" label="Nama Produk" required />
         </div>
 
         <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <label class="fw-semibold d-block mb-1" style="font-size:12.5px">SKU</label>
-                <input type="text" name="sku" value="{{ old('sku', $produk->sku) }}" placeholder="RL-XXX-000"
-                       class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px">
+                <x-form.input name="sku" value="{{ $produk->sku }}" label="SKU" placeholder="RL-XXX-000" />
             </div>
             <div class="col-md-6">
-                <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Kategori</label>
-                <select name="kategori_id" class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px">
+                <x-form.select name="kategori_id" label="Kategori">
                     <option value="">— Tanpa kategori —</option>
                     @foreach ($kategori as $k)
                         <option value="{{ $k->id }}" @selected(old('kategori_id', $produk->kategori_id) == $k->id)>{{ $k->nama_kategori }}</option>
                     @endforeach
-                </select>
+                </x-form.select>
             </div>
         </div>
 
         <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Harga (Rp) <span style="color:var(--red)">*</span></label>
-                <input type="number" name="harga" value="{{ old('harga', $produk->harga) }}" min="0"
-                       class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px" required>
+            <div class="col-md-4">
+                <x-form.input type="number" name="harga_modal" value="{{ $produk->harga_modal ?? 0 }}" label="Harga Modal / HPP" min="0" />
             </div>
-            <div class="col-md-6">
-                <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Stok <span style="color:var(--red)">*</span></label>
-                <input type="number" name="jumlah_produk" value="{{ old('jumlah_produk', $produk->jumlah_produk ?? 0) }}" min="0"
-                       class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px" required>
+            <div class="col-md-4">
+                <x-form.input type="number" name="harga" value="{{ $produk->harga ?? 0 }}" label="Harga Jual (Rp)" min="0" required />
+            </div>
+            <div class="col-md-4">
+                <x-form.input type="number" name="jumlah_produk" value="{{ $produk->jumlah_produk ?? 0 }}" label="Stok" min="0" required />
             </div>
         </div>
 
         <div class="mb-3">
-            <label class="fw-semibold d-block mb-1" style="font-size:12.5px">Deskripsi</label>
-            <textarea name="deskripsi_produk" rows="3"
-                      class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:10px 13px;font-size:13.5px">{{ old('deskripsi_produk', $produk->deskripsi_produk) }}</textarea>
+            <x-form.textarea name="deskripsi_produk" label="Deskripsi" rows="3">{{ $produk->deskripsi_produk }}</x-form.textarea>
         </div>
 
         <div class="mb-3">

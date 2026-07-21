@@ -47,7 +47,9 @@ final class ServiceController extends Controller
 
     public function create(): View
     {
-        return view('internal.service.form');
+        return view('internal.service.form', [
+            'teknisi' => \App\Models\Pegawai::query()->where('aktif', true)->get(),
+        ]);
     }
 
     public function store(StoreServiceRequest $request): RedirectResponse
@@ -60,7 +62,7 @@ final class ServiceController extends Controller
 
     public function show(Service $service): View
     {
-        $service->load(['pegawai', 'riwayat.pegawai', 'parts']);
+        $service->load(['pegawai', 'riwayat.pegawai', 'parts', 'teknisi']);
 
         return view('internal.service.show', [
             'service' => $service,
@@ -69,14 +71,20 @@ final class ServiceController extends Controller
 
     public function updateStatus(UpdateStatusServiceRequest $request, Service $service): RedirectResponse
     {
-        $this->service->updateStatus(
+        [$service, $waLink] = $this->service->updateStatus(
             $service,
             StatusService::from($request->validated('status')),
             $request->validated('catatan'),
             $request->user(),
         );
 
-        return redirect()->route('service.show', $service)->with('success', 'Status servis diperbarui.');
+        $response = redirect()->route('service.show', $service)->with('success', 'Status servis diperbarui.');
+        
+        if ($waLink) {
+            $response->with('wa_link', $waLink);
+        }
+
+        return $response;
     }
 
     public function storePart(StorePartServiceRequest $request, Service $service): RedirectResponse

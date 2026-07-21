@@ -1,7 +1,7 @@
 <x-layouts.public active="About Us" title="Tentang Kami">
-    <div style="background:var(--navy);color:#fff;padding:60px 34px;text-align:center">
-        <h1 class="fw-bold mb-3" style="font-size:32px;letter-spacing:-1px">Tentang Redline Komputer</h1>
-        <p class="text-muted mx-auto" style="max-width:500px;font-size:15px;color:#a9b7c7!important">Solusi terpercaya untuk kebutuhan IT Anda sejak 2015.</p>
+    <div class="rl-page-header">
+        <h1 class="rl-page-title">Tentang Redline Komputer</h1>
+        <p class="rl-page-desc">Solusi terpercaya untuk kebutuhan IT Anda sejak 2015.</p>
     </div>
 
     <div class="rl-body mx-auto" style="max-width:800px;padding-top:40px">

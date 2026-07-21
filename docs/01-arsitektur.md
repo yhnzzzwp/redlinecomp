@@ -5,6 +5,8 @@ SRS mewajibkan **MVC**. Agar mudah dirawat, logika bisnis tidak ditaruh di contr
 melainkan di **Service classes** (`app/Services`). Controller hanya orkestrasi tipis:
 terima request → panggil service → kembalikan view/redirect.
 
+Service digunakan untuk logika transaksional/multi-langkah (POS checkout, service ticket). Untuk CRUD sederhana (Promo, Pegawai), Eloquent langsung di controller.
+
 ```
 Request → Route → (Middleware auth/role) → Controller → Service → Model → DB
                                                      ↘ View (Blade)

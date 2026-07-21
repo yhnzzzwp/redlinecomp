@@ -18,8 +18,8 @@ Route::view('/', 'public.landing')->name('landing');
 Route::get('/about', [PublicController::class, 'about'])->name('about');
 Route::get('/catalogue', [PublicController::class, 'catalogue'])->name('catalogue');
 Route::get('/catalogue/{produk}', [PublicController::class, 'detailProduk'])->name('catalogue.show');
-Route::get('/cek-servis', [PublicController::class, 'cekServis'])->name('cek.servis');
-Route::get('/cek-nota', [PublicController::class, 'cekNota'])->name('cek.nota');
+Route::get('/cek-servis', [PublicController::class, 'cekServis'])->middleware('throttle:10,1')->name('cek.servis');
+Route::get('/cek-nota', [PublicController::class, 'cekNota'])->middleware('throttle:10,1')->name('cek.nota');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -35,6 +35,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/pos/nota/{transaksi}', [PosController::class, 'nota'])->name('pos.nota');
     
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
+    Route::get('/transaksi/export-csv', [TransaksiController::class, 'exportCsv'])->name('transaksi.export');
+    Route::post('/transaksi/{transaksi}/void', [TransaksiController::class, 'void'])->name('transaksi.void');
 
     Route::resource('produk', ProdukController::class)->except(['show']);
 
@@ -48,6 +50,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('owner')->group(function () {
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
         Route::get('/analytics/cetak', [AnalyticsController::class, 'cetak'])->name('analytics.cetak');
+        Route::get('/analytics/export-csv', [AnalyticsController::class, 'exportCsv'])->name('analytics.export');
         Route::resource('promo', PromoController::class)->except(['show']);
         Route::resource('pegawai', PegawaiController::class)->except(['show']);
     });

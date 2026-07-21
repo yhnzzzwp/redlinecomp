@@ -27,16 +27,24 @@ final class PosService
             $baris = [];
 
             foreach ($data->items as $item) {
-                $produk = Produk::query()->lockForUpdate()->findOrFail($item->produkId);
+                if ($item->tipe === 'produk') {
+                    $produk = Produk::query()->lockForUpdate()->findOrFail($item->itemId);
 
-                if ($produk->jumlah_produk < $item->jumlah) {
-                    throw new StokTidakCukupException($produk->nama_produk, $produk->jumlah_produk);
+                    if ($produk->jumlah_produk < $item->jumlah) {
+                        throw new StokTidakCukupException($produk->nama_produk, $produk->jumlah_produk);
+                    }
+
+                    $harga = (int) $produk->harga;
+                    $sub = $harga * $item->jumlah;
+                    $subtotal += $sub;
+                    $baris[] = ['tipe' => TipeItem::Produk, 'model' => $produk, 'jumlah' => $item->jumlah, 'harga' => $harga, 'sub' => $sub];
+                } else {
+                    $service = \App\Models\Service::query()->lockForUpdate()->findOrFail($item->itemId);
+                    $harga = (int) $service->biaya_service;
+                    $sub = $harga * $item->jumlah;
+                    $subtotal += $sub;
+                    $baris[] = ['tipe' => TipeItem::Servis, 'model' => $service, 'jumlah' => $item->jumlah, 'harga' => $harga, 'sub' => $sub];
                 }
-
-                $harga = (int) $produk->harga;
-                $sub = $harga * $item->jumlah;
-                $subtotal += $sub;
-                $baris[] = [$produk, $item->jumlah, $harga, $sub];
             }
 
             $promo = $data->kodePromo !== null
@@ -64,17 +72,22 @@ final class PosService
                 'nomor_hp_pembeli' => $data->nomorHpPembeli,
             ]);
 
-            foreach ($baris as [$produk, $jumlah, $harga, $sub]) {
+            foreach ($baris as $b) {
                 $transaksi->items()->create([
-                    'tipe' => TipeItem::Produk,
-                    'produk_id' => $produk->id,
-                    'nama_item' => $produk->nama_produk,
-                    'jumlah' => $jumlah,
-                    'harga' => $harga,
-                    'subtotal' => $sub,
+                    'tipe' => $b['tipe'],
+                    'produk_id' => $b['tipe'] === TipeItem::Produk ? $b['model']->id : null,
+                    'service_id' => $b['tipe'] === TipeItem::Servis ? $b['model']->id : null,
+                    'nama_item' => $b['tipe'] === TipeItem::Produk ? $b['model']->nama_produk : 'Servis: ' . $b['model']->nama_barang,
+                    'jumlah' => $b['jumlah'],
+                    'harga' => $b['harga'],
+                    'subtotal' => $b['sub'],
                 ]);
 
-                $produk->decrement('jumlah_produk', $jumlah);
+                if ($b['tipe'] === TipeItem::Produk) {
+                    $b['model']->decrement('jumlah_produk', $b['jumlah']);
+                } else {
+                    $b['model']->update(['status' => \App\Enums\StatusService::SudahDiambil]);
+                }
             }
 
             return $transaksi->load(['items', 'promo', 'pegawai']);

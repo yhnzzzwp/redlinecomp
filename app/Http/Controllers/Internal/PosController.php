@@ -26,6 +26,9 @@ final class PosController extends Controller
     {
         return view('internal.pos', [
             'produk' => Produk::query()->with('kategori')->orderBy('nama_produk')->get(),
+            'services' => \App\Models\Service::query()
+                ->whereNotIn('status', [\App\Enums\StatusService::Selesai, \App\Enums\StatusService::SudahDiambil])
+                ->get(),
             'kategori' => KategoriProduk::query()->orderBy('nama_kategori')->get(),
             'promo' => Promo::query()->where('aktif', true)->get(),
         ]);

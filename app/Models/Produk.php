@@ -13,12 +13,13 @@ class Produk extends Model
 
     protected $fillable = [
         'kategori_id', 'sku', 'nama_produk', 'jumlah_produk',
-        'harga', 'deskripsi_produk', 'show_katalog', 'foto_produk',
+        'harga', 'harga_modal', 'deskripsi_produk', 'show_katalog', 'foto_produk',
     ];
 
     protected $casts = [
         'show_katalog' => 'boolean',
         'harga' => 'integer',
+        'harga_modal' => 'integer',
         'jumlah_produk' => 'integer',
     ];
 

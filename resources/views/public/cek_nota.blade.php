@@ -3,17 +3,17 @@
         $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
     @endphp
 
-    <div style="background:var(--navy);color:#fff;padding:60px 34px 40px;text-align:center">
-        <h1 class="fw-bold mb-3" style="font-size:32px;letter-spacing:-1px">Cek Nota Transaksi</h1>
-        <p class="text-muted mx-auto" style="max-width:500px;font-size:15px;color:#a9b7c7!important">Verifikasi detail pembelian Anda di Redline Komputer.</p>
+    <div class="rl-page-header">
+        <h1 class="rl-page-title">Cek Nota Transaksi</h1>
+        <p class="rl-page-desc">Verifikasi detail pembelian Anda di Redline Komputer.</p>
     </div>
 
     <div class="rl-body mx-auto" style="max-width:700px">
         <div class="rl-card p-4 mb-4 text-center">
-            <h3 class="fw-bold mb-3" style="font-size:16px">Masukkan Kode Nota</h3>
+            <h3 class="rl-section-title">Masukkan Kode Nota</h3>
             <form method="GET" action="{{ route('cek.nota') }}" class="d-flex justify-content-center gap-2 max-w-md mx-auto" style="max-width:400px">
-                <input type="text" name="nota" value="{{ $nota }}" placeholder="Contoh: INV-..." required
-                       class="w-100" style="border:1px solid var(--line);border-radius:9px;padding:12px 16px;font-size:15px;text-align:center;letter-spacing:1px;font-family:monospace">
+                <input type="text" name="nota" value="{{ $nota }}" placeholder="Contoh: 123456" required
+                       class="rl-input w-100 text-center" style="letter-spacing:1px;font-family:monospace">
                 <button type="submit" class="btn-redline" style="padding:12px 24px">Cari</button>
             </form>
             @if(session('error'))

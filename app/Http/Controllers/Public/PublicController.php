@@ -63,7 +63,11 @@ final class PublicController extends Controller
         $service = null;
         if ($request->filled('resi')) {
             $service = Service::with(['riwayat', 'parts'])->where('nomor_resi', $request->input('resi'))->first();
-            if (! $service) {
+            if ($service) {
+                if ($service->nomor_hp_customer) {
+                    $service->nomor_hp_customer = '****' . substr($service->nomor_hp_customer, -4);
+                }
+            } else {
                 session()->flash('error', 'Nomor resi tidak ditemukan.');
             }
         }
@@ -80,7 +84,11 @@ final class PublicController extends Controller
         $transaksi = null;
         if ($request->filled('nota')) {
             $transaksi = Transaksi::with(['items', 'pegawai'])->where('kode_nota', $request->input('nota'))->first();
-            if (! $transaksi) {
+            if ($transaksi) {
+                if ($transaksi->nomor_hp_pembeli) {
+                    $transaksi->nomor_hp_pembeli = '****' . substr($transaksi->nomor_hp_pembeli, -4);
+                }
+            } else {
                 session()->flash('error', 'Kode nota tidak ditemukan.');
             }
         }

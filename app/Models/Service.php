@@ -14,7 +14,7 @@ class Service extends Model
     protected $table = 'service';
 
     protected $fillable = [
-        'nomor_resi', 'pegawai_id', 'nama_customer', 'nomor_hp_customer',
+        'nomor_resi', 'pegawai_id', 'teknisi_id', 'nama_customer', 'nomor_hp_customer',
         'nama_barang', 'masalah', 'biaya_service', 'status',
         'tanggal_masuk', 'estimasi_selesai',
     ];
@@ -27,6 +27,7 @@ class Service extends Model
     ];
 
     public function pegawai(): BelongsTo { return $this->belongsTo(Pegawai::class, 'pegawai_id'); }
+    public function teknisi(): BelongsTo { return $this->belongsTo(Pegawai::class, 'teknisi_id'); }
     public function parts(): HasMany { return $this->hasMany(PartService::class, 'service_id'); }
     public function riwayat(): HasMany { return $this->hasMany(ServiceStatus::class, 'service_id')->latest(); }
 }

@@ -7,6 +7,16 @@
         <a href="{{ route('produk.create') }}" class="btn-redline">+ Tambah Produk</a>
     </div>
 
+    @if($lowStockCount > 0)
+        <div class="rl-card p-3 mb-3 d-flex align-items-center gap-3" style="border-left: 4px solid var(--amber); background-color: #fff9f0;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--amber); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">!</div>
+            <div>
+                <h3 style="font-size: 14px; margin: 0; font-weight: bold; color: #b45309;">Peringatan Stok Tipis</h3>
+                <p style="font-size: 13px; margin: 0; color: #78350f;">Ada {{ $lowStockCount }} produk yang stoknya menipis atau habis. Segera lakukan restock.</p>
+            </div>
+        </div>
+    @endif
+
     <div class="rl-card">
         <form method="GET" class="d-flex align-items-center gap-2 p-3">
             <div class="rl-search" style="max-width:320px">
@@ -46,8 +56,12 @@
                         <td class="text-muted">{{ $p->kategori?->nama_kategori ?? '—' }}</td>
                         <td style="text-align:right" class="tnum fw-semibold">Rp {{ number_format($p->harga, 0, ',', '.') }}</td>
                         <td>
-                            @php $s = $p->statusStok(); @endphp
-                            <span class="rl-pill {{ $s === 'Out of Stock' ? 'red' : ($s === 'Low Stock' ? 'amber' : 'green') }}">{{ $s }} ({{ $p->jumlah_produk }})</span>
+                            @php 
+                                $s = $p->statusStok(); 
+                                $kritis = config('redline.stok_kritis', 5);
+                                $isRed = $p->jumlah_produk <= $kritis;
+                            @endphp
+                            <span class="rl-pill {{ $isRed ? 'red' : ($s === 'Low Stock' ? 'amber' : 'green') }}">{{ $s }} ({{ $p->jumlah_produk }})</span>
                         </td>
                         <td style="text-align:right">
                             <a href="{{ route('produk.edit', $p) }}" class="btn-ghost btn-sm">Edit</a>

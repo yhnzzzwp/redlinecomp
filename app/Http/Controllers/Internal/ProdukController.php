@@ -34,6 +34,7 @@ final class ProdukController extends Controller
             'produk' => $query->paginate(10)->withQueryString(),
             'total' => Produk::query()->count(),
             'cari' => $request->string('cari')->toString(),
+            'lowStockCount' => Produk::query()->where('jumlah_produk', '<=', config('redline.stok_kritis', 5))->count(),
         ]);
     }
 
