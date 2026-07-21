@@ -65,14 +65,17 @@
                                     @endif
                                 </div>
                                 <div class="p-3 d-flex flex-column flex-fill">
-                                    <div class="text-muted mb-1" style="font-size:11.5px">{{ $p->kategori->nama_kategori }} &middot; {{ $p->sku }}</div>
+                                    <div class="text-muted mb-1" style="font-size:11.5px">{{ $p->kategori?->nama_kategori ?? 'Umum' }} &middot; {{ $p->sku }}</div>
                                     <h3 class="fw-bold mb-2" style="font-size:15px;line-height:1.4"><a href="{{ route('catalogue.show', $p) }}" class="text-decoration-none text-dark">{{ $p->nama_produk }}</a></h3>
                                     
                                     <div class="mt-auto pt-3">
                                         <div class="fw-bold tnum mb-2" style="font-size:18px;color:var(--red-strong)">{{ $rp($p->harga) }}</div>
                                         <div class="d-flex align-items-center justify-content-between">
-                                            @if ($p->jumlah_produk > 0)
-                                                <span class="rl-pill green" style="font-size:10px">Stok: {{ $p->jumlah_produk }}</span>
+                                            @if ($p->jumlah_produk > 5)
+                                                <span class="rl-pill green" style="font-size:10px">Tersedia</span>
+                                                <a href="{{ route('catalogue.show', $p) }}" class="btn-redline btn-sm px-3 py-1" style="font-size:12px;border-radius:6px">Detail</a>
+                                            @elseif ($p->jumlah_produk > 0)
+                                                <span class="rl-pill amber" style="font-size:10px">Stok Terbatas</span>
                                                 <a href="{{ route('catalogue.show', $p) }}" class="btn-redline btn-sm px-3 py-1" style="font-size:12px;border-radius:6px">Detail</a>
                                             @else
                                                 <span class="rl-pill red" style="font-size:10px">Habis Terjual</span>

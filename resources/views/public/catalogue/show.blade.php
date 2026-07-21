@@ -20,7 +20,7 @@
             <div class="col-md-6">
                 <div class="d-flex flex-column h-100 justify-content-center">
                     <div class="text-muted mb-2" style="font-size:13px">
-                        {{ $produk->kategori->nama_kategori }} &middot; SKU: <span class="tnum">{{ $produk->sku }}</span>
+                        {{ $produk->kategori?->nama_kategori ?? 'Umum' }} &middot; SKU: <span class="tnum">{{ $produk->sku }}</span>
                     </div>
                     
                     <h1 class="fw-bold mb-3" style="font-size:28px;letter-spacing:-.5px">{{ $produk->nama_produk }}</h1>
@@ -29,9 +29,9 @@
                     
                     <div class="mb-4">
                         @if ($produk->jumlah_produk > 5)
-                            <span class="rl-pill green">Stok Tersedia ({{ $produk->jumlah_produk }})</span>
+                            <span class="rl-pill green">Stok Tersedia</span>
                         @elseif ($produk->jumlah_produk > 0)
-                            <span class="rl-pill amber">Sisa Stok: {{ $produk->jumlah_produk }}</span>
+                            <span class="rl-pill amber">Stok Terbatas</span>
                         @else
                             <span class="rl-pill red">Stok Habis</span>
                         @endif

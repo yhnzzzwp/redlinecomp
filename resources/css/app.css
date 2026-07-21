@@ -38,7 +38,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); -webk
 .rl-stripe { display: inline-block; width: 22px; height: 11px; background: var(--red); transform: skewX(-18deg); border-radius: 2px; }
 
 /* ---- Buttons ---- */
-.btn-redline { background: var(--red); color: #fff; font-weight: 700; border-radius: 11px; padding: 10px 18px; border: 0; box-shadow: 0 6px 16px rgba(193,39,44,.28); text-decoration: none; }
+.btn-redline { background: var(--red); color: #fff; font-weight: 700; border-radius: 11px; padding: 10px 18px; border: 0; text-decoration: none; }
 .btn-redline:hover { background: var(--red-strong); color: #fff; text-decoration: none; }
 .btn-ghost { background: #fff; color: #31343a; border: 1px solid var(--line); border-radius: 11px; padding: 10px 16px; font-weight: 600; text-decoration: none; }
 .btn-ghost:hover { border-color: #cfd0d4; color: #31343a; text-decoration: none; }
