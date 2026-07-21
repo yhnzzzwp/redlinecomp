@@ -33,7 +33,7 @@ final class ServiceTicketTest extends TestCase
             'nama_customer' => 'Budi', 'nama_barang' => 'Laptop Asus', 'masalah' => 'Mati total',
         ], $this->staff);
 
-        $this->assertMatchesRegularExpression('/^PK-\d{4}-\d{4}$/', $service->nomor_resi);
+        $this->assertMatchesRegularExpression('/^PK-\d{4}-[A-Z0-9]{6}$/', $service->nomor_resi);
         $this->assertSame(StatusService::Diterima, $service->status);
         $this->assertDatabaseCount('service_status', 1);
         $this->assertDatabaseHas('service_status', [

@@ -27,7 +27,7 @@ final class PosService
             $baris = [];
 
             foreach ($data->items as $item) {
-                if ($item->tipe === 'produk') {
+                if (strtolower($item->tipe) === 'produk') {
                     $produk = Produk::query()->lockForUpdate()->findOrFail($item->itemId);
 
                     if ($produk->jumlah_produk < $item->jumlah) {

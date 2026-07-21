@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Data\CartLine;
 use App\Data\CheckoutData;
 use App\Enums\MetodeBayar;
+use App\Enums\TipeItem;
 use App\Enums\TipePromo;
 use App\Exceptions\PembayaranKurangException;
 use App\Exceptions\PromoTidakValidException;
@@ -49,7 +50,7 @@ final class PosCheckoutTest extends TestCase
         $produk = $this->produk(5, 1_000_000);
 
         $trx = $this->pos->checkout(new CheckoutData(
-            items: [new CartLine($produk->id, 2)],
+            items: [new CartLine(TipeItem::Produk->value, $produk->id, 2)],
             metodeBayar: MetodeBayar::Tunai,
             bayar: 2_000_000,
         ), $this->kasir);
@@ -67,7 +68,7 @@ final class PosCheckoutTest extends TestCase
 
         try {
             $this->pos->checkout(new CheckoutData(
-                items: [new CartLine($produk->id, 2)],
+                items: [new CartLine(TipeItem::Produk->value, $produk->id, 2)],
                 metodeBayar: MetodeBayar::Tunai,
                 bayar: 2_000_000,
             ), $this->kasir);
@@ -88,7 +89,7 @@ final class PosCheckoutTest extends TestCase
         ]);
 
         $trx = $this->pos->checkout(new CheckoutData(
-            items: [new CartLine($produk->id, 1)],
+            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1)],
             metodeBayar: MetodeBayar::QRIS,
             bayar: 23_000_000,
             kodePromo: 'GAMING40',
@@ -109,7 +110,7 @@ final class PosCheckoutTest extends TestCase
 
         $this->expectException(PromoTidakValidException::class);
         $this->pos->checkout(new CheckoutData(
-            items: [new CartLine($produk->id, 1)],
+            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1)],
             metodeBayar: MetodeBayar::Tunai,
             bayar: 1_000_000,
             kodePromo: 'BIG',
@@ -122,7 +123,7 @@ final class PosCheckoutTest extends TestCase
 
         $this->expectException(PembayaranKurangException::class);
         $this->pos->checkout(new CheckoutData(
-            items: [new CartLine($produk->id, 1)],
+            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1)],
             metodeBayar: MetodeBayar::Tunai,
             bayar: 1_000_000,
         ), $this->kasir);

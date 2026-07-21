@@ -4,26 +4,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Internal;
 
-use App\Http\Controllers\Controller;
-use App\Models\Transaksi;
-use App\Models\ItemTransaksi;
 use App\Enums\TipeItem;
+use App\Http\Controllers\Controller;
+use App\Models\ItemTransaksi;
+use App\Models\Produk;
+use App\Models\Transaksi;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class AnalyticsController extends Controller
 {
     public function index(Request $request): View
     {
-        $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->dari)->startOfDay() : now()->startOfMonth();
-        $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->sampai)->endOfDay() : now()->endOfMonth();
+        $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->string('dari')->toString())->startOfDay() : now()->startOfMonth();
+        $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->string('sampai')->toString())->endOfDay() : now()->endOfMonth();
 
         $hariIni = now()->startOfDay();
 
-        // Calculate only Normal transactions for revenue and profit
-        // Wait, the instruction doesn't specify status filtering for analytics, but logically we should exclude Void/Refund.
-        // Assuming we count all or just add date ranges as requested.
         $transaksiQuery = Transaksi::whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
         $hariIniQuery = Transaksi::where('created_at', '>=', $hariIni)->where('status', 'Normal');
 
@@ -32,6 +31,7 @@ final class AnalyticsController extends Controller
         $transaksiPeriode = $transaksiQuery->count();
 
         // Profit calculation
+        /** @var object|null $profitData */
         $profitData = ItemTransaksi::select(
             DB::raw('SUM(item_transaksi.subtotal - (COALESCE(produk.harga_modal, 0) * item_transaksi.jumlah)) as total_profit')
         )
@@ -40,8 +40,8 @@ final class AnalyticsController extends Controller
                 $q->whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
             })
             ->first();
-        
-        $profitPeriode = $profitData ? $profitData->total_profit : 0;
+
+        $profitPeriode = $profitData && property_exists($profitData, 'total_profit') ? (int) $profitData->total_profit : 0;
 
         // 7 days trend
         $trend = [];
@@ -86,11 +86,11 @@ final class AnalyticsController extends Controller
         ));
     }
 
-    public function cetak(Request $request)
+    public function cetak(Request $request): mixed
     {
-        $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->dari)->startOfDay() : now()->startOfMonth();
-        $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->sampai)->endOfDay() : now()->endOfMonth();
-        
+        $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->string('dari')->toString())->startOfDay() : now()->startOfMonth();
+        $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->string('sampai')->toString())->endOfDay() : now()->endOfMonth();
+
         $produkTerlaris = ItemTransaksi::select('nama_item', DB::raw('SUM(jumlah) as total_terjual'), DB::raw('SUM(subtotal) as total_pendapatan'))
             ->where('item_transaksi.tipe', TipeItem::Produk->value)
             ->whereHas('transaksi', function ($q) use ($dari, $sampai) {
@@ -102,7 +102,7 @@ final class AnalyticsController extends Controller
             ->get();
 
         $pendapatanKategori = ItemTransaksi::select(
-            'item_transaksi.tipe', 
+            'item_transaksi.tipe',
             DB::raw('SUM(item_transaksi.subtotal) as total_pendapatan'),
             DB::raw('SUM(item_transaksi.subtotal - (COALESCE(produk.harga_modal, 0) * item_transaksi.jumlah)) as total_profit')
         )
@@ -112,7 +112,7 @@ final class AnalyticsController extends Controller
             })
             ->groupBy('item_transaksi.tipe')
             ->get();
-            
+
         $totalPendapatan = $pendapatanKategori->sum('total_pendapatan');
         $totalProfit = $pendapatanKategori->sum('total_profit');
 
@@ -120,13 +120,13 @@ final class AnalyticsController extends Controller
             'produkTerlaris', 'pendapatanKategori', 'totalPendapatan', 'totalProfit', 'dari', 'sampai'
         ));
 
-        return $pdf->download('Laporan-Penjualan-'.now()->format('Y-m-d').'.pdf');
+        return $pdf->download('Laporan-Penjualan-' . now()->format('Y-m-d') . '.pdf');
     }
 
-    public function exportCsv(Request $request)
+    public function exportCsv(Request $request): StreamedResponse
     {
-        $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->dari)->startOfDay() : now()->startOfMonth();
-        $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->sampai)->endOfDay() : now()->endOfMonth();
+        $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->string('dari')->toString())->startOfDay() : now()->startOfMonth();
+        $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->string('sampai')->toString())->endOfDay() : now()->endOfMonth();
 
         $items = ItemTransaksi::with(['transaksi.pegawai', 'produk'])
             ->whereHas('transaksi', function ($q) use ($dari, $sampai) {
@@ -134,37 +134,52 @@ final class AnalyticsController extends Controller
             })
             ->get();
 
-        $filename = 'Export-Penjualan-'.now()->format('Ymd-His').'.csv';
+        $filename = 'Export-Penjualan-' . now()->format('Ymd-His') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $callback = function () use ($items) {
+        $callback = function () use ($items): void {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['Tanggal', 'No Transaksi', 'Kasir', 'Tipe', 'Item', 'Qty', 'Harga Satuan', 'Subtotal', 'HPP', 'Profit']);
+            if ($file !== false) {
+                fputcsv($file, ['Tanggal', 'No Transaksi', 'Kasir', 'Tipe', 'Item', 'Qty', 'Harga Satuan', 'Subtotal', 'HPP', 'Profit']);
 
-            foreach ($items as $item) {
-                $hpp = $item->tipe === TipeItem::Produk && $item->produk ? $item->produk->harga_modal : 0;
-                $profit = $item->subtotal - ($hpp * $item->jumlah);
+                foreach ($items as $item) {
+                    /** @var Produk|null $produk */
+                    $produk = $item->produk;
+                    $hargaModal = $produk ? (int) $produk->harga_modal : 0;
+                    $hpp = $item->tipe === TipeItem::Produk && $produk ? $hargaModal : 0;
+                    $profit = $item->subtotal - ($hpp * $item->jumlah);
 
-                fputcsv($file, [
-                    $item->transaksi->created_at->format('Y-m-d H:i:s'),
-                    $item->transaksi->nomor_transaksi,
-                    $item->transaksi->pegawai->nama_pegawai,
-                    $item->tipe->value,
-                    $item->nama_item,
-                    $item->jumlah,
-                    $item->harga_satuan,
-                    $item->subtotal,
-                    $hpp,
-                    $profit
-                ]);
+                    /** @var Transaksi|null $trx */
+                    $trx = $item->transaksi;
+                    $tanggal = $trx && $trx->created_at ? $trx->created_at->format('Y-m-d H:i:s') : '-';
+                    $kodeNota = $trx ? $trx->kode_nota : '-';
+                    $pegawai = $trx?->pegawai;
+                    $kasir = $pegawai instanceof \App\Models\Pegawai ? $pegawai->nama_pegawai : '-';
+                    $tipeVal = $item->tipe->value;
+
+                    /** @var array<int, string|int|float|null> $row */
+                    $row = [
+                        $tanggal,
+                        $kodeNota,
+                        $kasir,
+                        $tipeVal,
+                        $item->nama_item,
+                        $item->jumlah,
+                        $item->harga,
+                        $item->subtotal,
+                        $hpp,
+                        $profit,
+                    ];
+
+                    fputcsv($file, $row);
+                }
+                fclose($file);
             }
-            fclose($file);
         };
 
         return response()->stream($callback, 200, $headers);
     }
 }
-
