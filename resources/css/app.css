@@ -444,6 +444,32 @@ a.rl-card:hover, .rl-carousel-item .rl-card:hover {
   .reveal-ready [data-reveal] { opacity: 1; transform: none; transition: none; }
 }
 
+/* Katalog — angkat kartu produk grid saat hover */
+.rl-card:has(.rl-catalogue-img-wrap) { transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
+.rl-card:has(.rl-catalogue-img-wrap):hover { transform: translateY(-6px); box-shadow: 0 18px 44px rgba(11,28,48,.18); }
+@media (min-width: 992px) { .rl-filter-sticky { position: sticky; top: 20px; } }
+
+/* Detail produk — panel gambar, grid spesifikasi, trust strip */
+.rl-detail-media {
+  position: relative; overflow: hidden;
+  background: radial-gradient(120% 120% at 30% 10%, #1b1e23, #0b1c30);
+  border: 1px solid var(--line);
+}
+.rl-detail-media .rl-hardware-thumb { min-height: 400px; background: transparent; border-bottom: 0; }
+.rl-detail-media::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(60% 40% at 50% 0%, rgba(193,39,44,.18), transparent 70%);
+}
+.rl-spec-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.rl-spec { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.rl-spec__label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.rl-spec__value { font-weight: 700; font-size: 14px; color: var(--ink); margin-top: 3px; }
+.rl-trust { display: flex; gap: 22px; flex-wrap: wrap; }
+.rl-trust__item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink); font-weight: 600; }
+.rl-trust__ico { width: 38px; height: 38px; border-radius: 11px; background: var(--red-soft); color: var(--red-strong); display: grid; place-items: center; flex: 0 0 38px; }
+.rl-text-total-lg { font-size: 30px; font-weight: 800; color: var(--red-strong); letter-spacing: -.5px; }
+.rl-text-desc { color: var(--muted); font-size: 14px; line-height: 1.65; }
+
 .rl-page-title { font-size: 32px; letter-spacing: -1px; font-weight: 700; margin-bottom: 12px; }
 .rl-page-desc { color: #a9b7c7 !important; font-size: 15px; max-width: 500px; margin: 0 auto; }
 .rl-page-header { background: var(--navy); color: #fff; padding: 60px 34px 40px; text-align: center; }
