@@ -45,13 +45,18 @@
             @endif
 
             <div class="rl-card p-4">
-                <h3 class="rl-section-title mb-3">Detail Perangkat</h3>
+                <h3 class="rl-section-title mb-3">Detail Perangkat &amp; Biaya</h3>
                 <div class="row g-3 rl-text-sm">
                     <div class="col-6"><div class="rl-text-xs text-muted mb-1">Masuk</div><b>{{ $service->tanggal_masuk?->format('d M Y') ?? '—' }}</b></div>
                     <div class="col-6"><div class="rl-text-xs text-muted mb-1">Estimasi Selesai</div><b>{{ $service->estimasi_selesai?->format('d M Y') ?? '—' }}</b></div>
                     <div class="col-6"><div class="rl-text-xs text-muted mb-1">Teknisi</div><b>{{ $service->teknisi?->nama_pegawai ?? '—' }}</b></div>
                     <div class="col-6"><div class="rl-text-xs text-muted mb-1">Dibuat Oleh</div><b>{{ $service->pegawai?->nama_pegawai ?? '—' }}</b></div>
-                    <div class="col-6"><div class="rl-text-xs text-muted mb-1">Estimasi Biaya</div><b>{{ $rp($service->biaya_service) }}</b></div>
+                    <div class="col-6"><div class="rl-text-xs text-muted mb-1">Biaya Jasa Servis</div><b>{{ $rp($service->biaya_service) }}</b></div>
+                    <div class="col-6"><div class="rl-text-xs text-muted mb-1">Total Suku Cadang</div><b>{{ $rp($service->parts->sum('subtotal')) }}</b></div>
+                    <div class="col-12 p-3 bg-light rounded-3 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold rl-text-sm">Total Biaya yang Harus Dibayar:</span>
+                        <b class="fs-5 text-danger tnum">{{ $rp($service->totalBiaya()) }}</b>
+                    </div>
                     <div class="col-12"><div class="rl-text-muted rl-text-xs">Masalah</div><div>{{ $service->masalah }}</div></div>
                 </div>
             </div>
@@ -100,11 +105,25 @@
                 @empty
                     <p class="rl-text-muted rl-text-sm">Belum ada suku cadang.</p>
                 @endforelse
-                <form method="POST" action="{{ route('service.part', $service) }}" class="row g-2 mt-2">
+                <form method="POST" action="{{ route('service.part', $service) }}" class="row g-2 mt-2" x-data="partSearch(@js($produkList))">
                     @csrf
-                    <div class="col-5">
+                    <input type="hidden" name="produk_id" :value="produkId">
+                    <div class="col-5 position-relative" @click.outside="open = false">
                         <label for="nama_part" class="visually-hidden">Nama suku cadang</label>
-                        <input type="text" id="nama_part" name="nama_part" placeholder="Nama suku cadang" class="rl-input w-100" required>
+                        <input type="text" id="nama_part" name="nama_part" x-model="query" @input="onInput" @focus="open = true" @keydown.escape="open = false" placeholder="Cari / ketik suku cadang…" class="rl-input w-100" autocomplete="off" required>
+
+                        <div x-show="open && filteredResults.length > 0" x-cloak class="position-absolute bg-white border rounded-3 shadow-lg py-1 z-3" style="bottom: 100%; right: 0; min-width: 320px; max-height: 240px; overflow-y: auto; margin-bottom: 6px;">
+                            <div class="px-3 py-1 rl-text-xs text-muted fw-bold border-bottom">Produk dari Database:</div>
+                            <template x-for="item in filteredResults" :key="item.id">
+                                <button type="button" class="dropdown-item d-flex justify-content-between align-items-center px-3 py-2 text-start w-100 border-0 bg-transparent" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'" @click="selectItem(item)">
+                                    <div>
+                                        <div class="fw-semibold rl-text-sm" x-text="item.nama"></div>
+                                        <span class="rl-text-xs text-muted" x-text="`${item.kategori} · Stok: ${item.stok}`"></span>
+                                    </div>
+                                    <span class="tnum text-danger fw-bold rl-text-xs ms-2" x-text="rp(item.harga)"></span>
+                                </button>
+                            </template>
+                        </div>
                     </div>
                     <div class="col-2">
                         <label for="jumlah" class="visually-hidden">Qty</label>
@@ -112,7 +131,7 @@
                     </div>
                     <div class="col-3">
                         <label for="harga" class="visually-hidden">Harga</label>
-                        <input type="number" id="harga" name="harga" placeholder="Harga" min="0" class="rl-input w-100" required>
+                        <input type="number" id="harga" name="harga" x-model.number="harga" placeholder="Harga" min="0" class="rl-input w-100" required>
                     </div>
                     <div class="col-2"><button type="submit" class="btn-ghost btn-sm w-100" aria-label="Tambah suku cadang">+ Tambah</button></div>
                 </form>
@@ -138,4 +157,38 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function partSearch(dbProducts) {
+            return {
+                query: '',
+                harga: '',
+                produkId: null,
+                open: false,
+                items: dbProducts,
+
+                get filteredResults() {
+                    if (!this.query || this.query.trim() === '') return [];
+                    const q = this.query.toLowerCase().trim();
+                    return this.items.filter(item => item.nama.toLowerCase().includes(q)).slice(0, 8);
+                },
+
+                selectItem(item) {
+                    this.query = item.nama;
+                    this.harga = item.harga;
+                    this.produkId = item.id;
+                    this.open = false;
+                },
+
+                onInput() {
+                    this.open = true;
+                    this.produkId = null;
+                },
+
+                rp(n) {
+                    return 'Rp ' + Number(n).toLocaleString('id-ID');
+                }
+            };
+        }
+    </script>
 </x-layouts.app>

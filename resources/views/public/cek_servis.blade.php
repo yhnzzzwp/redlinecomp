@@ -48,13 +48,30 @@
                     @endforeach
                 </div>
 
+                @if($service->status === \App\Enums\StatusService::Selesai)
+                    <div class="rl-alert rl-alert--success p-3 mb-4 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h4 class="fw-bold m-0 text-success rl-text-sm">✔ Servis Selesai &amp; Siap Diambil</h4>
+                            <div class="rl-text-xs text-muted">Silakan mengambil perangkat Anda di toko Redline Komputer.</div>
+                        </div>
+                        <div class="text-end ms-auto">
+                            <span class="rl-text-xs text-muted d-block">Total Biaya Pembayaran</span>
+                            <span class="fs-5 fw-bold text-success tnum">{{ $rp($service->totalBiaya()) }}</span>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="row g-4">
                     <div class="col-md-6">
                         <h4 class="rl-section-title mb-3">Informasi Perbaikan</h4>
                         <table class="w-100 rl-text-sm">
                             <tr><td class="text-muted py-2 rl-w-40">Tanggal Masuk</td><td class="fw-semibold">{{ $service->tanggal_masuk?->format('d M Y') ?? '—' }}</td></tr>
                             <tr><td class="text-muted py-2">Estimasi Selesai</td><td class="fw-semibold">{{ $service->estimasi_selesai?->format('d M Y') ?? '—' }}</td></tr>
-                            <tr><td class="text-muted py-2">Estimasi Biaya</td><td class="fw-bold tnum">{{ $rp($service->biaya_service) }}</td></tr>
+                            <tr><td class="text-muted py-2">Biaya Jasa Servis</td><td class="fw-semibold tnum">{{ $rp($service->biaya_service) }}</td></tr>
+                            @if($service->parts->count() > 0)
+                                <tr><td class="text-muted py-2">Biaya Suku Cadang</td><td class="fw-semibold tnum">{{ $rp($service->parts->sum('subtotal')) }}</td></tr>
+                            @endif
+                            <tr class="border-top"><td class="fw-bold py-2">Total Biaya</td><td class="fw-bold text-danger tnum fs-6">{{ $rp($service->totalBiaya()) }}</td></tr>
                             <tr>
                                 <td class="text-muted py-2 align-top">Keluhan</td>
                                 <td class="py-2 rl-text-wrap">{{ $service->masalah }}</td>
@@ -79,8 +96,12 @@
                 </div>
             </div>
             
+            @php
+                $waClean = preg_replace('/[^0-9]/', '', (string) config('redline.wa_number'));
+                if (str_starts_with($waClean, '0')) { $waClean = '62' . substr($waClean, 1); }
+            @endphp
             <div class="text-center text-muted rl-text-sm">
-                Bawa nota/resi asli saat mengambil perangkat. Pertanyaan lebih lanjut hubungi <a href="https://wa.me/{{ config('redline.wa_number') }}" target="_blank" class="text-decoration-none">WhatsApp Kami</a>.
+                Bawa nota/resi asli saat mengambil perangkat. Pertanyaan lebih lanjut hubungi <a href="https://wa.me/{{ $waClean }}" target="_blank" class="text-decoration-none">WhatsApp Kami</a>.
             </div>
         @endif
     </div>

@@ -60,11 +60,16 @@ final class ServiceTicketService
 
             $waLink = null;
             if ($service->nomor_hp_customer) {
-                $nomor = $service->nomor_hp_customer;
+                $nomor = preg_replace('/[^0-9]/', '', $service->nomor_hp_customer);
                 if (str_starts_with($nomor, '0')) {
                     $nomor = '62' . substr($nomor, 1);
                 }
-                $pesan = "Halo {$service->nama_customer}, status servis Anda ({$service->nomor_resi}) telah diperbarui menjadi: {$status->value}. - Redline Komputer";
+                $totalFormatted = 'Rp ' . number_format($service->totalBiaya(), 0, ',', '.');
+                if ($status === StatusService::Selesai) {
+                    $pesan = "Halo {$service->nama_customer}, servis perangkat Anda ({$service->nama_barang} - {$service->nomor_resi}) telah SELESAI!\n\nTotal Biaya yang Harus Dibayarkan: {$totalFormatted}.\nSilakan mengambil perangkat Anda di toko Redline Komputer dengan membawa nota/resi asli. Terima kasih!";
+                } else {
+                    $pesan = "Halo {$service->nama_customer}, status servis Anda ({$service->nomor_resi}) telah diperbarui menjadi: {$status->value}. Total estimasi biaya: {$totalFormatted}. - Redline Komputer";
+                }
                 $waLink = "https://wa.me/{$nomor}?text=" . urlencode($pesan);
             }
 

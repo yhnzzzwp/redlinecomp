@@ -48,7 +48,11 @@ final class PublicController extends Controller
     {
         abort_if(! $produk->show_katalog, 404);
 
-        $waNumber = config('redline.wa_number');
+        $waRaw = (string) config('redline.wa_number');
+        $waNumber = preg_replace('/[^0-9]/', '', $waRaw);
+        if (str_starts_with($waNumber, '0')) {
+            $waNumber = '62' . substr($waNumber, 1);
+        }
         $pesanWa = urlencode("Halo Redline, saya ingin memesan produk:\n\n*{$produk->nama_produk}*\nSKU: {$produk->sku}\nHarga: Rp " . number_format($produk->harga, 0, ',', '.') . "\n\nApakah stok masih tersedia?");
         $waLink = "https://wa.me/{$waNumber}?text={$pesanWa}";
 

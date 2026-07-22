@@ -30,4 +30,9 @@ class Service extends Model
     public function teknisi(): BelongsTo { return $this->belongsTo(Pegawai::class, 'teknisi_id'); }
     public function parts(): HasMany { return $this->hasMany(PartService::class, 'service_id'); }
     public function riwayat(): HasMany { return $this->hasMany(ServiceStatus::class, 'service_id')->latest(); }
+
+    public function totalBiaya(): int
+    {
+        return (int) $this->biaya_service + (int) $this->parts()->sum('subtotal');
+    }
 }

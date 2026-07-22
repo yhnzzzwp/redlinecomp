@@ -58,12 +58,7 @@
                     <tr>
                         <td>
                             <div class="fw-semibold tnum">#{{ $t->kode_nota }}</div>
-                            <div class="rl-text-muted rl-text-xs mb-1">{{ $t->created_at->format('d M Y, H:i') }}</div>
-                            @if($t->status === 'Normal')
-                                <span class="rl-pill green rl-text-xs">{{ $t->status }}</span>
-                            @else
-                                <span class="rl-pill red rl-text-xs">{{ $t->status }}</span>
-                            @endif
+                            <div class="rl-text-muted rl-text-xs">{{ $t->created_at->format('d M Y, H:i') }}</div>
                         </td>
                         <td>{{ $t->pegawai?->nama_pegawai ?? '—' }}</td>
                         <td>
@@ -78,7 +73,6 @@
                         </td>
                         <td class="text-end">
                             <div class="fw-bold tnum">{{ $rp($t->total) }}</div>
-                            <span class="rl-pill {{ $t->metode_bayar === 'Tunai' ? 'green' : 'blue' }} rl-text-xs">{{ $t->metode_bayar }}</span>
                         </td>
                         <td class="text-end">
                             <a href="{{ route('pos.nota', $t) }}" target="_blank" class="btn-ghost btn-sm" aria-label="Lihat atau print nota #{{ $t->kode_nota }}">Lihat Nota</a>

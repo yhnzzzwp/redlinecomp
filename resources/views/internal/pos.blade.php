@@ -7,6 +7,7 @@
             'harga' => (int) $p->harga,
             'stok' => (int) $p->jumlah_produk,
             'kategori' => $p->kategori?->nama_kategori ?? 'Lainnya',
+            'foto' => $p->foto_produk ? asset('storage/'.$p->foto_produk) : null,
             'tipe' => 'produk'
         ]);
         $serviceData = $services->map(fn ($s) => [
@@ -16,6 +17,7 @@
             'harga' => (int) $s->biaya_service,
             'stok' => 1,
             'kategori' => 'Servis',
+            'foto' => null,
             'tipe' => 'service'
         ]);
         $allItemData = $produkData->concat($serviceData)->values();
@@ -60,7 +62,9 @@
                     <template x-for="p in produkTampil" :key="p.id">
                         <div class="col-md-4">
                             <div class="rl-card h-100 p-3 d-flex flex-column" style="cursor: pointer; transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';" @click="if(p.stok > 0) ubah(p, 1)">
-                                <div class="rl-product-thumb mb-2"></div>
+                                <div class="rl-product-thumb mb-2">
+                                    <template x-if="p.foto"><img :src="p.foto" :alt="p.nama" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></template>
+                                </div>
                                 <div class="fw-semibold rl-text-sm" x-text="p.nama"></div>
                                 <div class="rl-text-muted rl-text-xs" x-text="`Stok: ${p.stok}`"></div>
                                 <div class="fw-bold mt-1 rl-text-price" x-text="rp(p.harga)"></div>
@@ -161,7 +165,7 @@
                     let p = this.kategoriAktif === null
                         ? this.produk
                         : this.produk.filter(p => p.kategori === this.kategoriAktif);
-                    if (this.cariProduk <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-label="Perhatian"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>== '') {
+                    if (this.cariProduk !== '') {
                         p = p.filter(x => x.nama.toLowerCase().includes(this.cariProduk.toLowerCase()));
                     }
                     return p;

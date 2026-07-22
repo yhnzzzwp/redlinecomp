@@ -48,7 +48,7 @@ final class ServiceController extends Controller
     public function create(): View
     {
         return view('internal.service.form', [
-            'teknisi' => \App\Models\Pegawai::query()->where('aktif', true)->get(),
+            'teknisi' => \App\Models\Pegawai::query()->where('masih_bekerja', true)->get(),
         ]);
     }
 
@@ -63,9 +63,21 @@ final class ServiceController extends Controller
     public function show(Service $service): View
     {
         $service->load(['pegawai', 'riwayat.pegawai', 'parts', 'teknisi']);
+        $produkList = \App\Models\Produk::query()
+            ->with('kategori')
+            ->orderBy('nama_produk')
+            ->get()
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'nama' => $p->nama_produk,
+                'harga' => (int) $p->harga,
+                'stok' => (int) $p->jumlah_produk,
+                'kategori' => $p->kategori?->nama_kategori ?? 'Produk',
+            ]);
 
         return view('internal.service.show', [
             'service' => $service,
+            'produkList' => $produkList,
         ]);
     }
 
