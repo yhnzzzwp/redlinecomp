@@ -1,21 +1,50 @@
 <x-layouts.app active="produk" title="Manajemen Produk">
-    <div class="rl-page-header d-flex align-items-start justify-content-between flex-wrap gap-2">
-        <div>
-            <h1 class="rl-page-title mb-1">Manajemen Produk</h1>
-            <p class="rl-page-desc mb-0">Kelola stok &amp; katalog hardware toko &mdash; Total {{ number_format($total, 0, ',', '.') }} produk.</p>
-        </div>
-        <a href="{{ route('produk.create') }}" class="btn-redline">+ Tambah Produk</a>
-    </div>
-
-    @if($lowStockCount > 0)
-        <div class="rl-alert rl-alert--error mb-3 d-flex align-items-center gap-3">
-            <div class="fw-bold fs-4"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-label="Perhatian"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+    <div x-data="{ showImport: false }">
+        <div class="rl-page-header d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
             <div>
-                <h3 class="fw-bold m-0 rl-text-sm">Peringatan Stok Tipis</h3>
-                <p class="m-0 rl-text-xs">Ada {{ $lowStockCount }} produk yang stoknya menipis atau habis. Segera lakukan restock.</p>
+                <h1 class="rl-page-title mb-1">Manajemen Produk</h1>
+                <p class="rl-page-desc mb-0">Kelola stok &amp; katalog hardware toko &mdash; Total {{ number_format($total, 0, ',', '.') }} produk.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn-ghost" @click="showImport = !showImport">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Import CSV
+                </button>
+                <a href="{{ route('produk.create') }}" class="btn-redline">+ Tambah Produk</a>
             </div>
         </div>
-    @endif
+
+        {{-- Form Upload CSV --}}
+        <div x-show="showImport" x-cloak class="rl-card p-4 mb-3 border-danger shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="rl-section-title mb-0">Import Data Produk Massal via CSV</h3>
+                <a href="{{ route('produk.template') }}" class="btn-ghost btn-sm text-decoration-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Unduh Format CSV
+                </a>
+            </div>
+            <p class="rl-text-xs text-muted mb-3">
+                Unggah file CSV dengan kolom header: <code>nama_produk</code>, <code>sku</code>, <code>kategori</code>, <code>harga</code>, <code>harga_modal</code>, <code>jumlah_produk</code>, <code>deskripsi</code>.
+            </p>
+            <form method="POST" action="{{ route('produk.import') }}" enctype="multipart/form-data" class="d-flex align-items-center gap-2 flex-wrap">
+                @csrf
+                <div class="flex-grow-1">
+                    <input type="file" name="file_csv" accept=".csv,text/csv" required class="rl-input w-100">
+                </div>
+                <button type="submit" class="btn-redline">Proses Import CSV</button>
+                <button type="button" class="btn-ghost" @click="showImport = false">Batal</button>
+            </form>
+        </div>
+
+        @if($lowStockCount > 0)
+            <div class="rl-alert rl-alert--error mb-3 d-flex align-items-center gap-3">
+                <div class="fw-bold fs-4"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-label="Perhatian"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                <div>
+                    <h3 class="fw-bold m-0 rl-text-sm">Peringatan Stok Tipis</h3>
+                    <p class="m-0 rl-text-xs">Ada {{ $lowStockCount }} produk yang stoknya menipis atau habis. Segera lakukan restock.</p>
+                </div>
+            </div>
+        @endif
 
     <div class="rl-card">
         <form method="GET" class="d-flex align-items-center gap-2 p-3 flex-wrap border-bottom">
@@ -104,4 +133,5 @@
             <div class="p-3">{{ $produk->links() }}</div>
         @endif
     </div>
+</div>
 </x-layouts.app>

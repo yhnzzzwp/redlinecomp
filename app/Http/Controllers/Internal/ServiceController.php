@@ -72,7 +72,7 @@ final class ServiceController extends Controller
                 'nama' => $p->nama_produk,
                 'harga' => (int) $p->harga,
                 'stok' => (int) $p->jumlah_produk,
-                'kategori' => $p->kategori?->nama_kategori ?? 'Produk',
+                'kategori' => $p->kategori instanceof \App\Models\KategoriProduk ? $p->kategori->nama_kategori : 'Produk',
             ]);
 
         return view('internal.service.show', [
@@ -104,5 +104,12 @@ final class ServiceController extends Controller
         $this->service->tambahPart($service, $request->validated());
 
         return redirect()->route('service.show', $service)->with('success', 'Sparepart ditambahkan.');
+    }
+
+    public function destroyPart(Service $service, \App\Models\PartService $part): RedirectResponse
+    {
+        $this->service->hapusPart($service, $part);
+
+        return redirect()->route('service.show', $service)->with('success', 'Sparepart dihapus dan stok dikembalikan.');
     }
 }

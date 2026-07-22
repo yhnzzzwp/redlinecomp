@@ -78,6 +78,35 @@ final class ServiceTicketTest extends TestCase
         ]);
     }
 
+    public function test_tambah_sparepart_mengurangi_stok_produk_otomatis(): void
+    {
+        $produk = \App\Models\Produk::create([
+            'nama_produk' => 'yohanes',
+            'sku' => 'RL-YOHANES',
+            'harga' => 150_000,
+            'jumlah_produk' => 15,
+        ]);
+
+        $service = app(ServiceTicketService::class)->buat([
+            'nama_customer' => 'Pelanggan X', 'nama_barang' => 'PC', 'masalah' => 'Upgrade',
+        ], $this->staff);
+
+        $this->actingAs($this->staff)->post(route('service.part', $service), [
+            'produk_id' => $produk->id,
+            'nama_part' => 'yohanes',
+            'jumlah' => 1,
+            'harga' => 150_000,
+        ])->assertRedirect();
+
+        $this->assertSame(14, $produk->fresh()->jumlah_produk);
+
+        $part = \App\Models\PartService::where('service_id', $service->id)->first();
+        $this->actingAs($this->staff)->delete(route('service.part.destroy', [$service, $part]))
+            ->assertRedirect();
+
+        $this->assertSame(15, $produk->fresh()->jumlah_produk);
+    }
+
     public function test_tamu_tidak_bisa_akses_servis(): void
     {
         $this->get(route('service'))->assertRedirect(route('login'));

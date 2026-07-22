@@ -100,7 +100,14 @@
                     <div class="d-flex align-items-center gap-2 py-2 border-bottom rl-divider-light rl-text-sm">
                         <span>{{ $part->nama_part }}</span>
                         <span class="rl-text-muted">&times;{{ $part->jumlah }}</span>
-                        <b class="ms-auto tnum">{{ $rp($part->subtotal) }}</b>
+                        <b class="ms-auto tnum me-2">{{ $rp($part->subtotal) }}</b>
+                        <form method="POST" action="{{ route('service.part.destroy', [$service, $part]) }}" onsubmit="return confirm('Hapus suku cadang ini dan kembalikan stok ke database?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn border-0 p-0 text-danger" title="Hapus suku cadang" style="min-width: 24px; min-height: 24px; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                            </button>
+                        </form>
                     </div>
                 @empty
                     <p class="rl-text-muted rl-text-sm">Belum ada suku cadang.</p>

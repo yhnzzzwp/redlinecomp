@@ -80,4 +80,69 @@ final class ProdukCrudTest extends TestCase
             ->assertRedirect(route('produk.index'));
         $this->assertDatabaseMissing('produk', ['id' => $produk->id]);
     }
+
+    public function test_staff_dan_owner_bisa_unduh_template_csv(): void
+    {
+        $this->actingAs($this->staff)
+            ->get(route('produk.template'))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+    }
+
+    public function test_staff_bisa_impor_produk_massal_via_csv(): void
+    {
+        $csvContent = "nama_produk,sku,kategori,harga,harga_modal,jumlah_produk,deskripsi\n".
+            "Keyboard Mechanical RGB,RL-KEY-001,Aksesori,450000,350000,15,Keyboard Mechanical Switch Blue\n".
+            "Mouse Gaming Wireless,RL-MOU-002,Aksesori,250000,180000,20,Mouse Optik 16000 DPI\n";
+
+        $file = UploadedFile::fake()->createWithContent('produk.csv', $csvContent);
+
+        $response = $this->actingAs($this->staff)->post(route('produk.import'), [
+            'file_csv' => $file,
+        ]);
+
+        $response->assertRedirect(route('produk.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('produk', [
+            'nama_produk' => 'Keyboard Mechanical RGB',
+            'sku' => 'RL-KEY-001',
+            'harga' => 450000,
+            'jumlah_produk' => 15,
+        ]);
+
+        $this->assertDatabaseHas('produk', [
+            'nama_produk' => 'Mouse Gaming Wireless',
+            'sku' => 'RL-MOU-002',
+            'harga' => 250000,
+            'jumlah_produk' => 20,
+        ]);
+
+        $this->assertDatabaseHas('kategori_produk', [
+            'nama_kategori' => 'Aksesori',
+        ]);
+    }
+
+    public function test_impor_csv_dengan_format_header_berbeda_dan_pemisah_titik_koma(): void
+    {
+        $csvContent = "Barang;Kode Barang;Jenis;Harga Jual;HPP;QTY;Keterangan\n".
+            "Headset Gaming 7.1;HS-009;Audio;Rp 350.000;Rp 250.000;12;Surround Sound\n";
+
+        $file = UploadedFile::fake()->createWithContent('supplier.csv', $csvContent);
+
+        $response = $this->actingAs($this->staff)->post(route('produk.import'), [
+            'file_csv' => $file,
+        ]);
+
+        $response->assertRedirect(route('produk.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('produk', [
+            'nama_produk' => 'Headset Gaming 7.1',
+            'sku' => 'HS-009',
+            'harga' => 350000,
+            'harga_modal' => 250000,
+            'jumlah_produk' => 12,
+        ]);
+    }
 }

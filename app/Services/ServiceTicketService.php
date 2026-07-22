@@ -79,19 +79,57 @@ final class ServiceTicketService
 
     public function tambahPart(Service $service, array $data): PartService
     {
-        $jumlah = (int) $data['jumlah'];
-        $harga = (int) $data['harga'];
+        return DB::transaction(function () use ($service, $data): PartService {
+            $jumlah = (int) $data['jumlah'];
+            $harga = (int) $data['harga'];
+            $produkId = isset($data['produk_id']) && $data['produk_id'] !== '' ? (int) $data['produk_id'] : null;
 
-        $part = new PartService([
-            'produk_id' => $data['produk_id'] ?? null,
-            'nama_part' => $data['nama_part'],
-            'jumlah' => $jumlah,
-            'harga' => $harga,
-            'subtotal' => $jumlah * $harga,
-        ]);
+            $produk = null;
+            if ($produkId !== null) {
+                $produk = \App\Models\Produk::query()->lockForUpdate()->find($produkId);
+            }
 
-        $service->parts()->save($part);
+            if ($produk === null && ! empty($data['nama_part'])) {
+                $produk = \App\Models\Produk::query()
+                    ->where('nama_produk', trim((string) $data['nama_part']))
+                    ->lockForUpdate()
+                    ->first();
+            }
 
-        return $part;
+            if ($produk !== null) {
+                if ($produk->jumlah_produk < $jumlah) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'jumlah' => "Stok produk \"{$produk->nama_produk}\" tidak mencukupi (Sisa stok: {$produk->jumlah_produk}).",
+                    ]);
+                }
+                $produk->decrement('jumlah_produk', $jumlah);
+                $produkId = $produk->id;
+            }
+
+            $part = new PartService([
+                'produk_id' => $produkId,
+                'nama_part' => $data['nama_part'],
+                'jumlah' => $jumlah,
+                'harga' => $harga,
+                'subtotal' => $jumlah * $harga,
+            ]);
+
+            $service->parts()->save($part);
+
+            return $part;
+        });
+    }
+
+    public function hapusPart(Service $service, PartService $part): void
+    {
+        DB::transaction(function () use ($part): void {
+            if ($part->produk_id !== null) {
+                $produk = \App\Models\Produk::query()->lockForUpdate()->find($part->produk_id);
+                if ($produk !== null) {
+                    $produk->increment('jumlah_produk', $part->jumlah);
+                }
+            }
+            $part->delete();
+        });
     }
 }

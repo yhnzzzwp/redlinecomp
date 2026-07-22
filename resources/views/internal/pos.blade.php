@@ -31,6 +31,7 @@
             'tipe' => $pr->tipe_promo->value ?? (string) $pr->tipe_promo,
             'besar' => (int) $pr->besar_promo,
             'min' => (int) $pr->minimal_transaksi,
+            'maks' => $pr->maksimal_diskon ? (int) $pr->maksimal_diskon : null,
         ])->values();
     @endphp
 
@@ -88,24 +89,26 @@
                 <div class="row g-3">
                     <template x-for="p in produkTampil" :key="p.id">
                         <div class="col-md-4">
-                            <div class="rl-card h-100 p-3 d-flex flex-column" style="cursor: pointer; transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';" @click="if(p.stok > 0) ubah(p, 1)">
-                                <div class="rl-product-thumb mb-2">
-                                    <template x-if="p.foto"><img :src="p.foto" :alt="p.nama" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"></template>
-                                </div>
-                                <div class="fw-semibold rl-text-sm" x-text="p.nama"></div>
-                                <div class="rl-text-muted rl-text-xs" x-text="`Stok: ${p.stok}`"></div>
-                                <div class="fw-bold mt-1 rl-text-price" x-text="rp(p.harga)"></div>
-                                <div class="mt-2">
-                                    <template x-if="p.stok > 0">
-                                        <div class="d-flex align-items-center gap-2" @click.stop>
-                                            <button type="button" class="btn-ghost btn-sm" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;" aria-label="Kurangi jumlah" @click="ubah(p, -1)">−</button>
-                                            <span class="tnum fw-semibold" x-text="qty(p.id)"></span>
-                                            <button type="button" class="btn-ghost btn-sm" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700;" aria-label="Tambah jumlah" @click="ubah(p, 1)"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-                                            <button type="button" class="btn-redline btn-sm ms-auto" style="min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Tambah ke keranjang" @click="ubah(p, 1)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></button>
-                                        </div>
+                            <div class="rl-card p-3 h-100 d-flex flex-direction-column justify-content-between">
+                                <div>
+                                    <template x-if="p.foto">
+                                        <img :src="p.foto" :alt="p.nama" class="img-fluid rounded mb-2 w-100" style="height: 120px; object-fit: cover;">
                                     </template>
-                                    <template x-if="p.stok <= 0">
-                                        <button type="button" class="btn-ghost btn-sm w-100" disabled>Habis</button>
+                                    <div class="fw-bold rl-text-sm mb-1" x-text="p.nama"></div>
+                                    <div class="tnum text-danger fw-bold mb-2" x-text="rp(p.harga)"></div>
+                                </div>
+
+                                <div>
+                                    <div class="rl-text-xs text-muted mb-2" x-text="`Stok: ${p.stok}`"></div>
+                                    <template x-if="qty(p.id) === 0">
+                                        <button type="button" class="btn-ghost w-100 py-1" :disabled="p.stok === 0" @click="ubah(p, 1)">+ Tambah</button>
+                                    </template>
+                                    <template x-if="qty(p.id) > 0">
+                                        <div class="d-flex align-items-center justify-content-between border rounded p-1">
+                                            <button type="button" class="btn border-0 p-0 text-danger" style="min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Kurangi jumlah" @click="ubah(p, -1)">-</button>
+                                            <span class="fw-bold tnum rl-text-sm" x-text="qty(p.id)"></span>
+                                            <button type="button" class="btn border-0 p-0 text-danger" style="min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Tambah jumlah" @click="ubah(p, 1)" :disabled="qty(p.id) >= p.stok">+</button>
+                                        </div>
                                     </template>
                                 </div>
                             </div>
@@ -116,12 +119,12 @@
         </div>
 
         <div class="col-lg-4">
-            <form method="POST" action="{{ route('pos.checkout') }}" class="rl-card p-3 d-flex flex-column rl-pos-bill">
+            <form method="POST" action="{{ route('pos.checkout') }}" class="rl-card p-3">
                 @csrf
-                <h2 class="rl-section-title mb-3">Detail Tagihan</h2>
+                <h2 class="rl-section-title mb-3">Struk Pembelian</h2>
 
-                <div class="flex-fill">
-                    <template x-if="Object.keys(cart).length === 0">
+                <div class="mb-3">
+                    <template x-if="cartLines.length === 0">
                         <div class="text-center rl-text-muted py-5 rl-text-sm d-flex flex-column align-items-center justify-content-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mb-3" style="color: #E9E9EC;">
                                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
@@ -171,9 +174,13 @@
                     <div class="d-flex justify-content-between py-1 rl-text-sm">
                         <span class="rl-text-muted">Subtotal</span><span class="tnum" x-text="rp(subtotal)"></span>
                     </div>
+                    <div class="d-flex justify-content-between py-1 rl-text-sm text-success" x-show="diskonPromo > 0" x-cloak>
+                        <span class="fw-semibold">Diskon Promo (<span x-text="appliedPromoKode"></span>)</span>
+                        <span class="tnum fw-semibold" x-text="`- ${rp(diskonPromo)}`"></span>
+                    </div>
                     <div class="d-flex justify-content-between py-2 border-top rl-divider mt-1">
                         <span class="fw-bold">Total</span>
-                        <span class="fw-bold tnum rl-text-total" x-text="rp(subtotal)"></span>
+                        <span class="fw-bold tnum rl-text-total" x-text="rp(totalAkhir)"></span>
                     </div>
 
                     <label for="metode_bayar" class="visually-hidden">Metode Pembayaran</label>
@@ -186,7 +193,7 @@
                     <input type="number" id="bayar" name="bayar" x-model.number="bayar" placeholder="Jumlah bayar" min="0" class="rl-input w-100 mb-1">
                     <div class="d-flex justify-content-between py-1 rl-text-sm">
                         <span class="rl-text-muted">Kembalian</span>
-                        <span class="tnum" x-text="rp(Math.max(0, bayar - subtotal))"></span>
+                        <span class="tnum" x-text="rp(Math.max(0, bayar - totalAkhir))"></span>
                     </div>
                     <input type="hidden" name="nama_pembeli" value="Umum">
 
@@ -221,6 +228,37 @@
                     return this.promos.filter(p => p.kode.toLowerCase().includes(q) || p.nama.toLowerCase().includes(q));
                 },
 
+                get matchedPromo() {
+                    if (!this.promos || !this.kodePromo || this.kodePromo.trim() === '') return null;
+                    const q = this.kodePromo.toLowerCase().trim();
+                    return this.promos.find(p => p.kode.toLowerCase() === q);
+                },
+
+                get diskonPromo() {
+                    const pr = this.matchedPromo;
+                    if (!pr) return 0;
+                    if (this.subtotal < pr.min) return 0;
+
+                    let d = 0;
+                    if (pr.tipe === 'Persen') {
+                        d = Math.floor((this.subtotal * pr.besar) / 100);
+                    } else {
+                        d = pr.besar;
+                    }
+                    if (pr.maks && pr.maks > 0) {
+                        d = Math.min(d, pr.maks);
+                    }
+                    return Math.min(d, this.subtotal);
+                },
+
+                get appliedPromoKode() {
+                    return this.matchedPromo ? this.matchedPromo.kode : '';
+                },
+
+                get totalAkhir() {
+                    return Math.max(0, this.subtotal - this.diskonPromo);
+                },
+
                 get produkTampil() {
                     let p = this.kategoriAktif === null
                         ? this.produk
@@ -244,8 +282,10 @@
                     else { this.cart[p.id] = { id: p.id, real_id: p.real_id, tipe: p.tipe, nama: p.nama, harga: p.harga, jumlah: next }; }
                 },
                 hapus(id) { delete this.cart[id]; },
-                rp(n) { return 'Rp ' + Number(n).toLocaleString('id-ID'); },
-            };
+                rp(n) {
+                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(n);
+                }
+            }
         }
     </script>
 </x-layouts.app>
