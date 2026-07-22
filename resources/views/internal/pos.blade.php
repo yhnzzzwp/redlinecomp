@@ -23,6 +23,15 @@
         $allItemData = $produkData->concat($serviceData)->values();
         
         $kategoriList = $kategori->pluck('nama_kategori')->push('Servis');
+        
+        $promoData = $promo->map(fn ($pr) => [
+            'id' => $pr->id,
+            'nama' => $pr->nama_promo,
+            'kode' => $pr->kode_promo,
+            'tipe' => $pr->tipe_promo->value ?? (string) $pr->tipe_promo,
+            'besar' => (int) $pr->besar_promo,
+            'min' => (int) $pr->minimal_transaksi,
+        ])->values();
     @endphp
 
     @if (session('error'))
@@ -31,7 +40,7 @@
         </div>
     @endif
 
-    <div x-data="pos(@js($allItemData), @js($kategoriList))" class="row g-3">
+    <div x-data="pos(@js($allItemData), @js($kategoriList), @js($promoData))" class="row g-3">
         <div class="col-lg-8 d-flex flex-column gap-3">
             <div>
                 <h2 class="rl-section-title mb-3">Kategori</h2>
@@ -49,11 +58,29 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h2 class="rl-section-title mb-0">Pilih Produk</h2>
                     <div class="d-flex align-items-center gap-3">
-                        <div class="position-relative">
-                            <input type="text" x-model="cariProduk" placeholder="Cari menu..." class="rl-input rl-input--sm rl-input--search w-auto pe-4" aria-label="Cari produk" id="cariProduk">
-                            <button type="button" class="btn border-0 p-0 position-absolute end-0 top-50 translate-middle-y me-2" style="min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; color: #6c757d;" x-show="cariProduk !== ''" @click="cariProduk = ''" aria-label="Bersihkan pencarian">
+                        <div class="position-relative" @click.outside="openProductDropdown = false">
+                            <input type="text" x-model="cariProduk" @focus="openProductDropdown = true" @input="openProductDropdown = true" placeholder="Cari menu..." class="rl-input rl-input--sm rl-input--search w-auto pe-4" aria-label="Cari produk" id="cariProduk" autocomplete="off">
+                            <button type="button" class="btn border-0 p-0 position-absolute end-0 top-50 translate-middle-y me-2" style="min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center; color: #6c757d;" x-show="cariProduk !== ''" @click="cariProduk = ''; openProductDropdown = false" aria-label="Bersihkan pencarian">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
+
+                            {{-- Dropdown pencarian produk --}}
+                            <div x-show="openProductDropdown && cariProduk.trim() !== '' && produkSearchDropdown.length > 0" x-cloak class="position-absolute bg-white border rounded-3 shadow-lg py-1 z-3 end-0 mt-1" style="top: 100%; min-width: 320px; max-height: 260px; overflow-y: auto;">
+                                <div class="px-3 py-1 rl-text-xs text-muted fw-bold border-bottom">Hasil Pencarian Menu:</div>
+                                <template x-for="p in produkSearchDropdown" :key="p.id">
+                                    <button type="button" class="dropdown-item d-flex justify-content-between align-items-center px-3 py-2 text-start w-100 border-0 bg-transparent" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'" @click="if(p.stok > 0) { ubah(p, 1); openProductDropdown = false; }">
+                                        <div>
+                                            <div class="fw-semibold rl-text-sm" x-text="p.nama"></div>
+                                            <span class="rl-text-xs text-muted" x-text="`${p.kategori} · Stok: ${p.stok}`"></span>
+                                        </div>
+                                        <div class="text-end ms-2">
+                                            <span class="tnum text-danger fw-bold rl-text-xs d-block" x-text="rp(p.harga)"></span>
+                                            <span class="badge bg-danger text-white rl-text-xs" x-show="p.stok > 0">+ Tambah</span>
+                                            <span class="badge bg-secondary text-white rl-text-xs" x-show="p.stok <= 0">Habis</span>
+                                        </div>
+                                    </button>
+                                </template>
+                            </div>
                         </div>
                         <span class="rl-text-muted rl-text-xs" x-text="`Menampilkan ${produkTampil.length} item`"></span>
                     </div>
@@ -122,8 +149,25 @@
                 </div>
 
                 <div class="mt-2">
-                    <label for="kode_promo" class="visually-hidden">Kode Promo</label>
-                    <input type="text" id="kode_promo" name="kode_promo" x-model="kodePromo" placeholder="Kode promo (opsional)" class="rl-input w-100 mb-2">
+                    <div class="position-relative mb-2" @click.outside="openPromoDropdown = false">
+                        <label for="kode_promo" class="visually-hidden">Kode Promo</label>
+                        <input type="text" id="kode_promo" name="kode_promo" x-model="kodePromo" @focus="openPromoDropdown = true" @input="openPromoDropdown = true" placeholder="Pilih / ketik kode promo (opsional)" class="rl-input w-100" autocomplete="off">
+                        
+                        {{-- Dropdown pilihan kode promo --}}
+                        <div x-show="openPromoDropdown && filteredPromos.length > 0" x-cloak class="position-absolute bg-white border rounded-3 shadow-lg py-1 z-3 w-100" style="bottom: 100%; left: 0; max-height: 220px; overflow-y: auto; margin-bottom: 6px;">
+                            <div class="px-3 py-1 rl-text-xs text-muted fw-bold border-bottom">Pilih Promo Aktif:</div>
+                            <template x-for="pr in filteredPromos" :key="pr.id">
+                                <button type="button" class="dropdown-item d-flex justify-content-between align-items-center px-3 py-2 text-start w-100 border-0 bg-transparent" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'" @click="kodePromo = pr.kode; openPromoDropdown = false;">
+                                    <div>
+                                        <div class="fw-bold rl-text-sm text-danger" x-text="pr.kode"></div>
+                                        <div class="rl-text-xs text-muted" x-text="pr.nama"></div>
+                                    </div>
+                                    <span class="badge bg-light text-dark border rl-text-xs ms-2" x-text="pr.tipe === 'Persen' ? `${pr.besar}%` : rp(pr.besar)"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
                     <div class="d-flex justify-content-between py-1 rl-text-sm">
                         <span class="rl-text-muted">Subtotal</span><span class="tnum" x-text="rp(subtotal)"></span>
                     </div>
@@ -153,14 +197,30 @@
     </div>
 
     <script>
-        function pos(produk, kategori) {
+        function pos(produk, kategori, promos) {
             return {
-                produk, kategori,
+                produk, kategori, promos,
                 kategoriAktif: null,
                 cariProduk: '',
+                openProductDropdown: false,
+                openPromoDropdown: false,
                 cart: {},
                 kodePromo: '',
                 bayar: 0,
+
+                get produkSearchDropdown() {
+                    if (!this.cariProduk || this.cariProduk.trim() === '') return [];
+                    const q = this.cariProduk.toLowerCase().trim();
+                    return this.produk.filter(p => p.nama.toLowerCase().includes(q)).slice(0, 8);
+                },
+
+                get filteredPromos() {
+                    if (!this.promos) return [];
+                    if (!this.kodePromo || this.kodePromo.trim() === '') return this.promos;
+                    const q = this.kodePromo.toLowerCase().trim();
+                    return this.promos.filter(p => p.kode.toLowerCase().includes(q) || p.nama.toLowerCase().includes(q));
+                },
+
                 get produkTampil() {
                     let p = this.kategoriAktif === null
                         ? this.produk
