@@ -1,5 +1,5 @@
 <x-layouts.public active="About Us" title="Tentang Kami">
-    <div class="rl-page-header">
+    <div class="rl-public-header">
         <h1 class="rl-page-title">Tentang Redline Komputer</h1>
         <p class="rl-page-desc">Solusi terpercaya untuk kebutuhan IT Anda sejak 2015.</p>
     </div>

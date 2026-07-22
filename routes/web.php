@@ -35,7 +35,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/pos/nota/{transaksi}', [PosController::class, 'nota'])->name('pos.nota');
     
     Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
-    Route::get('/transaksi/export-csv', [TransaksiController::class, 'exportCsv'])->name('transaksi.export');
     Route::post('/transaksi/{transaksi}/void', [TransaksiController::class, 'void'])->name('transaksi.void');
 
     Route::resource('produk', ProdukController::class)->except(['show']);
@@ -48,6 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/service/{service}/part', [ServiceController::class, 'storePart'])->name('service.part');
 
     Route::middleware('owner')->group(function () {
+        Route::get('/transaksi/export-csv', [TransaksiController::class, 'exportCsv'])->name('transaksi.export');
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
         Route::get('/analytics/cetak', [AnalyticsController::class, 'cetak'])->name('analytics.cetak');
         Route::get('/analytics/export-csv', [AnalyticsController::class, 'exportCsv'])->name('analytics.export');

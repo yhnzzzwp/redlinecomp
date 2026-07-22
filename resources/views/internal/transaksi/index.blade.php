@@ -1,4 +1,4 @@
-<x-layouts.app active="dashboard" title="Daftar Transaksi">
+<x-layouts.app active="transaksi" title="Daftar Transaksi">
     @php
         $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
     @endphp
@@ -10,7 +10,9 @@
                 <h1 class="rl-page-title mb-1">Daftar Transaksi</h1>
                 <p class="rl-page-desc mb-0">Riwayat seluruh transaksi di Redline Komputer.</p>
             </div>
-            <a href="{{ route('transaksi.export', ['cari' => $cari, 'tanggal' => $tanggal, 'jenis' => $jenis]) }}" class="btn-redline">⭳ Export CSV</a>
+            @if (auth()->user()?->isOwner())
+                <a href="{{ route('transaksi.export', ['cari' => $cari, 'tanggal' => $tanggal, 'jenis' => $jenis]) }}" class="btn-redline">⭳ Export CSV</a>
+            @endif
         </div>
     </div>
 

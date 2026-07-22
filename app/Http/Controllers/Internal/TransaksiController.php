@@ -69,6 +69,10 @@ final class TransaksiController extends Controller
 
     public function exportCsv(Request $request): StreamedResponse
     {
+        if (! $request->user()?->isOwner()) {
+            abort(403, 'Akses ditolak: Hanya Owner yang dapat melakukan ekspor data CSV.');
+        }
+
         $query = Transaksi::query()->with(['items', 'pegawai'])->latest();
 
         if ($request->filled('cari')) {

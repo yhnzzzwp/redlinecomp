@@ -3,7 +3,7 @@
         $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
     @endphp
 
-    <div class="rl-page-header">
+    <div class="rl-public-header">
         <h1 class="rl-page-title">Cek Nota Transaksi</h1>
         <p class="rl-page-desc">Verifikasi detail pembelian Anda di Redline Komputer.</p>
     </div>

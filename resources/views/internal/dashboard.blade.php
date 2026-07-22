@@ -8,45 +8,51 @@
             <h1 class="rl-page-title mb-1">Ringkasan Dashboard</h1>
             <p class="rl-page-desc mb-0">Metrik kinerja real-time Redline Komputer.</p>
         </div>
-        <a href="{{ route('analytics.cetak') }}" target="_blank" class="btn-redline text-decoration-none">⭳ Ekspor Laporan</a>
+        @if (auth()->user()?->isOwner())
+            <a href="{{ route('analytics.cetak') }}" target="_blank" class="btn-redline text-decoration-none">⭳ Ekspor Laporan</a>
+        @endif
     </div>
 
     {{-- KPI bento --}}
     <div class="row g-3">
         <div class="col-6 col-lg-3" data-reveal>
             <div class="rl-card rl-kpi h-100">
-                <div class="rl-kpi__ico mb-4 bg-danger bg-opacity-10 text-danger">
+                <div class="rl-kpi__ico mb-3 bg-danger bg-opacity-10 text-danger">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
                 </div>
                 <div class="rl-kpi__label">Total Penjualan</div>
                 <div class="rl-kpi__val tnum">{{ rl_rp($totalSales) }}</div>
+                <div class="rl-text-xs text-muted mt-1">Omzet bersih terakumulasi</div>
             </div>
         </div>
         <div class="col-6 col-lg-3" data-reveal>
             <div class="rl-card rl-kpi h-100">
-                <div class="rl-kpi__ico mb-4 bg-primary bg-opacity-10 text-primary">
+                <div class="rl-kpi__ico mb-3 bg-success bg-opacity-10 text-success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="rl-kpi__label">Penjualan Hari Ini</div>
+                <div class="rl-kpi__val tnum text-success">{{ rl_rp($todaySales) }}</div>
+                <div class="rl-text-xs text-muted mt-1">{{ $todayCount }} transaksi hari ini</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3" data-reveal>
+            <div class="rl-card rl-kpi h-100">
+                <div class="rl-kpi__ico mb-3 bg-primary bg-opacity-10 text-primary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M14 6a4 4 0 005 5l-8 8-3-3 6-6a4 4 0 010-4z"/></svg>
                 </div>
                 <div class="rl-kpi__label">Servis Aktif</div>
-                <div class="rl-kpi__val tnum">{{ $activeServices }} <span class="fs-6 fw-normal text-muted">Servis</span></div>
+                <div class="rl-kpi__val tnum">{{ $activeServices }} <span class="fs-6 fw-normal text-muted">Tiket</span></div>
+                <div class="rl-text-xs text-muted mt-1">Dalam proses perbaikan</div>
             </div>
         </div>
         <div class="col-6 col-lg-3" data-reveal>
             <div class="rl-card rl-kpi h-100">
-                <div class="rl-kpi__ico mb-4 bg-warning bg-opacity-10 text-warning">
+                <div class="rl-kpi__ico mb-3 bg-warning bg-opacity-10 text-warning">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg>
                 </div>
                 <div class="rl-kpi__label">Total Produk</div>
                 <div class="rl-kpi__val tnum">{{ number_format($totalProducts,0,',','.') }} <span class="fs-6 fw-normal text-muted">Item</span></div>
-            </div>
-        </div>
-        <div class="col-6 col-lg-3" data-reveal>
-            <div class="rl-card rl-kpi h-100">
-                <div class="rl-kpi__ico mb-4 bg-success bg-opacity-10 text-success">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5 6-5s6 1.7 6 5"/></svg>
-                </div>
-                <div class="rl-kpi__label">Total Pegawai</div>
-                <div class="rl-kpi__val tnum">{{ \App\Models\Pegawai::count() }} <span class="fs-6 fw-normal text-muted">Akun</span></div>
+                <div class="rl-text-xs text-muted mt-1">Tercatat di katalog</div>
             </div>
         </div>
     </div>
@@ -57,16 +63,16 @@
             <div class="rl-card p-4 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h3 class="rl-section-title mb-1">Tren Penjualan</h3>
-                        <p class="rl-text-xs rl-text-muted mb-0">Pendapatan 7 hari terakhir</p>
+                        <h3 class="rl-section-title mb-1">Tren Penjualan (7 Hari Terakhir)</h3>
+                        <p class="rl-text-xs rl-text-muted mb-0">Pendapatan harian dari transaksi normal</p>
                     </div>
                 </div>
                 @php $max = max(1, $trend->max('total')); @endphp
                 <div class="rl-chart-bar-wrap">
                     @foreach ($trend as $t)
                         <div class="rl-chart-bar">
-                            <div class="rl-chart-bar__fill rounded-top" title="{{ rl_rp($t['total']) }}"
-                                 style="height:{{ max(4, (int)($t['total']/$max*100)) }}%;"></div>
+                            <div class="rl-chart-bar__fill rounded-top" title="{{ $t['label'] }}: {{ rl_rp($t['total']) }}"
+                                 style="height:{{ max(6, (int)($t['total']/$max*100)) }}%;"></div>
                             <small class="rl-chart-bar__label">{{ $t['label'] }}</small>
                         </div>
                     @endforeach
@@ -86,11 +92,15 @@
                         <div class="d-flex align-items-center justify-content-between px-2 py-2 border-bottom rl-divider-light">
                             <div>
                                 <div class="fw-semibold rl-text-sm">Nota #{{ $t->kode_nota }}</div>
-                                <div class="rl-text-muted rl-text-xs">{{ $t->pegawai?->nama_pegawai }} · {{ $t->created_at->format('d M H:i') }}</div>
+                                <div class="rl-text-muted rl-text-xs">{{ $t->nama_pembeli ?? 'Umum' }} &middot; {{ $t->pegawai?->nama_pegawai ?? 'Kasir' }} &middot; {{ $t->created_at?->format('d M H:i') }}</div>
                             </div>
                             <div class="text-end">
                                 <div class="fw-bold tnum rl-text-sm">{{ rl_rp($t->total) }}</div>
-                                <span class="rl-pill green rl-text-xs">LUNAS</span>
+                                @if(($t->status->value ?? $t->status) === 'Batal')
+                                    <span class="rl-pill red rl-text-xs">BATAL</span>
+                                @else
+                                    <span class="rl-pill green rl-text-xs">LUNAS</span>
+                                @endif
                             </div>
                         </div>
                     @empty
@@ -110,14 +120,18 @@
         <div class="row g-3">
             @forelse ($criticalStock as $p)
                 <div class="col-md-4">
-                    <div class="d-flex align-items-center gap-3 p-2 rounded bg-light">
-                        <div class="rl-product-thumb"></div>
+                    <div class="d-flex align-items-center gap-3 p-2 rounded bg-light border">
+                        @if ($p->foto_produk)
+                            <img src="{{ asset('storage/'.$p->foto_produk) }}" alt="" class="rl-product-thumb">
+                        @else
+                            <x-ui.hardware-thumb :kategori="$p->kategori?->nama_kategori" :isPos="true" />
+                        @endif
                         <div class="flex-fill">
-                            <div class="fw-semibold rl-text-sm">{{ $p->nama_produk }}</div>
-                            <div class="rl-text-muted rl-text-xs">{{ $p->sku }}</div>
+                            <div class="fw-semibold rl-text-sm text-truncate" style="max-width: 150px;">{{ $p->nama_produk }}</div>
+                            <div class="rl-text-muted rl-text-xs">{{ $p->sku ?? '—' }}</div>
                         </div>
                         <div class="text-end">
-                            <div class="fw-bold {{ $p->jumlah_produk == 0 ? 'text-danger' : 'text-danger' }} rl-text-sm">{{ $p->jumlah_produk }} Tersisa</div>
+                            <div class="fw-bold text-danger rl-text-sm tnum">{{ $p->jumlah_produk }} Tersisa</div>
                             <div class="rl-text-muted rl-text-xs">{{ $p->statusStok() }}</div>
                         </div>
                     </div>

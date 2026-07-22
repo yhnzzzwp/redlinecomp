@@ -6,10 +6,7 @@
     <div class="rl-page-header d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
         <div>
             <h1 class="rl-page-title mb-1">Analisis Penjualan</h1>
-            <p class="rl-page-desc mb-0">
-                Laporan penjualan dan statistik periode ini.
-                <span class="rl-badge-owner ms-1">Khusus Owner</span>
-            </p>
+            <p class="rl-page-desc mb-0">Laporan penjualan dan statistik kinerja toko periode ini.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('analytics.cetak', ['dari' => request('dari'), 'sampai' => request('sampai')]) }}" class="btn-ghost" target="_blank">⭳ PDF</a>

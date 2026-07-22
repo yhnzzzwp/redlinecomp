@@ -15,27 +15,45 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalSales = (int) Transaksi::sum('total');
+        $todaySales = (int) Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)
+            ->whereDate('created_at', Carbon::today())
+            ->sum('total');
+        $todayCount = Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)
+            ->whereDate('created_at', Carbon::today())
+            ->count();
+
         $activeServices = Service::whereNotIn('status', [
             StatusService::Selesai->value, StatusService::SudahDiambil->value,
         ])->count();
         $totalProducts = Produk::count();
 
-        $criticalStock = Produk::where('jumlah_produk', '<=', config('redline.stok_kritis'))
-            ->orderBy('jumlah_produk')->limit(6)->get();
+        $criticalStock = Produk::with('kategori')
+            ->where('jumlah_produk', '<=', config('redline.stok_kritis', 5))
+            ->orderBy('jumlah_produk')
+            ->limit(6)
+            ->get();
 
         $recent = Transaksi::with('pegawai')->latest()->limit(5)->get();
 
         $trend = collect(range(6, 0))->map(function ($d) {
             $day = Carbon::today()->subDays($d);
             return [
-                'label' => $day->translatedFormat('D'),
-                'total' => (int) Transaksi::whereDate('created_at', $day)->sum('total'),
+                'label' => $day->translatedFormat('d M'),
+                'total' => (int) Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)
+                    ->whereDate('created_at', $day)
+                    ->sum('total'),
             ];
         });
 
         return view('internal.dashboard', compact(
-            'totalSales', 'activeServices', 'totalProducts', 'criticalStock', 'recent', 'trend'
+            'totalSales',
+            'todaySales',
+            'todayCount',
+            'activeServices',
+            'totalProducts',
+            'criticalStock',
+            'recent',
+            'trend'
         ));
     }
 }

@@ -4,13 +4,10 @@
         $besaran = fn ($p) => $p->tipe_promo === \App\Enums\TipePromo::Persen ? $p->besar_promo.'%' : $rp($p->besar_promo);
     @endphp
 
-    <div class="rl-page-header d-flex align-items-start justify-content-between flex-wrap gap-2">
+    <div class="rl-page-header d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">
         <div>
             <h1 class="rl-page-title mb-1">Manajemen Promo</h1>
-            <p class="rl-page-desc mb-0">
-                Kelola kode promo &amp; diskon &mdash; {{ $aktif }} promo aktif.
-                <span class="rl-badge-owner ms-1">Khusus Owner</span>
-            </p>
+            <p class="rl-page-desc mb-0">Kelola kode diskon &amp; kupon promo toko &mdash; Total {{ $aktif }} promo aktif.</p>
         </div>
         <a href="{{ route('promo.create') }}" class="btn-redline">+ Tambah Promo</a>
     </div>

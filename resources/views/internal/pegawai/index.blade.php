@@ -2,10 +2,7 @@
     <div class="rl-page-header d-flex align-items-start justify-content-between flex-wrap gap-2">
         <div>
             <h1 class="rl-page-title mb-1">Akun Pegawai</h1>
-            <p class="rl-page-desc mb-0">
-                Kelola akun &amp; data karyawan &mdash; {{ $aktif }} pegawai aktif.
-                <span class="rl-badge-owner ms-1">Khusus Owner</span>
-            </p>
+            <p class="rl-page-desc mb-0">Kelola akun &amp; data karyawan &mdash; {{ $aktif }} pegawai aktif.</p>
         </div>
         <a href="{{ route('pegawai.create') }}" class="btn-redline">+ Tambah Pegawai</a>
     </div>

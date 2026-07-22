@@ -3,7 +3,7 @@
         $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
     @endphp
 
-    <div class="rl-page-header">
+    <div class="rl-public-header">
         <h1 class="rl-page-title">Lacak Status Servis</h1>
         <p class="rl-page-desc">Pantau perkembangan perbaikan perangkat Anda secara real-time.</p>
     </div>

@@ -3,7 +3,7 @@
         $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
     @endphp
 
-    <div class="rl-page-header">
+    <div class="rl-public-header">
         <h1 class="rl-page-title">Katalog Produk</h1>
         <p class="rl-page-desc">Jelajahi koleksi hardware dan periferal premium kami. Temukan komponen terbaik untuk kebutuhan PC Anda.</p>
     </div>
