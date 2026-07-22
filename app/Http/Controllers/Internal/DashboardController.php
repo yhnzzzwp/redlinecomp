@@ -15,6 +15,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $totalSales = (int) Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)->sum('total');
         $todaySales = (int) Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)
             ->whereDate('created_at', Carbon::today())
             ->sum('total');

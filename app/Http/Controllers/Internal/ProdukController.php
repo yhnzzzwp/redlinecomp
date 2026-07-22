@@ -67,7 +67,7 @@ final class ProdukController extends Controller
     public function importCsv(Request $request): RedirectResponse
     {
         $request->validate([
-            'file_csv' => 'required|file|max:4096',
+            'file_csv' => 'required|file|mimes:csv,txt|max:4096',
         ], [
             'file_csv.required' => 'File CSV wajib diunggah.',
             'file_csv.max' => 'Ukuran file CSV tidak boleh melebihi 4MB.',
@@ -187,7 +187,8 @@ final class ProdukController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             fclose($handle);
-            return back()->withErrors(['file_csv' => 'Terjadi kesalahan saat impor CSV: ' . $e->getMessage()]);
+            report($e);
+            return back()->withErrors(['file_csv' => 'Terjadi kesalahan saat mengimpor file CSV. Silakan periksa format file dan coba lagi.']);
         }
 
         fclose($handle);

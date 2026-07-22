@@ -51,12 +51,19 @@ final class TransaksiController extends Controller
         }
 
         DB::transaction(function () use ($transaksi) {
+            // Re-fetch with lock to prevent double-void race condition
+            $transaksi = Transaksi::query()->lockForUpdate()->findOrFail($transaksi->id);
+
+            if ($transaksi->status !== TransaksiStatus::Normal) {
+                return; // Already voided by another request
+            }
+
             $transaksi->update(['status' => TransaksiStatus::Void->value]);
 
             foreach ($transaksi->items as $item) {
                 /** @var \App\Models\ItemTransaksi $item */
                 if ($item->tipe === TipeItem::Produk && $item->produk_id) {
-                    $produk = Produk::find($item->produk_id);
+                    $produk = Produk::query()->lockForUpdate()->find($item->produk_id);
                     if ($produk) {
                         $produk->increment('jumlah_produk', $item->jumlah);
                     }

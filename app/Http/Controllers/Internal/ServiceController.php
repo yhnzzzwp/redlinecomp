@@ -108,6 +108,8 @@ final class ServiceController extends Controller
 
     public function destroyPart(Service $service, \App\Models\PartService $part): RedirectResponse
     {
+        abort_if($part->service_id !== $service->id, 404);
+
         $this->service->hapusPart($service, $part);
 
         return redirect()->route('service.show', $service)->with('success', 'Sparepart dihapus dan stok dikembalikan.');

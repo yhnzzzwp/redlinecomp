@@ -78,7 +78,7 @@
                         </td>
                         <td class="text-end">
                             <a href="{{ route('pos.nota', $t) }}" target="_blank" class="btn-ghost btn-sm" aria-label="Lihat atau print nota #{{ $t->kode_nota }}">Lihat Nota</a>
-                            @if($t->status === 'Normal')
+                            @if($t->status === 'Normal' && auth()->user()->isOwner())
                                 <form method="POST" action="{{ route('transaksi.void', $t) }}" class="d-inline"
                                       onsubmit="return confirm('Apakah Anda yakin ingin melakukan Void transaksi ini? Stok produk akan dikembalikan.');">
                                     @csrf
