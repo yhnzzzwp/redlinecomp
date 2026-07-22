@@ -7,7 +7,7 @@
         type="{{ $type }}"
         name="{{ $name }}"
         id="{{ $name }}"
-        value="{{ old($name, $value) }}"
+        value="{{ $type === 'password' ? '' : old($name, $value) }}"
         placeholder="{{ $placeholder }}"
         class="rl-input {{ $small ? 'rl-input--sm' : '' }} {{ $errors->has($name) ? 'rl-input--error' : '' }}"
         {{ $required ? 'required' : '' }}

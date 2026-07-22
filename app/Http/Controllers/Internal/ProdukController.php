@@ -136,8 +136,13 @@ final class ProdukController extends Controller
                 $skuUser = isset($row[$idxSku]) ? trim((string) $row[$idxSku]) : '';
                 $katNama = isset($row[$idxKategori]) ? trim((string) $row[$idxKategori]) : '';
                 $harga = isset($row[$idxHarga]) ? (int) preg_replace('/[^0-9]/', '', (string) $row[$idxHarga]) : 0;
+                $harga = min(10_000_000_000, max(0, $harga));
+
                 $hargaModal = isset($row[$idxHargaModal]) ? (int) preg_replace('/[^0-9]/', '', (string) $row[$idxHargaModal]) : 0;
+                $hargaModal = min(10_000_000_000, max(0, $hargaModal));
+
                 $jumlah = isset($row[$idxJumlah]) ? (int) preg_replace('/[^0-9]/', '', (string) $row[$idxJumlah]) : 0;
+                $jumlah = min(1_000_000, max(0, $jumlah));
                 $deskripsi = isset($row[$idxDeskripsi]) ? trim((string) $row[$idxDeskripsi]) : null;
 
                 $kategoriId = null;

@@ -26,24 +26,43 @@ final class PosService
             $subtotal = 0;
             $baris = [];
 
+            // Aggregated item lines by tipe & itemId to prevent duplicate line double-spending
+            $consolidated = [];
             foreach ($data->items as $item) {
-                if (strtolower($item->tipe) === 'produk') {
-                    $produk = Produk::query()->lockForUpdate()->findOrFail($item->itemId);
+                $key = strtolower($item->tipe) . '_' . $item->itemId;
+                if (! isset($consolidated[$key])) {
+                    $consolidated[$key] = [
+                        'itemId' => $item->itemId,
+                        'tipe' => $item->tipe,
+                        'jumlah' => $item->jumlah,
+                    ];
+                } else {
+                    $consolidated[$key]['jumlah'] += $item->jumlah;
+                }
+            }
 
-                    if ($produk->jumlah_produk < $item->jumlah) {
+            foreach ($consolidated as $item) {
+                $tipe = (string) $item['tipe'];
+                $itemId = (int) $item['itemId'];
+                $jumlah = (int) $item['jumlah'];
+
+                if (strtolower($tipe) === 'produk') {
+                    $produk = Produk::query()->lockForUpdate()->findOrFail($itemId);
+
+                    if ($produk->jumlah_produk < $jumlah) {
                         throw new StokTidakCukupException($produk->nama_produk, $produk->jumlah_produk);
                     }
 
                     $harga = (int) $produk->harga;
-                    $sub = $harga * $item->jumlah;
+                    $sub = $harga * $jumlah;
                     $subtotal += $sub;
-                    $baris[] = ['tipe' => TipeItem::Produk, 'model' => $produk, 'jumlah' => $item->jumlah, 'harga' => $harga, 'sub' => $sub];
+                    $baris[] = ['tipe' => TipeItem::Produk, 'model' => $produk, 'jumlah' => $jumlah, 'harga' => $harga, 'sub' => $sub];
                 } else {
-                    $service = \App\Models\Service::query()->lockForUpdate()->findOrFail($item->itemId);
+                    $service = \App\Models\Service::query()->lockForUpdate()->findOrFail($itemId);
                     $harga = (int) $service->biaya_service;
-                    $sub = $harga * $item->jumlah;
+                    $sub = $harga * $jumlah;
                     $subtotal += $sub;
-                    $baris[] = ['tipe' => TipeItem::Servis, 'model' => $service, 'jumlah' => $item->jumlah, 'harga' => $harga, 'sub' => $sub];
+                    $baris[] = ['tipe' => TipeItem::Servis, 'model' => $service, 'jumlah' => $jumlah, 'harga' => $harga, 'sub' => $sub];
                 }
             }
 

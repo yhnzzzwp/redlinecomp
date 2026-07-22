@@ -39,10 +39,13 @@
                 <x-form.input type="email" name="email" label="Email" value="{{ old('email', $pegawai->email) }}" placeholder="email@redline.tech" required />
             </div>
             <div class="col-md-6">
-                <x-form.input type="password" name="password" 
-                              label="Password {{ $pegawai->exists ? '(kosongkan bila tidak diubah)' : '' }}" 
-                              placeholder="{{ $pegawai->exists ? '••••••••' : 'Min. 8 karakter' }}" 
-                              {{ $pegawai->exists ? '' : 'required' }} />
+                <x-form.input 
+                    type="password" 
+                    name="password" 
+                    label="Password{{ $pegawai->exists ? ' (kosongkan bila tidak diubah)' : '' }}" 
+                    placeholder="{{ $pegawai->exists ? '••••••••' : 'Min. 8 karakter' }}" 
+                    :required="!$pegawai->exists" 
+                />
             </div>
         </div>
 
