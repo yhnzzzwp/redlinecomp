@@ -286,7 +286,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); -webk
 .rl-carousel { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
 .rl-carousel::-webkit-scrollbar { display: none; }
 .rl-carousel-item { flex: 0 0 220px; scroll-snap-align: start; }
-.rl-footer { background: var(--navy); color: #c7d2df; padding: 40px 34px 22px; }
+.rl-footer { background: var(--navy); color: #c7d2df; padding: 40px 34px 22px; margin-top: auto; }
 .rl-footer h4 { color: #fff; font-size: 14px; margin-bottom: 12px; }
 .rl-footer a { display: block; font-size: 12.5px; color: #a9b7c7; padding: 4px 0; text-decoration: none; }
 
@@ -518,7 +518,7 @@ a.rl-card:hover, .rl-carousel-item .rl-card:hover {
 .rl-text-total-lg { font-size: 30px; font-weight: 800; color: var(--red-strong); letter-spacing: -.5px; }
 .rl-text-desc { color: var(--muted); font-size: 14px; line-height: 1.65; }
 
-.rl-public-header { background: var(--navy); color: #fff; padding: 50px 24px 36px; text-align: center; margin-bottom: 24px; border-radius: 0 0 16px 16px; }
-.rl-public-header .rl-page-title { font-size: 30px; letter-spacing: -0.5px; font-weight: 700; margin-bottom: 8px; color: #fff; }
-.rl-public-header .rl-page-desc { color: #a9b7c7; font-size: 14.5px; max-width: 540px; margin: 0 auto; }
+.rl-public-header { background: var(--navy); color: #fff; padding: 64px 24px 48px; text-align: center; margin-bottom: 40px; }
+.rl-public-header .rl-page-title { font-size: 32px; letter-spacing: -0.5px; font-weight: 700; margin-bottom: 10px; color: #fff; }
+.rl-public-header .rl-page-desc { color: #a9b7c7; font-size: 15px; max-width: 580px; margin: 0 auto; line-height: 1.6; }
 .rl-section-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }

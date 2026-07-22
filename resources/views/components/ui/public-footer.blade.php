@@ -1,4 +1,4 @@
-<footer class="rl-footer mt-4">
+<footer class="rl-footer mt-auto">
     <div class="row g-4 mx-auto rl-footer-container">
         <div class="col-md-6">
             <h4>Redline Komputer</h4>

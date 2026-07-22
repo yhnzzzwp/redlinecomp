@@ -8,7 +8,7 @@
         <p class="rl-page-desc">Pantau perkembangan perbaikan perangkat Anda secara real-time.</p>
     </div>
 
-    <div class="rl-body rl-container-700">
+    <div class="rl-body rl-container-700 my-5 pb-5">
         <div class="rl-card p-4 mb-4 text-center">
             <h3 class="rl-section-title">Masukkan Nomor Resi</h3>
             <form method="GET" action="{{ route('cek.servis') }}" class="d-flex justify-content-center gap-2 mx-auto rl-w-400px">

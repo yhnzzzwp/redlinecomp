@@ -4,7 +4,7 @@
         <p class="rl-page-desc">Solusi terpercaya untuk kebutuhan IT Anda sejak 2015.</p>
     </div>
 
-    <div class="rl-body rl-container-800 pt-5">
+    <div class="rl-body rl-container-800 my-5 pb-5">
         <div class="rl-card p-4 p-md-5 mb-4">
             <h2 class="rl-title-lg rl-text-red mb-4">Visi & Misi</h2>
             

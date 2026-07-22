@@ -8,9 +8,11 @@
     <title>{{ $title ? $title.' · ' : '' }}Redline Komputer</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     <x-ui.public-nav :active="$active" />
-    {{ $slot }}
+    <main class="flex-grow-1">
+        {{ $slot }}
+    </main>
     <x-ui.public-footer />
 </body>
 </html>

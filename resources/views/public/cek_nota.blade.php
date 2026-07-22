@@ -8,7 +8,7 @@
         <p class="rl-page-desc">Verifikasi detail pembelian Anda di Redline Komputer.</p>
     </div>
 
-    <div class="rl-body rl-container-700">
+    <div class="rl-body rl-container-700 my-5 pb-5">
         <div class="rl-card p-4 mb-4 text-center">
             <h3 class="rl-section-title">Masukkan Kode Nota</h3>
             <form method="GET" action="{{ route('cek.nota') }}" class="d-flex justify-content-center gap-2 mx-auto rl-w-400px">
