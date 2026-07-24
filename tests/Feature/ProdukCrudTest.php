@@ -49,6 +49,22 @@ final class ProdukCrudTest extends TestCase
         Storage::disk('public')->assertExists($produk->foto_produk);
     }
 
+    public function test_sku_otomatis_di_generate_jika_dikosongkan(): void
+    {
+        $response = $this->actingAs($this->staff)->post(route('produk.store'), [
+            'nama_produk' => 'Monitor Gaming 144Hz',
+            'sku' => '',
+            'harga' => 2_500_000,
+            'jumlah_produk' => 5,
+        ]);
+
+        $response->assertRedirect(route('produk.index'));
+        $produk = Produk::query()->where('nama_produk', 'Monitor Gaming 144Hz')->first();
+        $this->assertNotNull($produk);
+        $this->assertNotNull($produk->sku);
+        $this->assertStringStartsWith('RL-PRD-', $produk->sku);
+    }
+
     public function test_validasi_menolak_produk_tanpa_nama_dan_harga(): void
     {
         $this->actingAs($this->staff)
