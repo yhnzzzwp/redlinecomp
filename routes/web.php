@@ -59,8 +59,6 @@ Route::middleware('portal:internal')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
-        Route::get('/login/2fa', [\App\Http\Controllers\Internal\TotpController::class, 'tantangan'])->name('totp.tantangan');
-        Route::post('/login/2fa', [\App\Http\Controllers\Internal\TotpController::class, 'verifikasi'])->middleware('throttle:10,1')->name('totp.verifikasi');
     });
     Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->name('logout');
 
@@ -92,9 +90,6 @@ Route::middleware('portal:internal')->group(function () {
         Route::delete('/service/{service}/part/{part}', [ServiceController::class, 'destroyPart'])->name('service.part.destroy');
 
         Route::middleware('owner')->group(function () {
-            Route::get('/keamanan', [\App\Http\Controllers\Internal\TotpController::class, 'kelola'])->name('keamanan');
-            Route::post('/keamanan/2fa/aktifkan', [\App\Http\Controllers\Internal\TotpController::class, 'aktifkan'])->name('totp.aktifkan');
-            Route::post('/keamanan/2fa/nonaktifkan', [\App\Http\Controllers\Internal\TotpController::class, 'nonaktifkan'])->name('totp.nonaktifkan');
             Route::post('/transaksi/{transaksi}/void', [TransaksiController::class, 'void'])->name('transaksi.void');
             Route::get('/transaksi/export-csv', [TransaksiController::class, 'exportCsv'])->name('transaksi.export');
             Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');

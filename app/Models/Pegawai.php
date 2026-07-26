@@ -20,25 +20,18 @@ class Pegawai extends Authenticatable
         'nomor_hp', 'alamat_pegawai', 'tanggal_masuk', 'masih_bekerja',
     ];
 
-    protected $hidden = ['password', 'remember_token', 'totp_secret', 'totp_recovery'];
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'password' => 'hashed',
         'role' => RolePegawai::class,
         'masih_bekerja' => 'boolean',
         'tanggal_masuk' => 'date',
-        'totp_secret' => 'encrypted',
-        'totp_recovery' => 'array',
     ];
 
     public function isOwner(): bool
     {
         return $this->role === RolePegawai::Owner;
-    }
-
-    public function totpAktif(): bool
-    {
-        return $this->totp_secret !== null;
     }
 
     public function transaksi(): HasMany

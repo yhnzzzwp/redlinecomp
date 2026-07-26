@@ -12,7 +12,6 @@
         ['service', 'Servis', route('service'), false, 'M14 6a4 4 0 005 5l-8 8-3-3 6-6a4 4 0 010-4z'],
         ['promo', 'Promo', route('promo.index'), true, 'M3 12l8-8h8v8l-8 8-8-8zM15 9h.01'],
         ['pegawai', 'Akun Pegawai', route('pegawai.index'), true, 'M3 5h18v14H3zM9 12a2 2 0 100-4 2 2 0 000 4z'],
-        ['keamanan', 'Keamanan', route('keamanan'), true, 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'],
     ];
 @endphp
 <aside class="rl-side" role="navigation">

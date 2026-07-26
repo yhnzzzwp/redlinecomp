@@ -6,7 +6,7 @@ Dokumen ini tumbuh seiring fitur diselesaikan. Tiap fitur: alur normal + alur al
 | Fitur | Zona | Status |
 |-------|------|--------|
 | Login + role gate (1 role ↔ 1 portal) | Internal | ✅ |
-| 2FA TOTP untuk Owner | Internal (Owner) | ✅ |
+| 2FA TOTP untuk Owner | Internal (Owner) | ✖️ dihapus atas keputusan Owner (27 Jul 2026) |
 | Dashboard | Internal | ✅ |
 | POS / Pengkasiran | Internal | ✅ |
 | Nota PDF + Struk thermal 80mm | Internal | ✅ |

@@ -1,5 +1,9 @@
 # Changelog — SIRC
 
+## [Penyederhanaan] — Fitur 2FA TOTP Owner dihapus
+### Dihapus
+- **Seluruh fitur 2FA TOTP** atas keputusan Owner: halaman & menu Keamanan, tantangan login 2FA, `TotpController`, `App\Support\Totp`, kolom `totp_secret`/`totp_recovery` (migrasi drop — berisi rahasia, tidak dibiarkan yatim), dependensi `pragmarx/google2fa`, dan 7 test TOTP. Login Owner kembali username + password (throttle + sesi host-only tetap berlaku). Total 87 test.
+
 ## [P3 Akuntansi — poles hasil review] — Integritas servis & jurnal
 ### Diperbaiki
 - **POS kini menagih `totalBiaya()` servis (jasa + part)** — sebelumnya hanya `biaya_service`, padahal halaman servis, pesan WA, dan cek servis publik menjanjikan total termasuk part (bug kurang tagih).

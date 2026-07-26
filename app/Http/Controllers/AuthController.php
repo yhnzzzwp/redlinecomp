@@ -61,17 +61,6 @@ class AuthController extends Controller
 
         RateLimiter::clear($key);
 
-        // Owner dengan 2FA aktif: password saja belum cukup — tahan login,
-        // minta kode TOTP dulu (identitas disimpan sementara di sesi).
-        $user = Auth::user();
-        if ($portal === Portal::Admin && $user instanceof \App\Models\Pegawai && $user->totpAktif()) {
-            Auth::logout();
-            $request->session()->put('totp.id', $user->id);
-            $request->session()->put('totp.remember', $request->boolean('remember'));
-
-            return redirect()->route('totp.tantangan');
-        }
-
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard'));

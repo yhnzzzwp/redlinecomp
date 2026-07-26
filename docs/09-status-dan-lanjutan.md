@@ -13,14 +13,14 @@
 
 SIRC (Sistem Informasi Redline Komputer): POS + servis + stok + situs publik customer.
 **Laravel 13 · PHP 8.3 (Docker) / 8.5 (host) · Blade · Bootstrap 5 + design system kustom ·
-Alpine (internal saja) · MySQL 8 · PhpSpreadsheet 5 · google2fa · dompdf.**
+Alpine (internal saja) · MySQL 8 · PhpSpreadsheet 5 · dompdf.**
 
 ### Arsitektur tiga portal (subdomain, sesi terisolasi per host)
 | Portal | URL lokal | Isi | Login |
 |---|---|---|---|
 | Publik | `http://localhost:8080` | Beranda = hero + **katalog langsung**, detail produk, lacak servis, tentang kami | tidak ada — `/login` sengaja **404** |
 | Karyawan | `http://karyawan.localhost:8080` | Dashboard, POS, Produk, **Stok** (opname+mutasi), Transaksi, Servis | role `Karyawan` |
-| Admin | `http://admin.localhost:8080` | Semua fitur karyawan **+** Analytics (laba), Promo, Akun Pegawai, **Keamanan (2FA)**, void/export | role `Owner` (+ TOTP bila diaktifkan) |
+| Admin | `http://admin.localhost:8080` | Semua fitur karyawan **+** Analytics (laba + jurnal), Promo, Akun Pegawai, void/export | role `Owner` |
 
 Kredensial demo: `owner`/`password` (portal admin) · `rijal`/`password` (portal karyawan).
 
@@ -95,8 +95,8 @@ evaluasi service-worker/offline — lihat ide pasca-P3.)_
 
 1. **1 role ↔ 1 portal**: Owner hanya di `admin.*`, Karyawan hanya di `karyawan.*`; login di
    portal salah = pesan generik (anti enumerasi). Zona internal dari host publik = **404**, bukan redirect.
-2. **Nol pihak ketiga di runtime**: font self-host, tanpa CDN, WA via wa.me (bukan API),
-   TOTP = algoritma lokal. Jangan menambah dependensi eksternal tanpa alasan kuat.
+2. **Nol pihak ketiga di runtime**: font self-host, tanpa CDN, WA via wa.me (bukan API).
+   Jangan menambah dependensi eksternal tanpa alasan kuat.
 3. **CSP publik ketat tanpa `unsafe-eval`** → semua interaksi zona publik HARUS vanilla JS
    (lihat `initPublik()` di `resources/js/app.js`); Alpine hanya untuk portal internal.
 4. **Tanpa gambar**: aplikasi tidak menampilkan/mengunggah gambar (keputusan Owner; kolom foto
@@ -114,19 +114,19 @@ evaluasi service-worker/offline — lihat ide pasca-P3.)_
 ## 5. Peta File Penting
 
 ```
-app/Support/            Portal (host→portal) · Uang · Wa · Totp · CobaUlang
+app/Support/            Portal (host→portal) · Uang · Wa · CobaUlang
 app/Http/Middleware/    EnsurePortal (pemisah zona) · SecurityHeaders (CSP per portal)
 app/Services/           PosService · ProdukExcelService · StokService · ProductService ·
                         ServiceTicketService · PromoService · KodeGenerator
-app/Http/Controllers/   AuthController (login per portal + alur 2FA) ·
-  Internal/             TotpController · StokController · PosController (nota+struk) ·
+app/Http/Controllers/   AuthController (login per portal) ·
+  Internal/             StokController · PosController (nota+struk) ·
                         PwaController (manifest per portal) · …
 resources/css/app.css   Design system v2 (token → komponen rl-* → responsif → motion)
 resources/js/app.js     Alpine (internal) + vanilla publik + guard view-transition + reveal
 resources/views/
   public/               landing (hero+katalog) · catalogue/show · cek_servis · about · soon
-  internal/             dashboard · pos · struk · keamanan · stok/{opname,mutasi} · …
-  auth/                 login (split per portal) · totp (tantangan 2FA)
+  internal/             dashboard · pos · struk · stok/{opname,mutasi} · …
+  auth/                 login (split per portal)
 scripts/                backup-db.sh · restore-db.sh · smoke-produksi.sh ·
                         buat-ikon-pwa.php (regenerasi ikon public/icons)
 docs/08-deploy-produksi.md   Prosedur go-live lengkap
