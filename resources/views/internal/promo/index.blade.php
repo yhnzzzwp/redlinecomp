@@ -36,7 +36,7 @@
                         <div class="d-flex gap-2 mt-3">
                             <a href="{{ route('promo.edit', $p) }}" class="btn-ghost btn-sm flex-fill text-center">Edit</a>
                             <form method="POST" action="{{ route('promo.destroy', $p) }}"
-                                  onsubmit="return confirm('Hapus promo {{ $p->kode_promo }}?')">
+                                  x-data @submit.prevent='if (confirm("Hapus promo " + @js($p->kode_promo) + "?")) $el.submit()'>
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn-ghost btn-sm text-danger">Hapus</button>
                             </form>

@@ -1,5 +1,10 @@
 # Changelog — SIRC
 
+## [Integritas] — Riwayat pengambilan via POS + konfirmasi hapus yang benar-benar muncul
+### Diperbaiki
+- **Pengambilan servis via POS kini tercatat di riwayat status** ("Dibayar & diambil via POS — Nota #…", pegawai = kasir) — sebelumnya timeline bolong (SRS §2.5). Tetap tanpa guard transisi & tanpa WA di jalur ini (by design: bayar = ambil, customer hadir di kasir).
+- **Dialog konfirmasi aksi destruktif kini benar-benar muncul**: 5 view internal (hapus produk/promo/pegawai/part servis, void transaksi) memakai `onsubmit="return confirm(...)"` — inline handler yang **diblokir CSP** (tanpa `unsafe-inline`) sehingga form ter-submit tanpa konfirmasi. Diganti pola Alpine `@submit.prevent` + `@js()` (CSP-safe, nama item aman dari karakter kutip).
+
 ## [Sesi] — Manajemen sesi aktif (logout perangkat lain)
 ### Ditambahkan
 - Halaman **Sesi Aktif** (menu sidebar, semua staf): daftar perangkat yang login dengan akun sendiri — label perangkat (`App\Support\Perangkat`, heuristik UA tanpa dependensi), IP, terakhir aktif, badge "Sesi ini" — plus tombol **Keluarkan** per perangkat dan **Keluarkan Semua Perangkat Lain** (konfirmasi Alpine, CSP-safe).

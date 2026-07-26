@@ -62,6 +62,28 @@ final class PosCheckoutTest extends TestCase
         $this->assertDatabaseHas('transaksi', ['kode_nota' => $trx->kode_nota, 'total' => 2_000_000]);
     }
 
+    public function test_checkout_servis_mencatat_riwayat_status_diambil(): void
+    {
+        $servis = app(\App\Services\ServiceTicketService::class)->buat([
+            'nama_customer' => 'Budi', 'nama_barang' => 'Laptop Uji', 'masalah' => 'Mati total',
+        ], $this->kasir);
+        $servis->update(['biaya_service' => 100_000]);
+
+        $trx = $this->pos->checkout(new CheckoutData(
+            items: [new CartLine(TipeItem::Servis->value, $servis->id, 1)],
+            metodeBayar: MetodeBayar::Tunai,
+            bayar: 100_000,
+        ), $this->kasir);
+
+        // Jejak pengambilan via POS tercatat di timeline riwayat (SRS §2.5).
+        $this->assertDatabaseHas('service_status', [
+            'service_id' => $servis->id,
+            'status' => \App\Enums\StatusService::SudahDiambil->value,
+            'pegawai_id' => $this->kasir->id,
+            'catatan' => 'Dibayar & diambil via POS — Nota #' . $trx->kode_nota,
+        ]);
+    }
+
     public function test_checkout_menolak_saat_stok_tidak_cukup(): void
     {
         $produk = $this->produk(1, 1_000_000);

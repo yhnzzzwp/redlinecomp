@@ -120,7 +120,19 @@ final class PosService
                         $kasir->id,
                     );
                 } else {
+                    // Pembayaran di POS = unit diambil customer. Jalur ini sengaja
+                    // TANPA guard transisi (bayar berarti ambil, apa pun status
+                    // sebelumnya) dan TANPA tawaran WA (customer hadir di kasir) —
+                    // tapi riwayat status tetap dicatat (SRS §2.5: jejak utuh).
+                    $sebelumnya = $b['model']->status;
                     $b['model']->update(['status' => \App\Enums\StatusService::SudahDiambil]);
+                    if ($sebelumnya !== \App\Enums\StatusService::SudahDiambil) {
+                        $b['model']->riwayat()->create([
+                            'pegawai_id' => $kasir->id,
+                            'status' => \App\Enums\StatusService::SudahDiambil,
+                            'catatan' => 'Dibayar & diambil via POS — Nota #' . $transaksi->kode_nota,
+                        ]);
+                    }
                 }
             }
 

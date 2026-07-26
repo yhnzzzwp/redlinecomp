@@ -49,7 +49,7 @@
                                 <a href="{{ route('pegawai.edit', $p) }}" class="btn-ghost btn-sm">Edit</a>
                                 @if ($p->id !== auth()->id())
                                     <form method="POST" action="{{ route('pegawai.destroy', $p) }}"
-                                          onsubmit="return confirm('Hapus pegawai {{ $p->nama_pegawai }}?')">
+                                          x-data @submit.prevent='if (confirm("Hapus pegawai " + @js($p->nama_pegawai) + "?")) $el.submit()'>
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn-ghost btn-sm text-danger">Hapus</button>
                                     </form>

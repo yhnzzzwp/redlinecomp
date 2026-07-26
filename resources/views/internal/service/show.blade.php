@@ -123,7 +123,7 @@
                         <span>{{ $part->nama_part }}</span>
                         <span class="rl-text-muted">&times;{{ $part->jumlah }}</span>
                         <b class="ms-auto tnum me-2">{{ $rp($part->subtotal) }}</b>
-                        <form method="POST" action="{{ route('service.part.destroy', [$service, $part]) }}" onsubmit="return confirm('Hapus suku cadang ini dan kembalikan stok ke database?');">
+                        <form method="POST" action="{{ route('service.part.destroy', [$service, $part]) }}" x-data @submit.prevent="if (confirm('Hapus suku cadang ini dan kembalikan stok?')) $el.submit()">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn border-0 p-0 text-danger" title="Hapus suku cadang" style="min-width: 24px; min-height: 24px; display: inline-flex; align-items: center; justify-content: center;">

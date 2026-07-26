@@ -123,7 +123,7 @@
                             <a href="{{ route('stok.mutasi', ['produk_id' => $p->id]) }}" class="btn-ghost btn-sm me-1" aria-label="Riwayat stok {{ $p->nama_produk }}">Riwayat</a>
                             <a href="{{ route('produk.edit', $p) }}" class="btn-ghost btn-sm me-1" aria-label="Edit {{ $p->nama_produk }}">Edit</a>
                             <form method="POST" action="{{ route('produk.destroy', $p) }}" class="d-inline"
-                                  onsubmit="return confirm('Hapus produk &quot;{{ $p->nama_produk }}&quot;? Tindakan ini permanen.')">
+                                  x-data @submit.prevent='if (confirm("Hapus produk " + @js($p->nama_produk) + "? Tindakan ini permanen.")) $el.submit()'>
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn-ghost btn-sm text-danger" aria-label="Hapus {{ $p->nama_produk }}">Hapus</button>
