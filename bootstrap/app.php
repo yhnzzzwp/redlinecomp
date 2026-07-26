@@ -30,6 +30,12 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,
+            // Ganti/reset password mengakhiri sesi di perangkat lain, dan cookie
+            // "ingat perangkat" dengan password lama ditolak (melengkapi halaman
+            // Sesi Aktif — lihat SesiController).
+            \Illuminate\Session\Middleware\AuthenticateSession::class,
+            // Pegawai nonaktif langsung ter-logout, tak menunggu sesi kedaluwarsa.
+            \App\Http\Middleware\PastikanMasihBekerja::class,
         ]);
 
         $middleware->alias([

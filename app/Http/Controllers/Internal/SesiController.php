@@ -8,7 +8,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Manajemen sesi aktif — pegawai melihat perangkat mana saja yang sedang
@@ -47,9 +49,13 @@ final class SesiController extends Controller
             ->where('user_id', $request->user()->id) // hanya sesi milik sendiri
             ->delete();
 
-        return $dihapus > 0
-            ? back()->with('success', 'Perangkat dikeluarkan — sesinya berakhir pada request berikutnya.')
-            : back()->with('error', 'Sesi tidak ditemukan (mungkin sudah berakhir).');
+        if ($dihapus === 0) {
+            return back()->with('error', 'Sesi tidak ditemukan (mungkin sudah berakhir).');
+        }
+
+        $this->putusIngatPerangkat($request);
+
+        return back()->with('success', 'Perangkat dikeluarkan — sesinya berakhir seketika.');
     }
 
     public function keluarkanLain(Request $request): RedirectResponse
@@ -59,8 +65,34 @@ final class SesiController extends Controller
             ->where('id', '!=', $request->session()->getId())
             ->delete();
 
-        return back()->with('success', $jumlah > 0
-            ? "{$jumlah} perangkat lain dikeluarkan."
-            : 'Tidak ada perangkat lain yang sedang login.');
+        if ($jumlah === 0) {
+            return back()->with('success', 'Tidak ada perangkat lain yang sedang login.');
+        }
+
+        $this->putusIngatPerangkat($request);
+
+        return back()->with('success', "{$jumlah} perangkat lain dikeluarkan.");
+    }
+
+    /**
+     * Menghapus baris sesi saja TIDAK cukup: perangkat yang login dengan
+     * "Ingat perangkat" menyimpan cookie recaller dan akan membuat sesi baru
+     * pada request berikutnya. Rotasi remember_token mematikan cookie itu.
+     *
+     * Konsekuensi (disebut di UI): token bersifat per-akun, jadi status
+     * "diingat" hilang di SEMUA perangkat. Perangkat yang sedang dipakai tetap
+     * login (sesinya utuh) dan cookie-nya diterbitkan ulang bila tadinya ada.
+     */
+    private function putusIngatPerangkat(Request $request): void
+    {
+        $pegawai = $request->user();
+        $tadinyaDiingat = $request->cookies->has(Auth::guard()->getRecallerName());
+
+        $pegawai->setRememberToken(Str::random(60));
+        $pegawai->save();
+
+        if ($tadinyaDiingat) {
+            Auth::login($pegawai, true); // terbitkan ulang recaller dengan token baru
+        }
     }
 }

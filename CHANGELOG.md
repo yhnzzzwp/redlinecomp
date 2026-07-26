@@ -9,7 +9,11 @@
 ## [Sesi] — Manajemen sesi aktif (logout perangkat lain)
 ### Ditambahkan
 - Halaman **Sesi Aktif** (menu sidebar, semua staf): daftar perangkat yang login dengan akun sendiri — label perangkat (`App\Support\Perangkat`, heuristik UA tanpa dependensi), IP, terakhir aktif, badge "Sesi ini" — plus tombol **Keluarkan** per perangkat dan **Keluarkan Semua Perangkat Lain** (konfirmasi Alpine, CSP-safe).
-- Berbasis `SESSION_DRIVER=database` yang sudah dipakai: menghapus baris sesi = perangkat ter-logout pada request berikutnya. Hanya sesi milik sendiri yang terlihat/tersentuh; sesi yang sedang dipakai dilindungi; sesi kedaluwarsa disembunyikan. 8 test baru.
+- Berbasis `SESSION_DRIVER=database` yang sudah dipakai: menghapus baris sesi = perangkat ter-logout seketika. Hanya sesi milik sendiri yang terlihat/tersentuh; sesi yang sedang dipakai dilindungi; sesi kedaluwarsa disembunyikan.
+- **Rotasi `remember_token` saat mengeluarkan perangkat** — tanpa ini, perangkat yang login dengan "Ingat perangkat" membuat sesi baru pada request berikutnya (seolah tak pernah dikeluarkan). Konsekuensinya disebut di UI: status "diingat" dicabut di semua perangkat; perangkat yang sedang dipakai tetap login.
+### Diperkuat (keamanan sesi)
+- `AuthenticateSession` diaktifkan: **ganti/reset password kini mengakhiri sesi di perangkat lain**, dan cookie "ingat perangkat" dengan password lama ditolak.
+- Middleware `PastikanMasihBekerja`: pegawai yang dinonaktifkan **langsung ter-logout** pada request berikutnya — sebelumnya `masih_bekerja` hanya dicek saat login, jadi sesi berjalan tetap hidup sampai idle 30 menit (relevan saat pegawai keluar). 11 test baru.
 
 ## [Servis] — Notifikasi WA semi-otomatis saat ganti status
 ### Ditambahkan

@@ -113,6 +113,41 @@ final class SesiAktifTest extends TestCase
         $this->get(route('sesi'))->assertRedirect(route('login'));
     }
 
+    public function test_mengeluarkan_perangkat_merotasi_remember_token(): void
+    {
+        // Tanpa rotasi, perangkat ber-cookie "Ingat perangkat" akan membuat
+        // sesi baru pada request berikutnya — seolah tak pernah dikeluarkan.
+        $this->staff->setRememberToken('token-lama-perangkat');
+        $this->staff->save();
+        $this->buatSesi($this->staff, 'sesiHp');
+
+        $this->actingAs($this->staff)->post(route('sesi.keluarkan-lain'))->assertRedirect();
+
+        $this->assertNotSame('token-lama-perangkat', $this->staff->fresh()->getRememberToken());
+    }
+
+    public function test_remember_token_tidak_dirotasi_bila_tak_ada_yang_dikeluarkan(): void
+    {
+        $this->staff->setRememberToken('token-lama-perangkat');
+        $this->staff->save();
+
+        $this->actingAs($this->staff)->post(route('sesi.keluarkan-lain'))->assertRedirect();
+
+        $this->assertSame('token-lama-perangkat', $this->staff->fresh()->getRememberToken());
+    }
+
+    public function test_pegawai_nonaktif_langsung_ter_logout(): void
+    {
+        $this->actingAs($this->staff)->get(route('sesi'))->assertOk();
+
+        $this->staff->update(['masih_bekerja' => false]);
+
+        $this->actingAs($this->staff)->get(route('sesi'))
+            ->assertRedirect(route('login'))
+            ->assertSessionHasErrors('login');
+        $this->assertGuest();
+    }
+
     public function test_label_perangkat_dari_user_agent(): void
     {
         $this->assertSame('Chrome · Android', Perangkat::label('Mozilla/5.0 (Linux; Android 14) Chrome/126.0 Mobile Safari/537.36'));

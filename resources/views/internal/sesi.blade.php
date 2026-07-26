@@ -1,7 +1,7 @@
 <x-layouts.app active="sesi" title="Sesi Aktif">
     <div class="rl-page-header mb-3">
         <h1 class="rl-page-title mb-1">Sesi Aktif</h1>
-        <p class="rl-page-desc mb-0">Perangkat yang sedang login dengan akun Anda. Keluarkan perangkat yang tidak Anda kenali atau lupa di-logout.</p>
+        <p class="rl-page-desc mb-0">Perangkat yang sedang login dengan akun Anda. Keluarkan perangkat yang tidak Anda kenali atau lupa di-logout — sesinya berakhir seketika, dan status “Ingat perangkat” dicabut di semua perangkat (perangkat ini tetap login).</p>
     </div>
 
     <div class="rl-card p-0">
