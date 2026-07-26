@@ -4,8 +4,8 @@
 > berisi semua yang SUDAH dikerjakan, yang BELUM, keputusan desain yang wajib dipertahankan,
 > dan cara memulai lagi.
 >
-> Pembaruan terakhir: **27 Juli 2026** · commit `edf0dfb` · branch `main`
-> (`origin` github.com/yhnzzzwp/redlinecomp) · **87 test lulus** · Larastan level 5 = 0 error.
+> Pembaruan terakhir: **27 Juli 2026** · commit `af661cb` · branch `main`
+> (`origin` github.com/yhnzzzwp/redlinecomp) · **89 test lulus** · Larastan level 5 = 0 error.
 
 ---
 
@@ -27,7 +27,7 @@ Kredensial demo: `owner`/`password` (portal admin) · `rijal`/`password` (portal
 ### Alur kerja harian
 ```bash
 colima start && docker compose up -d      # nyalakan (macOS)
-php artisan test                          # 87 test — harus selalu hijau
+php artisan test                          # 89 test — harus selalu hijau
 ./vendor/bin/phpstan analyse --memory-limit=1G
 npm run build                             # bila menyentuh CSS/JS
 docker compose exec -T app php artisan migrate --force   # bila ada migrasi baru
@@ -61,8 +61,9 @@ Total perubahan sejak `32ba211`: **±5.343 baris tambah / 1.532 hapus** dalam 23
 | `2d029b0` | **Integritas servis & jurnal (hasil review)**: POS menagih `totalBiaya()` (jasa+part — fix kurang tagih), mutasi part servis via `StokService` (tipe `Part Servis`), snapshot `harga_modal` (HPP tak berubah retroaktif), HPP part dijurnal, `lazy()` anti N+1, cap periode 1 tahun |
 | `c2b1db0` | **Fitur 2FA TOTP Owner DIHAPUS** (keputusan Owner): halaman/menu Keamanan, tantangan login, kolom DB (drop), dependensi google2fa — login Owner kembali password saja |
 | `edf0dfb` | **UI mobile**: chip Kategori POS digulir ke samping (bukan wrap), menu publik jadi drawer meluncur dari kanan (overlay+X+Escape, vanilla JS patuh CSP; fix `backdrop-filter` containing-block via `::before`) |
+| `186db79`+`af661cb` | **Service worker offline shell PWA POS**: `/build` cache-first, `/fonts`+`/icons` stale-while-revalidate, navigasi selalu jaringan → fallback `offline.html`; non-GET & HTML terautentikasi TIDAK PERNAH disentuh (**checkout offline sengaja tak didukung** — dijaga test); registrasi ter-gate link manifest; CSP `worker-src` internal `'self'` / publik `'none'` |
 
-Kualitas terkunci otomatis: **87 test / 300 assertion**, Larastan bersih, CI GitHub Actions
+Kualitas terkunci otomatis: **89 test / 322 assertion**, Larastan bersih, CI GitHub Actions
 (test+phpstan+audit PHP · npm audit+build), `composer audit` & `npm audit` bersih.
 
 ---
@@ -77,8 +78,6 @@ akuntan lewat `config/redline.php` bagian `akun` bila perlu).
 ### Ide pasca-P3 (dari laporan evaluasi, belum diprioritaskan)
 - Jurnal balik otomatis untuk Void/Refund lintas periode di Ekspor Jurnal Akuntansi
   (sekarang: Void dikecualikan + peringatan di sheet Info; koreksi lintas periode manual).
-- Service worker/offline untuk PWA POS (manifest+ikon sudah ada; hati-hati CSP —
-  jangan longgarkan `unsafe-eval`, dan cache offline berisiko stok basi di kasir).
 - Notifikasi WA otomatis saat ganti status (sekarang: tombol manual by design, tanpa API).
 - Manajemen sesi aktif (logout perangkat lain).
 - Audit aksesibilitas formal + Lighthouse budget.
@@ -89,6 +88,9 @@ akuntan lewat `config/redline.php` bagian `akun` bila perlu).
 - Produk hasil impor Excel milik pemakai belum berisi `harga_modal` → kolom Laba tampil 100%.
   Isi via edit produk / ekspor-ubah-impor agar laporan laba bermakna.
 - `TrustHosts` nonaktif di `APP_ENV=local` & saat test (perilaku bawaan Laravel) — aktif di produksi.
+- Opsi hardening belum diterapkan: `/sw.js`, `/offline.html`, `/icons/*` statis ikut tersaji di host
+  publik (isinya generik, registrasi SW publik sudah diblok CSP `worker-src 'none'`); bila ingin nol
+  jejak, blok path itu untuk host publik di config webserver produksi.
 - Belum go-live: ikuti `docs/08-deploy-produksi.md` + `scripts/smoke-produksi.sh` saat domain/VPS siap.
 
 ---
