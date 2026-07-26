@@ -158,7 +158,7 @@ final class ProdukController extends Controller
                     $existing = Produk::query()->where('nama_produk', $nama)->first();
                 }
 
-                $sku = $skuUser !== '' ? $skuUser : ($existing?->sku ?? ('RL-PRD-' . strtoupper(Str::random(6))));
+                $sku = $skuUser !== '' ? $skuUser : ($existing->sku ?? ('RL-PRD-' . strtoupper(Str::random(6))));
                 if ($existing) {
                     $existing->update([
                         'nama_produk' => $nama,

@@ -26,3 +26,8 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 .phpstan-cache
+
+# Artefak lokal
+/redline
+*.sqlite
+*.sqlite-journal
