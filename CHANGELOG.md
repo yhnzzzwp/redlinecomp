@@ -3,7 +3,8 @@
 ## [Integritas] — Riwayat pengambilan via POS + konfirmasi hapus yang benar-benar muncul
 ### Diperbaiki
 - **Pengambilan servis via POS kini tercatat di riwayat status** ("Dibayar & diambil via POS — Nota #…", pegawai = kasir) — sebelumnya timeline bolong (SRS §2.5). Tetap tanpa guard transisi & tanpa WA di jalur ini (by design: bayar = ambil, customer hadir di kasir).
-- **Dialog konfirmasi aksi destruktif kini benar-benar muncul**: 5 view internal (hapus produk/promo/pegawai/part servis, void transaksi) memakai `onsubmit="return confirm(...)"` — inline handler yang **diblokir CSP** (tanpa `unsafe-inline`) sehingga form ter-submit tanpa konfirmasi. Diganti pola Alpine `@submit.prevent` + `@js()` (CSP-safe, nama item aman dari karakter kutip).
+- **Dialog konfirmasi aksi destruktif kini benar-benar muncul**: 5 view internal (hapus produk/promo/pegawai/part servis, void transaksi) memakai `onsubmit="return confirm(...)"` — inline handler yang **diblokir CSP** (tanpa `unsafe-inline`) sehingga form ter-submit tanpa konfirmasi. Diganti pola Alpine `@submit.prevent` (CSP-safe).
+- Nama entitas disisipkan lewat `@js()` **di dalam atribut kutip-ganda** (`x-data="{ nama: @js(...) }"`): `Js::from()` selalu berpembatas kutip tunggal, sehingga di atribut kutip-tunggal atribut akan **putus** — tombol Hapus mati total sekaligus membuka injeksi atribut lewat nama produk/pegawai. Dikunci `KonfirmasiDestruktifTest` (4 test; diverifikasi menangkap markup lama).
 
 ## [Sesi] — Manajemen sesi aktif (logout perangkat lain)
 ### Ditambahkan
