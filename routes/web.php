@@ -75,6 +75,10 @@ Route::middleware('portal:internal')->group(function () {
         Route::post('/produk/import-excel', [ProdukController::class, 'import'])->name('produk.import');
         Route::resource('produk', ProdukController::class)->except(['show']);
 
+        Route::get('/stok/opname', [\App\Http\Controllers\Internal\StokController::class, 'opname'])->name('stok.opname');
+        Route::post('/stok/opname', [\App\Http\Controllers\Internal\StokController::class, 'simpanOpname'])->name('stok.opname.simpan');
+        Route::get('/stok/mutasi', [\App\Http\Controllers\Internal\StokController::class, 'mutasi'])->name('stok.mutasi');
+
         Route::get('/service', [ServiceController::class, 'index'])->name('service');
         Route::get('/service/create', [ServiceController::class, 'create'])->name('service.create');
         Route::post('/service', [ServiceController::class, 'store'])->name('service.store');

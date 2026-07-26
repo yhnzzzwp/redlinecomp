@@ -65,7 +65,13 @@ final class TransaksiController extends Controller
                 if ($item->tipe === TipeItem::Produk && $item->produk_id) {
                     $produk = Produk::query()->lockForUpdate()->find($item->produk_id);
                     if ($produk) {
+                        $sebelum = (int) $produk->jumlah_produk;
                         $produk->increment('jumlah_produk', $item->jumlah);
+                        app(\App\Services\StokService::class)->catat(
+                            $produk, $sebelum, $sebelum + $item->jumlah,
+                            \App\Enums\TipeMutasiStok::Void,
+                            'Void nota #' . $transaksi->kode_nota,
+                        );
                     }
                 }
             }

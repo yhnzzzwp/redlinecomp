@@ -27,6 +27,8 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
  */
 final class ProdukExcelService
 {
+    public function __construct(private readonly StokService $stok) {}
+
     private const KOLOM = ['nama_produk', 'sku', 'kategori', 'harga', 'harga_modal', 'jumlah_produk', 'deskripsi'];
 
     private const MAKS_BARIS = 2000;
@@ -136,6 +138,7 @@ final class ProdukExcelService
                     : Produk::query()->where('nama_produk', $b['nama'])->first();
 
                 if ($existing) {
+                    $stokSebelum = (int) $existing->jumlah_produk;
                     $existing->update([
                         'nama_produk' => $b['nama'],
                         'kategori_id' => $kategoriId ?? $existing->kategori_id,
@@ -144,9 +147,10 @@ final class ProdukExcelService
                         'jumlah_produk' => $b['jumlah'] > 0 ? $b['jumlah'] : $existing->jumlah_produk,
                         'deskripsi_produk' => $b['deskripsi'] ?? $existing->deskripsi_produk,
                     ]);
+                    $this->stok->catat($existing, $stokSebelum, (int) $existing->jumlah_produk, \App\Enums\TipeMutasiStok::Impor, 'Impor Excel');
                     $diperbarui++;
                 } else {
-                    Produk::query()->create([
+                    $produkBaru = Produk::query()->create([
                         'nama_produk' => $b['nama'],
                         'sku' => $b['sku'] !== '' ? $b['sku'] : ('RL-PRD-' . strtoupper(Str::random(6))),
                         'kategori_id' => $kategoriId,
@@ -156,6 +160,7 @@ final class ProdukExcelService
                         'deskripsi_produk' => $b['deskripsi'],
                         'show_katalog' => true,
                     ]);
+                    $this->stok->catat($produkBaru, 0, (int) $produkBaru->jumlah_produk, \App\Enums\TipeMutasiStok::Impor, 'Impor Excel (produk baru)');
                     $baru++;
                 }
             }

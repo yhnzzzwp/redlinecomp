@@ -18,6 +18,7 @@ final class PosService
     public function __construct(
         private readonly PromoService $promoService,
         private readonly KodeGenerator $kodeGenerator,
+        private readonly StokService $stok,
     ) {}
 
     public function checkout(CheckoutData $data, Pegawai $kasir): Transaksi
@@ -105,7 +106,14 @@ final class PosService
                 ]);
 
                 if ($b['tipe'] === TipeItem::Produk) {
+                    $sebelum = (int) $b['model']->jumlah_produk;
                     $b['model']->decrement('jumlah_produk', $b['jumlah']);
+                    $this->stok->catat(
+                        $b['model'], $sebelum, $sebelum - $b['jumlah'],
+                        \App\Enums\TipeMutasiStok::Penjualan,
+                        'Nota #' . $transaksi->kode_nota,
+                        $kasir->id,
+                    );
                 } else {
                     $b['model']->update(['status' => \App\Enums\StatusService::SudahDiambil]);
                 }

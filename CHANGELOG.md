@@ -1,5 +1,13 @@
 # Changelog — SIRC
 
+## [P3 Stok] — Stok opname + riwayat mutasi stok (jejak audit barang)
+### Ditambahkan
+- **Tabel `mutasi_stok`** — jejak audit setiap pergerakan barang: sebelum → sesudah (selisih ±), tipe, keterangan, pegawai. Tercatat otomatis dari **5 titik**: penjualan POS (`Nota #…`), void transaksi, edit produk (hanya bila stok berubah), impor Excel, dan opname.
+- **Halaman Stok Opname** (menu "Stok", semua staf): daftar produk + input stok fisik, selisih & penghitung live, catatan opname, konfirmasi sebelum simpan; hanya baris terisi yang diproses, dengan `lockForUpdate` per produk.
+- **Halaman Riwayat Mutasi**: filter tipe/pencarian produk/per-produk (tombol "Riwayat" di tabel produk), paginasi, pill berwarna per tipe.
+- `StokService` sebagai satu pintu pencatatan (perubahan tanpa selisih tidak dicatat); enum `TipeMutasiStok`.
+- 7 test baru (opname menyesuaikan + mencatat, POS mencatat penjualan, void mengembalikan + mencatat, edit produk selektif, impor tercatat, halaman & filter) — total 80 test.
+
 ## [P3 Fitur Bisnis] — WA servis, 2FA Owner, struk thermal, laba per produk
 ### Ditambahkan
 - **Notifikasi WhatsApp status servis** (`App\Support\Wa`): tombol "Kirim Update WA" di halaman servis membuka wa.me dengan pesan terisi sesuai status terkini (template per status, nomor dinormalisasi 0→62, tautan lacak publik) — tanpa API pihak ketiga.
