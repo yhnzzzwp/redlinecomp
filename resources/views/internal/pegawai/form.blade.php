@@ -43,7 +43,7 @@
                     type="password" 
                     name="password" 
                     label="Password{{ $pegawai->exists ? ' (kosongkan bila tidak diubah)' : '' }}" 
-                    placeholder="{{ $pegawai->exists ? '••••••••' : 'Min. 8 karakter' }}" 
+                    placeholder="{{ $pegawai->exists ? '••••••••' : 'Min. 8 karakter, huruf + angka' }}"
                     :required="!$pegawai->exists" 
                 />
             </div>
