@@ -37,6 +37,7 @@ H="$(ambil_header "$SCHEME://$PUBLIK$PORT/")"
 cek "tanpa X-Robots-Tag"          '^TIDAK-ADA$' "$(printf '%s' "$H" | grep -i 'X-Robots-Tag' || echo 'TIDAK-ADA')"
 cek "CSP tanpa unsafe-eval"       '^TIDAK-ADA$' "$(printf '%s' "$H" | grep -i 'Content-Security-Policy' | grep -o 'unsafe-eval' || echo 'TIDAK-ADA')"
 cek "robots.txt mengizinkan"      'Disallow:\s*$' "$(curl -sk "$SCHEME://$PUBLIK$PORT/robots.txt")"
+cek "manifest PWA tersembunyi (404)" '^404$' "$(ambil_status "$SCHEME://$PUBLIK$PORT/manifest.webmanifest")"
 
 echo "== PORTAL ADMIN ($SCHEME://$ADMIN$PORT) =="
 cek "/login admin 200"            '^200$' "$(ambil_status "$SCHEME://$ADMIN$PORT/login")"
@@ -47,6 +48,7 @@ cek "cookie sesi HttpOnly"        '[Hh]ttp[Oo]nly' "$(printf '%s' "$HA" | grep -
 
 echo "== PORTAL KARYAWAN ($SCHEME://$STAFF$PORT) =="
 cek "/login karyawan 200"         '^200$' "$(ambil_status "$SCHEME://$STAFF$PORT/login")"
+cek "manifest PWA 200"            '^200$' "$(ambil_status "$SCHEME://$STAFF$PORT/manifest.webmanifest")"
 
 if [ "$SCHEME" = "https" ]; then
     echo "== KHUSUS PRODUKSI (HTTPS) =="

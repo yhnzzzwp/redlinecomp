@@ -52,6 +52,10 @@ Route::middleware('portal:public')->group(function () {
 | Role user wajib cocok dengan portal: Owner ↔ admin, Karyawan ↔ karyawan.
 */
 Route::middleware('portal:internal')->group(function () {
+    // Manifest PWA: tanpa auth (browser mengambilnya tanpa cookie sesi),
+    // tetap 404 dari host publik karena berada di grup portal:internal.
+    Route::get('/manifest.webmanifest', [\App\Http\Controllers\Internal\PwaController::class, 'manifest'])->name('pwa.manifest');
+
     Route::middleware('guest')->group(function () {
         Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');

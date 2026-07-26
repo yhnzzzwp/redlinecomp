@@ -1,5 +1,15 @@
 # Changelog — SIRC
 
+## [P3 PWA] — POS dapat di-install (Add to Home Screen)
+### Ditambahkan
+- **Manifest PWA** (`/manifest.webmanifest`) disajikan via route di grup `portal:internal` — dari host publik **404** (zona internal tetap tersembunyi), nama aplikasi mengikuti portal (`SIRC POS · Portal Karyawan` / `· Admin Console`), `start_url` ke `/pos`, tampil `standalone`; tanpa auth karena browser mengambil manifest tanpa cookie sesi.
+- **Ikon PWA** (`public/icons/`): 192/512 + varian maskable + `apple-touch-icon` — monogram RL Barlow Condensed 800 Italic + bar merah bercelah 18° di atas carbon-950, digenerate lokal via `scripts/buat-ikon-pwa.php` (PHP GD + font self-host proyek; nol aset pihak ketiga).
+- **Meta pemasangan** di layout internal: `theme-color`, `link manifest`, `apple-touch-icon`, `apple-mobile-web-app-*` — layout publik tidak disentuh.
+- Smoke test produksi: +2 cek (manifest 200 di portal karyawan, 404 di host publik) — kini 13 cek lokal.
+- 6 test baru (manifest per portal, 404 publik, ikon benar-benar ada, tag di layout internal, publik bersih) — total 86 test.
+### Catatan
+- Service worker/offline **sengaja belum dibuat** (CSP ketat; dievaluasi belakangan sesuai docs/09 §3).
+
 ## [P3 Stok] — Stok opname + riwayat mutasi stok (jejak audit barang)
 ### Ditambahkan
 - **Tabel `mutasi_stok`** — jejak audit setiap pergerakan barang: sebelum → sesudah (selisih ±), tipe, keterangan, pegawai. Tercatat otomatis dari **5 titik**: penjualan POS (`Nota #…`), void transaksi, edit produk (hanya bila stok berubah), impor Excel, dan opname.

@@ -8,6 +8,13 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="robots" content="noindex, nofollow">
     <title>{{ $title ? $title.' · ' : '' }}{{ $portal->label() }} · Redline Komputer</title>
+    {{-- PWA: POS dapat di-install di HP/tablet kasir (lihat PwaController). --}}
+    <meta name="theme-color" content="#ffffff">
+    <link rel="manifest" href="{{ route('pwa.manifest') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SIRC POS">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body x-data="{ mobileNav: false }" class="portal-{{ $portal->value }}">
