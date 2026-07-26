@@ -91,8 +91,12 @@ final class ServiceController extends Controller
         );
 
         $response = redirect()->route('service.show', $service)->with('success', 'Status servis diperbarui.');
-        
-        if ($waLink) {
+
+        // Semi-otomatis (keputusan Owner, tanpa API): bila staf mencentang
+        // "kirim WA", halaman tujuan membuka WhatsApp otomatis dengan pesan
+        // status terbaru — banner tombolnya tetap tampil sebagai fallback
+        // saat popup diblokir browser.
+        if ($waLink !== null && $request->boolean('kirim_wa')) {
             $response->with('wa_link', $waLink);
         }
 

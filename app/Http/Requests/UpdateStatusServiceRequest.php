@@ -20,6 +20,7 @@ class UpdateStatusServiceRequest extends FormRequest
         return [
             'status' => ['required', Rule::enum(StatusService::class)],
             'catatan' => ['nullable', 'string', 'max:2000'],
+            'kirim_wa' => ['nullable', 'boolean'],
         ];
     }
 }

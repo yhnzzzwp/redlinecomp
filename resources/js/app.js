@@ -92,8 +92,19 @@ const initPwa = () => {
         .catch(() => { /* gagal daftar (mis. mode privat) — aplikasi tetap normal */ });
 };
 
+// WA semi-otomatis: setelah ganti status servis, buka WhatsApp dengan pesan
+// terisi tanpa klik tambahan. Bila popup diblokir, banner bertombol di halaman
+// tetap jadi fallback 1-klik. Hanya jalan pada muat halaman biasa (bfcache
+// tidak memicu DOMContentLoaded — tidak ada buka-ulang saat tombol back).
+const initWaAuto = () => {
+    const banner = document.querySelector('[data-wa-auto]');
+    if (! banner) return;
+    window.open(banner.dataset.waAuto, '_blank', 'noopener');
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     initReveal();
     initPublik();
     initPwa();
+    initWaAuto();
 });

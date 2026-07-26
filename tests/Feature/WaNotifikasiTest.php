@@ -63,6 +63,59 @@ final class WaNotifikasiTest extends TestCase
         $this->actingAs($servis->pegawai)->get(route('service.show', $servis))
             ->assertOk()
             ->assertSee('Kirim Update WA')
-            ->assertSee('https://wa.me/62812000111', false);
+            ->assertSee('https://wa.me/62812000111', false)
+            ->assertSee('kirim_wa'); // centang WA semi-otomatis di form status
+    }
+
+    public function test_ganti_status_dengan_centang_wa_memicu_buka_otomatis(): void
+    {
+        $this->usePortal('staff');
+        $servis = $this->buatServis('0812000111', StatusService::Diterima);
+
+        $respon = $this->actingAs($servis->pegawai)->post(route('service.status', $servis), [
+            'status' => StatusService::Dikerjakan->value, 'kirim_wa' => '1',
+        ]);
+
+        // Link di sesi memakai template kanonik App\Support\Wa untuk status BARU.
+        $respon->assertRedirect(route('service.show', $servis));
+        $link = (string) session('wa_link');
+        $this->assertStringStartsWith('https://wa.me/62812000111?text=', $link);
+        $this->assertSame(Wa::linkStatusServis($servis->fresh()), $link);
+        $this->assertStringContainsString(rawurlencode('sedang dikerjakan'), $link);
+
+        // Halaman tujuan membawa atribut pemicu auto-open + tombol fallback.
+        $this->followingRedirects();
+        $this->actingAs($servis->pegawai)
+            ->post(route('service.status', $servis->fresh()), [
+                'status' => StatusService::Selesai->value, 'kirim_wa' => '1',
+            ])
+            ->assertOk()
+            ->assertSee('data-wa-auto', false)
+            ->assertSee('Buka WhatsApp');
+    }
+
+    public function test_tanpa_centang_wa_tidak_ada_buka_otomatis(): void
+    {
+        $this->usePortal('staff');
+        $servis = $this->buatServis('0812000111', StatusService::Diterima);
+
+        $this->actingAs($servis->pegawai)->post(route('service.status', $servis), [
+            'status' => StatusService::Dikerjakan->value, // kirim_wa tidak dikirim
+        ])->assertSessionMissing('wa_link');
+    }
+
+    public function test_customer_tanpa_nomor_hp_tidak_pernah_memicu_wa(): void
+    {
+        $this->usePortal('staff');
+        $servis = $this->buatServis(null, StatusService::Diterima);
+
+        $this->actingAs($servis->pegawai)->post(route('service.status', $servis), [
+            'status' => StatusService::Dikerjakan->value, 'kirim_wa' => '1',
+        ])->assertSessionMissing('wa_link');
+
+        // Form pun tidak menawarkan centang WA.
+        $this->actingAs($servis->pegawai)->get(route('service.show', $servis->fresh()))
+            ->assertOk()
+            ->assertDontSee('kirim_wa');
     }
 }

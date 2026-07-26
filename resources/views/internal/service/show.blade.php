@@ -43,12 +43,15 @@
         {{-- Kiri: info + update status --}}
         <div class="col-lg-7 d-flex flex-column gap-3">
             @if(session('wa_link'))
-                <div class="rl-alert rl-alert--success p-3 d-flex align-items-center justify-content-between">
+                {{-- data-wa-auto: app.js membuka WhatsApp otomatis saat halaman
+                     dimuat; tombol di bawah = fallback bila popup diblokir. --}}
+                <div class="rl-alert rl-alert--success p-3 d-flex align-items-center justify-content-between gap-3"
+                     data-wa-auto="{{ session('wa_link') }}">
                     <div>
                         <b class="fs-6">Status Berhasil Diperbarui</b>
-                        <p class="mb-0 rl-text-muted rl-text-sm">Kirim notifikasi WhatsApp ke pelanggan.</p>
+                        <p class="mb-0 rl-text-muted rl-text-sm">WhatsApp terbuka otomatis dengan pesan terisi — bila tidak, tekan tombol di samping (izinkan popup agar selalu otomatis).</p>
                     </div>
-                    <a href="{{ session('wa_link') }}" target="_blank" class="btn btn-sm btn-success">Kirim Notifikasi WA</a>
+                    <a href="{{ session('wa_link') }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-success text-nowrap">Buka WhatsApp</a>
                 </div>
             @endif
 
@@ -90,6 +93,14 @@
                         <label for="catatan" class="rl-label d-block mb-1">Catatan</label>
                         <textarea id="catatan" name="catatan" rows="2" placeholder="Catatan pengerjaan…" class="rl-textarea w-100"></textarea>
                     </div>
+                    @if (\App\Support\Wa::normalisasi($service->nomor_hp_customer) !== null)
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="kirim_wa" id="kirim_wa" value="1" checked>
+                            <label class="form-check-label rl-text-sm" for="kirim_wa">
+                                Kirim update WA ke customer setelah disimpan
+                            </label>
+                        </div>
+                    @endif
                     <button type="submit" class="btn-redline">Simpan Status</button>
                 </form>
             </div>
