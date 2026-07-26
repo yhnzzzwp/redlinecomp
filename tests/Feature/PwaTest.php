@@ -98,6 +98,36 @@ final class PwaTest extends TestCase
             ->assertSee(route('pwa.manifest'));
     }
 
+    public function test_service_worker_dan_halaman_offline_tersedia(): void
+    {
+        // File statis dilayani webserver — pastikan ada dan isinya benar.
+        $this->assertFileExists(public_path('sw.js'));
+        $this->assertFileExists(public_path('offline.html'));
+
+        $sw = (string) file_get_contents(public_path('sw.js'));
+        $this->assertStringContainsString('/offline.html', $sw);
+        foreach (['/build/', '/fonts/', '/icons/'] as $prefix) {
+            $this->assertStringContainsString($prefix, $sw, "sw.js tidak meng-cache {$prefix}");
+        }
+        // Jaga keputusan desain: HTML/data tidak di-cache — navigasi via jaringan.
+        $this->assertStringContainsString("req.mode === 'navigate'", $sw);
+
+        // Halaman offline mandiri: tanpa <script>, tanpa aset eksternal.
+        $offline = (string) file_get_contents(public_path('offline.html'));
+        $this->assertStringNotContainsString('<script', $offline);
+        $this->assertStringNotContainsString('http://', $offline);
+        $this->assertStringNotContainsString('https://', $offline);
+    }
+
+    public function test_csp_internal_mengizinkan_worker_self(): void
+    {
+        $this->usePortal('staff');
+
+        $csp = (string) $this->get(route('login'))->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString("worker-src 'self'", $csp);
+        $this->assertStringNotContainsString('unsafe-eval', explode('worker-src', $csp)[1] ?? '');
+    }
+
     public function test_halaman_publik_tanpa_tag_pwa(): void
     {
         $this->usePortal('public');

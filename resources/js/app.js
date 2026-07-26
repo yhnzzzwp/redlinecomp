@@ -81,7 +81,19 @@ const initPublik = () => {
     }
 };
 
+// PWA POS: daftarkan service worker HANYA di halaman yang memasang link
+// manifest (= portal internal; zona publik tidak pernah mendaftar).
+// SW meng-cache app shell saja — HTML & data POS selalu dari jaringan.
+const initPwa = () => {
+    if (! ('serviceWorker' in navigator)) return;
+    if (! document.querySelector('link[rel="manifest"]')) return;
+
+    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+        .catch(() => { /* gagal daftar (mis. mode privat) — aplikasi tetap normal */ });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     initReveal();
     initPublik();
+    initPwa();
 });

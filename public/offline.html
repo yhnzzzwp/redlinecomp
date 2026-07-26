@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Koneksi Terputus · Redline Komputer</title>
+<!-- Halaman fallback offline service worker — mandiri penuh: tanpa JS,
+     tanpa font/aset eksternal, hanya CSS inline (CSP style unsafe-inline). -->
+<style>
+  :root { --carbon: #0b0d11; --red: #de1f26; --bg: #f3f4f6; --ink: #15181e; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    padding: 24px; text-align: center;
+  }
+  .kartu { max-width: 420px; }
+  .logo { font-weight: 800; font-style: italic; font-size: 28px; letter-spacing: .01em; }
+  .logo i { color: var(--red); font-style: inherit; }
+  .stripe {
+    height: 8px; width: 120px; margin: 18px auto 26px;
+    background: linear-gradient(90deg, var(--red) 0 70%, transparent 70% 78%, var(--red) 78%);
+    transform: skewX(-18deg);
+  }
+  h1 { font-size: 22px; margin-bottom: 10px; }
+  p { color: #5b6470; font-size: 14.5px; line-height: 1.65; margin-bottom: 8px; }
+  a.tombol {
+    display: inline-block; margin-top: 22px; padding: 12px 28px;
+    background: var(--red); color: #fff; text-decoration: none;
+    font-weight: 700; border-radius: 10px; font-size: 14.5px;
+  }
+</style>
+</head>
+<body>
+  <main class="kartu">
+    <div class="logo">REDL<i>INE</i></div>
+    <div class="stripe"></div>
+    <h1>Koneksi Terputus</h1>
+    <p>Perangkat sedang offline. POS membutuhkan koneksi supaya stok, harga,
+       dan transaksi selalu segar — transaksi offline sengaja tidak didukung.</p>
+    <p>Periksa Wi‑Fi / data seluler, lalu coba lagi.</p>
+    <a class="tombol" href="">Muat Ulang</a>
+  </main>
+</body>
+</html>

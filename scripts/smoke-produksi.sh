@@ -50,6 +50,7 @@ cek "manifest PWA 200"            '^200$' "$(ambil_status "$SCHEME://$ADMIN$PORT
 echo "== PORTAL KARYAWAN ($SCHEME://$STAFF$PORT) =="
 cek "/login karyawan 200"         '^200$' "$(ambil_status "$SCHEME://$STAFF$PORT/login")"
 cek "manifest PWA 200"            '^200$' "$(ambil_status "$SCHEME://$STAFF$PORT/manifest.webmanifest")"
+cek "service worker 200"          '^200$' "$(ambil_status "$SCHEME://$STAFF$PORT/sw.js")"
 
 if [ "$SCHEME" = "https" ]; then
     echo "== KHUSUS PRODUKSI (HTTPS) =="

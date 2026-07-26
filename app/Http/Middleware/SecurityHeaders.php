@@ -71,6 +71,7 @@ class SecurityHeaders
             'connect-src '.implode(' ', $connect),
             "img-src 'self' data:",
             "font-src 'self' data:",
+            "worker-src 'self'", // service worker PWA POS (public/sw.js)
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",
