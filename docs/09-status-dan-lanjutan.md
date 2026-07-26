@@ -4,8 +4,8 @@
 > berisi semua yang SUDAH dikerjakan, yang BELUM, keputusan desain yang wajib dipertahankan,
 > dan cara memulai lagi.
 >
-> Pembaruan terakhir: **27 Juli 2026** · commit `ccca2f6` · branch `main`
-> (`origin` github.com/yhnzzzwp/redlinecomp) · **92 test lulus** · Larastan level 5 = 0 error.
+> Pembaruan terakhir: **27 Juli 2026** · commit `9122b89` · branch `main`
+> (`origin` github.com/yhnzzzwp/redlinecomp) · **107 test lulus** · Larastan level 5 = 0 error.
 
 ---
 
@@ -27,7 +27,7 @@ Kredensial demo: `owner`/`password` (portal admin) · `rijal`/`password` (portal
 ### Alur kerja harian
 ```bash
 colima start && docker compose up -d      # nyalakan (macOS)
-php artisan test                          # 92 test — harus selalu hijau
+php artisan test                          # 107 test — harus selalu hijau
 ./vendor/bin/phpstan analyse --memory-limit=1G
 npm run build                             # bila menyentuh CSS/JS
 docker compose exec -T app php artisan migrate --force   # bila ada migrasi baru
@@ -38,7 +38,7 @@ git add -A && git commit && git push origin main
 
 ## 2. SUDAH Dikerjakan (kronologis, per commit)
 
-Total perubahan sejak `32ba211`: **±5.343 baris tambah / 1.532 hapus** dalam 23 commit.
+Total perubahan sejak `32ba211`: **±6.307 baris tambah / 1.560 hapus** dalam 33 commit.
 
 | Commit | Isi |
 |---|---|
@@ -63,8 +63,12 @@ Total perubahan sejak `32ba211`: **±5.343 baris tambah / 1.532 hapus** dalam 23
 | `edf0dfb` | **UI mobile**: chip Kategori POS digulir ke samping (bukan wrap), menu publik jadi drawer meluncur dari kanan (overlay+X+Escape, vanilla JS patuh CSP; fix `backdrop-filter` containing-block via `::before`) |
 | `186db79`+`af661cb` | **Service worker offline shell PWA POS**: `/build` cache-first, `/fonts`+`/icons` stale-while-revalidate, navigasi selalu jaringan → fallback `offline.html`; non-GET & HTML terautentikasi TIDAK PERNAH disentuh (**checkout offline sengaja tak didukung** — dijaga test); registrasi ter-gate link manifest; CSP `worker-src` internal `'self'` / publik `'none'` |
 | `ccca2f6` | **WA semi-otomatis saat ganti status** (keputusan Owner, tetap wa.me tanpa API): centang "kirim WA" default aktif → WhatsApp terbuka otomatis berisi pesan status baru, banner tombol = fallback popup-diblokir; template disatukan ke `App\Support\Wa` (estimasi biaya kini hanya di status Selesai — sadar) |
+| `9f59a80` | **Manajemen sesi aktif**: halaman Sesi Aktif (perangkat login milik sendiri: label UA, IP, terakhir aktif, badge "Sesi ini"), Keluarkan per perangkat + Keluarkan Semua |
+| `b4c354a` | Riwayat status saat servis diambil via POS (timeline SRS §2.5 tidak bolong) + konfirmasi destruktif dipindah dari `onsubmit` inline (diblokir CSP → dialog tak pernah muncul) ke Alpine |
+| `c6beb85` | **Fix XSS/regresi `@js()`**: `Js::from()` selalu berkutip tunggal → di atribut kutip-tunggal atribut PUTUS (tombol Hapus mati + nama produk bisa jadi atribut `x-init` yang dieksekusi Alpine). Semua pindah ke `x-data="{ nama: @js(...) }"`, dikunci `KonfirmasiDestruktifTest` |
+| `9122b89` | **Pengerasan sesi**: rotasi `remember_token` saat mengeluarkan perangkat (tanpa ini cookie "Ingat perangkat" menghidupkan sesi lagi), `AuthenticateSession` aktif (ganti password mengakhiri sesi lain), middleware `PastikanMasihBekerja` (pegawai nonaktif langsung ter-logout) |
 
-Kualitas terkunci otomatis: **92 test / 335 assertion**, Larastan bersih, CI GitHub Actions
+Kualitas terkunci otomatis: **107 test / 432 assertion**, Larastan bersih, CI GitHub Actions
 (test+phpstan+audit PHP · npm audit+build), `composer audit` & `npm audit` bersih.
 
 ---
@@ -79,7 +83,8 @@ akuntan lewat `config/redline.php` bagian `akun` bila perlu).
 ### Ide pasca-P3 (dari laporan evaluasi, belum diprioritaskan)
 - Jurnal balik otomatis untuk Void/Refund lintas periode di Ekspor Jurnal Akuntansi
   (sekarang: Void dikecualikan + peringatan di sheet Info; koreksi lintas periode manual).
-- Manajemen sesi aktif (logout perangkat lain).
+- Owner mengeluarkan sesi pegawai LAIN dari halaman Akun Pegawai (sekarang self-service:
+  tiap pegawai hanya mengelola sesinya sendiri; menonaktifkan akun sudah menendang otomatis).
 - Audit aksesibilitas formal + Lighthouse budget.
 - Alpine CSP build untuk portal internal (publik sudah tanpa `unsafe-eval`; internal masih pakai
   karena POS bergantung ekspresi inline Alpine — keputusan sadar, lihat §4).
@@ -121,7 +126,8 @@ akuntan lewat `config/redline.php` bagian `akun` bila perlu).
 
 ```
 app/Support/            Portal (host→portal) · Uang · Wa · CobaUlang
-app/Http/Middleware/    EnsurePortal (pemisah zona) · SecurityHeaders (CSP per portal)
+app/Http/Middleware/    EnsurePortal (pemisah zona) · SecurityHeaders (CSP per portal) ·
+                        PastikanMasihBekerja (pegawai nonaktif langsung keluar)
 app/Services/           PosService · ProdukExcelService · StokService · ProductService ·
                         ServiceTicketService · PromoService · KodeGenerator
 app/Http/Controllers/   AuthController (login per portal) ·

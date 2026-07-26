@@ -18,7 +18,8 @@ Dokumen ini tumbuh seiring fitur diselesaikan. Tiap fitur: alur normal + alur al
 | Analytics / Laporan Penjualan (laba, PDF, CSV) | Internal (Owner) | ✅ |
 | Ekspor Jurnal Akuntansi (.xlsx) | Internal (Owner) | ✅ |
 | Akun Pegawai | Internal (Owner) | ✅ |
-| PWA — POS dapat di-install | Internal | ✅ |
+| PWA — POS dapat di-install + offline shell | Internal | ✅ |
+| Sesi Aktif (keluarkan perangkat lain) | Internal | ✅ |
 | Landing (beranda = katalog) + Detail Produk | Publik | ✅ |
 | Cek / Lacak Servis | Publik | ✅ |
 | Cek Nota | Publik | ✖️ dihapus (`910d61b`) — bukan lagi bagian aplikasi |
