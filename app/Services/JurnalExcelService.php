@@ -19,11 +19,12 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
  * siap diimpor/dipetakan ke software akuntansi (Accurate, Zahir, Jurnal.id).
  *
  * Per transaksi berstatus Normal pada periode:
- *   Debit  Kas/Bank/QRIS (per metode bayar)  = total
+ *   Debit  Kas/Bank/QRIS (per metode bayar)  = total (bila > 0)
  *   Debit  Diskon Penjualan                  = diskon (bila ada)
  *   Kredit Pendapatan Penjualan Produk       = Σ subtotal item Produk
  *   Kredit Pendapatan Jasa Servis            = Σ subtotal item Servis
- *   Debit  HPP  /  Kredit Persediaan         = Σ (harga_modal × qty) item Produk
+ *   Debit  HPP  /  Kredit Persediaan         = Σ (snapshot harga_modal × qty)
+ *                                              — produk & part servis
  *
  * Setiap blok dijamin seimbang (total + diskon = Σ subtotal item; HPP berpasangan).
  * Transaksi Void/Refund dikecualikan. Bagan akun dari config/redline.php ('akun').
@@ -46,13 +47,15 @@ final class JurnalExcelService
         $baris = 2;
         $jumlahTrx = 0;
 
+        // lazy() (bukan cursor()) supaya eager load items.produk benar-benar
+        // berjalan per halaman — cursor() diam-diam mengabaikan with().
         $query = Transaksi::query()
             ->with(['items.produk'])
             ->whereBetween('created_at', [$dari, $sampai])
             ->where('status', TransaksiStatus::Normal->value)
             ->orderBy('created_at');
 
-        foreach ($query->cursor() as $trx) {
+        foreach ($query->lazy(500) as $trx) {
             $jumlahTrx++;
             foreach ($this->barisJurnal($trx) as $b) {
                 [$kunciAkun, $keterangan, $debit, $kredit] = $b;
@@ -96,18 +99,31 @@ final class JurnalExcelService
         foreach ($trx->items as $item) {
             if ($item->tipe === TipeItem::Produk) {
                 $penjualanProduk += (int) $item->subtotal;
-                /** @var Produk|null $produk */
-                $produk = $item->produk;
-                $hpp += ((int) ($produk->harga_modal ?? 0)) * (int) $item->jumlah;
             } else {
                 $pendapatanServis += (int) $item->subtotal;
             }
+
+            // HPP dari SNAPSHOT harga_modal saat checkout (item Servis: total
+            // modal part). Baris lama tanpa snapshot: fallback harga_modal
+            // produk saat ekspor (Servis lama: 0) — lihat sheet Info.
+            $modalSatuan = $item->harga_modal;
+            if ($modalSatuan === null && $item->tipe === TipeItem::Produk) {
+                /** @var Produk|null $produk */
+                $produk = $item->produk;
+                $modalSatuan = (int) ($produk->harga_modal ?? 0);
+            }
+            $hpp += ((int) $modalSatuan) * (int) $item->jumlah;
         }
 
         $kunciBayar = self::METODE_KE_AKUN[$trx->metode_bayar] ?? 'kas';
         $keterangan = 'Penjualan '.$trx->kode_nota;
 
-        $baris = [[$kunciBayar, $keterangan, (int) $trx->total, 0]];
+        // Baris kas hanya bila ada uang berpindah (transaksi total 0 sah:
+        // promo menutup seluruh subtotal) — importer akuntansi menolak baris 0.
+        $baris = [];
+        if ((int) $trx->total > 0) {
+            $baris[] = [$kunciBayar, $keterangan, (int) $trx->total, 0];
+        }
 
         if ((int) $trx->diskon > 0) {
             $baris[] = ['diskon_penjualan', 'Diskon promo — '.$trx->kode_nota, (int) $trx->diskon, 0];
@@ -161,15 +177,25 @@ final class JurnalExcelService
         foreach ($data as $i => $nilai) {
             $koordinat = [$i + 1, $baris];
             if (in_array($i, $teks, true)) {
-                $nilai = (string) $nilai;
-                $sheet->getCell($koordinat)->setValueExplicit($nilai, DataType::TYPE_STRING);
-                if ($nilai !== '' && str_contains('=+-@', $nilai[0])) {
-                    $sheet->getStyle($koordinat)->setQuotePrefix(true);
-                }
+                $this->tulisTeks($sheet, $koordinat, (string) $nilai);
             } else {
                 $sheet->getCell($koordinat)->setValueExplicit((string) (int) $nilai, DataType::TYPE_NUMERIC);
                 $sheet->getStyle($koordinat)->getNumberFormat()->setFormatCode('#,##0');
             }
+        }
+    }
+
+    /**
+     * Sel teks: STRING eksplisit + quote prefix untuk awalan = + - @
+     * (defense-in-depth formula injection — dipakai semua sheet).
+     *
+     * @param array{int, int} $koordinat
+     */
+    private function tulisTeks(Worksheet $sheet, array $koordinat, string $nilai): void
+    {
+        $sheet->getCell($koordinat)->setValueExplicit($nilai, DataType::TYPE_STRING);
+        if ($nilai !== '' && str_contains('=+-@', $nilai[0])) {
+            $sheet->getStyle($koordinat)->setQuotePrefix(true);
         }
     }
 
@@ -200,8 +226,8 @@ final class JurnalExcelService
 
         $baris = 2;
         foreach ($rekap as $r) {
-            $sheet->getCell([1, $baris])->setValueExplicit($r['kode'], DataType::TYPE_STRING);
-            $sheet->getCell([2, $baris])->setValueExplicit($r['nama'], DataType::TYPE_STRING);
+            $this->tulisTeks($sheet, [1, $baris], $r['kode']);
+            $this->tulisTeks($sheet, [2, $baris], $r['nama']);
             $sheet->getCell([3, $baris])->setValueExplicit((string) $r['debit'], DataType::TYPE_NUMERIC);
             $sheet->getCell([4, $baris])->setValueExplicit((string) $r['kredit'], DataType::TYPE_NUMERIC);
             $sheet->getStyle("C{$baris}:D{$baris}")->getNumberFormat()->setFormatCode('#,##0');
@@ -226,15 +252,19 @@ final class JurnalExcelService
             ['Jumlah transaksi', (string) $jumlahTrx],
             [''],
             ['Catatan:'],
-            ['- Hanya transaksi berstatus Normal; transaksi Void/Refund dikecualikan.'],
-            ['- HPP dihitung dari harga_modal produk saat ekspor; produk tanpa harga modal tercatat HPP 0'],
-            ['  (isi via edit produk atau alur ekspor-ubah-impor Excel agar jurnal HPP bermakna).'],
+            ['- Hanya transaksi berstatus Normal; transaksi Void/Refund dikecualikan TANPA jurnal balik.'],
+            ['  PENTING: bila sebuah transaksi di-void SETELAH periodenya diekspor/diimpor akuntan,'],
+            ['  ekspor ulang periode itu akan berbeda isi — koordinasikan koreksinya manual dengan akuntan.'],
+            ['- HPP memakai SNAPSHOT harga modal saat transaksi (produk & part servis) sehingga tidak'],
+            ['  berubah bila harga modal diedit belakangan. Transaksi lama (sebelum pembaruan snapshot)'],
+            ['  memakai harga_modal produk saat ekspor; servis lama tanpa snapshot tercatat HPP 0.'],
+            ['- Produk tanpa harga modal tercatat HPP 0 — isi via edit produk / ekspor-ubah-impor Excel.'],
             ['- Kode & nama akun dapat disesuaikan akuntan lewat config/redline.php bagian "akun".'],
             ['- Setiap blok transaksi seimbang: debit = kredit (jurnal umum double-entry).'],
         ];
         foreach ($baris as $r => $kolom) {
             foreach ($kolom as $k => $nilai) {
-                $sheet->getCell([$k + 1, $r + 1])->setValueExplicit($nilai, DataType::TYPE_STRING);
+                $this->tulisTeks($sheet, [$k + 1, $r + 1], $nilai);
             }
         }
         $sheet->getStyle('A1')->getFont()->setBold(true);

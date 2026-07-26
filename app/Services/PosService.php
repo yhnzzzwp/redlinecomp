@@ -57,13 +57,17 @@ final class PosService
                     $harga = (int) $produk->harga;
                     $sub = $harga * $jumlah;
                     $subtotal += $sub;
-                    $baris[] = ['tipe' => TipeItem::Produk, 'model' => $produk, 'jumlah' => $jumlah, 'harga' => $harga, 'sub' => $sub];
+                    $baris[] = ['tipe' => TipeItem::Produk, 'model' => $produk, 'jumlah' => $jumlah, 'harga' => $harga, 'modal' => (int) $produk->harga_modal, 'sub' => $sub];
                 } else {
                     $service = \App\Models\Service::query()->lockForUpdate()->findOrFail($itemId);
-                    $harga = (int) $service->biaya_service;
+                    // Tagih TOTAL biaya (jasa + part) — angka yang sama dengan yang
+                    // dijanjikan ke customer di halaman servis, WA, dan cek servis publik.
+                    $harga = $service->totalBiaya();
+                    // Modal per unit servis = total modal part yang terpasang (snapshot).
+                    $modal = (int) $service->parts()->selectRaw('COALESCE(SUM(COALESCE(harga_modal, 0) * jumlah), 0) as m')->value('m');
                     $sub = $harga * $jumlah;
                     $subtotal += $sub;
-                    $baris[] = ['tipe' => TipeItem::Servis, 'model' => $service, 'jumlah' => $jumlah, 'harga' => $harga, 'sub' => $sub];
+                    $baris[] = ['tipe' => TipeItem::Servis, 'model' => $service, 'jumlah' => $jumlah, 'harga' => $harga, 'modal' => $modal, 'sub' => $sub];
                 }
             }
 
@@ -102,6 +106,7 @@ final class PosService
                     'nama_item' => $b['tipe'] === TipeItem::Produk ? $b['model']->nama_produk : 'Servis: ' . $b['model']->nama_barang,
                     'jumlah' => $b['jumlah'],
                     'harga' => $b['harga'],
+                    'harga_modal' => $b['modal'], // snapshot saat checkout — dasar HPP jurnal
                     'subtotal' => $b['sub'],
                 ]);
 

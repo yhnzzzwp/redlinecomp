@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 final class ServiceTicketService
 {
-    public function __construct(private readonly KodeGenerator $kodeGenerator) {}
+    public function __construct(
+        private readonly KodeGenerator $kodeGenerator,
+        private readonly StokService $stok,
+    ) {}
 
     public function buat(array $data, Pegawai $pegawai): Service
     {
@@ -103,7 +106,13 @@ final class ServiceTicketService
                         'jumlah' => "Stok produk \"{$produk->nama_produk}\" tidak mencukupi (Sisa stok: {$produk->jumlah_produk}).",
                     ]);
                 }
+                $sebelum = (int) $produk->jumlah_produk;
                 $produk->decrement('jumlah_produk', $jumlah);
+                $this->stok->catat(
+                    $produk, $sebelum, $sebelum - $jumlah,
+                    \App\Enums\TipeMutasiStok::PartServis,
+                    'Part servis '.$service->nomor_resi,
+                );
                 $produkId = $produk->id;
             }
 
@@ -112,6 +121,8 @@ final class ServiceTicketService
                 'nama_part' => $data['nama_part'],
                 'jumlah' => $jumlah,
                 'harga' => $harga,
+                // Snapshot modal per unit saat part dipasang — dasar HPP jurnal.
+                'harga_modal' => $produk !== null ? (int) $produk->harga_modal : null,
                 'subtotal' => $jumlah * $harga,
             ]);
 
@@ -123,11 +134,17 @@ final class ServiceTicketService
 
     public function hapusPart(Service $service, PartService $part): void
     {
-        DB::transaction(function () use ($part): void {
+        DB::transaction(function () use ($service, $part): void {
             if ($part->produk_id !== null) {
                 $produk = \App\Models\Produk::query()->lockForUpdate()->find($part->produk_id);
                 if ($produk !== null) {
+                    $sebelum = (int) $produk->jumlah_produk;
                     $produk->increment('jumlah_produk', $part->jumlah);
+                    $this->stok->catat(
+                        $produk, $sebelum, $sebelum + $part->jumlah,
+                        \App\Enums\TipeMutasiStok::PartServis,
+                        'Part servis dibatalkan '.$service->nomor_resi,
+                    );
                 }
             }
             $part->delete();

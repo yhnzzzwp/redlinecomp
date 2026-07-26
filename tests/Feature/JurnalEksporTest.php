@@ -108,16 +108,25 @@ final class JurnalEksporTest extends TestCase
             kodePromo: 'HEMAT10',
         ), $this->kasir);
 
-        // Servis: biaya 250.000 — dibayar Tunai.
+        // Servis: jasa 250.000 + part dari stok (jual 100.000, modal 60.000) — Tunai.
+        // POS menagih totalBiaya (jasa + part) sesuai janji ke customer.
+        $part = Produk::create([
+            'nama_produk' => 'Keyboard Part', 'jumlah_produk' => 3, 'harga' => 100_000,
+            'harga_modal' => 60_000, 'show_katalog' => false,
+        ]);
         $servis = app(ServiceTicketService::class)->buat([
             'nama_customer' => 'Budi', 'nama_barang' => 'Laptop Uji', 'masalah' => 'Mati total',
         ], $this->kasir);
         $servis->update(['biaya_service' => 250_000]);
+        app(ServiceTicketService::class)->tambahPart($servis, [
+            'produk_id' => $part->id, 'nama_part' => 'Keyboard Part', 'jumlah' => 1, 'harga' => 100_000,
+        ]);
         $trxServis = $pos->checkout(new CheckoutData(
             items: [new CartLine(TipeItem::Servis->value, $servis->id, 1)],
             metodeBayar: MetodeBayar::Tunai,
-            bayar: 250_000,
+            bayar: 350_000,
         ), $this->kasir);
+        $this->assertSame(350_000, $trxServis->total); // jasa 250rb + part 100rb
 
         $baris = $this->barisJurnal($this->muatJurnal());
 
@@ -140,15 +149,47 @@ final class JurnalEksporTest extends TestCase
         $this->assertSame(1_800_000, $jumlahPerAkun[$akun('qris')]['debit']);          // QRIS = total setelah diskon
         $this->assertSame(200_000, $jumlahPerAkun[$akun('diskon_penjualan')]['debit']); // promo 10% dari 2.000.000
         $this->assertSame(2_000_000, $jumlahPerAkun[$akun('penjualan_produk')]['kredit']);
-        $this->assertSame(1_400_000, $jumlahPerAkun[$akun('hpp')]['debit']);            // 2 × 700.000
-        $this->assertSame(1_400_000, $jumlahPerAkun[$akun('persediaan')]['kredit']);
-        $this->assertSame(250_000, $jumlahPerAkun[$akun('kas')]['debit']);              // servis Tunai
-        $this->assertSame(250_000, $jumlahPerAkun[$akun('pendapatan_servis')]['kredit']);
+        $this->assertSame(1_460_000, $jumlahPerAkun[$akun('hpp')]['debit']);            // 2×700rb produk + 60rb part servis
+        $this->assertSame(1_460_000, $jumlahPerAkun[$akun('persediaan')]['kredit']);
+        $this->assertSame(350_000, $jumlahPerAkun[$akun('kas')]['debit']);              // servis Tunai (jasa+part)
+        $this->assertSame(350_000, $jumlahPerAkun[$akun('pendapatan_servis')]['kredit']);
 
         // No bukti kedua transaksi ikut tercantum.
         $bukti = array_map(fn (array $r): string => (string) $r[1], $baris);
         $this->assertContains($trxProduk->kode_nota, $bukti);
         $this->assertContains($trxServis->kode_nota, $bukti);
+    }
+
+    public function test_hpp_memakai_snapshot_bukan_harga_modal_terkini(): void
+    {
+        $pos = app(PosService::class);
+        $produk = Produk::create([
+            'nama_produk' => 'VGA Uji', 'jumlah_produk' => 5, 'harga' => 5_000_000,
+            'harga_modal' => 4_000_000, 'show_katalog' => true,
+        ]);
+        $pos->checkout(new CheckoutData(
+            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1)],
+            metodeBayar: MetodeBayar::Transfer,
+            bayar: 5_000_000,
+        ), $this->kasir);
+
+        // Harga modal diedit SETELAH transaksi — jurnal tidak boleh berubah.
+        $produk->update(['harga_modal' => 9_999_999]);
+
+        $baris = $this->barisJurnal($this->muatJurnal());
+        $hpp = array_sum(array_map(
+            fn (array $r): int => (string) $r[2] === (string) config('redline.akun.hpp.kode') ? (int) $r[5] : 0,
+            $baris,
+        ));
+        $this->assertSame(4_000_000, $hpp);
+    }
+
+    public function test_periode_lebih_dari_setahun_ditolak_dengan_pesan(): void
+    {
+        $this->actingAs($this->owner)
+            ->get(route('analytics.jurnal', ['dari' => '2020-01-01', 'sampai' => '2026-12-31']))
+            ->assertRedirect()
+            ->assertSessionHas('error');
     }
 
     public function test_transaksi_void_dan_di_luar_periode_dikecualikan(): void

@@ -145,6 +145,34 @@ final class StokTest extends TestCase
         ]);
     }
 
+    public function test_part_servis_mencatat_mutasi_pasang_dan_batal(): void
+    {
+        $produk = Produk::create(['nama_produk' => 'PSU Part', 'sku' => 'PSU-1', 'harga' => 800_000, 'harga_modal' => 650_000, 'jumlah_produk' => 4]);
+        $svc = app(\App\Services\ServiceTicketService::class);
+        $servis = $svc->buat([
+            'nama_customer' => 'Andi', 'nama_barang' => 'PC Rakitan', 'masalah' => 'PSU mati',
+        ], $this->staff);
+
+        $part = $svc->tambahPart($servis, ['produk_id' => $produk->id, 'nama_part' => 'PSU Part', 'jumlah' => 2, 'harga' => 800_000]);
+
+        $this->assertSame(2, $produk->fresh()->jumlah_produk);
+        $this->assertSame(650_000, $part->harga_modal); // snapshot modal saat dipasang
+        $this->assertDatabaseHas('mutasi_stok', [
+            'produk_id' => $produk->id, 'tipe' => TipeMutasiStok::PartServis->value,
+            'jumlah_sebelum' => 4, 'jumlah_sesudah' => 2,
+            'keterangan' => 'Part servis ' . $servis->nomor_resi,
+        ]);
+
+        $svc->hapusPart($servis, $part);
+
+        $this->assertSame(4, $produk->fresh()->jumlah_produk);
+        $this->assertDatabaseHas('mutasi_stok', [
+            'produk_id' => $produk->id, 'tipe' => TipeMutasiStok::PartServis->value,
+            'jumlah_sebelum' => 2, 'jumlah_sesudah' => 4,
+            'keterangan' => 'Part servis dibatalkan ' . $servis->nomor_resi,
+        ]);
+    }
+
     public function test_halaman_mutasi_menampilkan_riwayat_dan_filter_tipe(): void
     {
         $produk = Produk::create(['nama_produk' => 'Kabel Uji', 'sku' => 'KB-1', 'harga' => 50_000, 'jumlah_produk' => 3]);

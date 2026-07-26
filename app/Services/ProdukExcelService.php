@@ -202,7 +202,8 @@ final class ProdukExcelService
         $this->tulisHeader($sheet);
 
         $r = 2;
-        foreach (Produk::query()->with('kategori')->orderBy('nama_produk')->cursor() as $p) {
+        // lazy() (bukan cursor()) supaya eager load kategori benar-benar berjalan.
+        foreach (Produk::query()->with('kategori')->orderBy('nama_produk')->lazy(500) as $p) {
             $this->tulisBaris($sheet, $r++, [
                 $p->nama_produk,
                 $p->sku ?? '',

@@ -11,6 +11,7 @@ enum TipeMutasiStok: string
     case Penyesuaian = 'Penyesuaian';
     case Opname = 'Opname';
     case Impor = 'Impor';
+    case PartServis = 'Part Servis';
 
     public function warna(): string
     {
@@ -20,6 +21,7 @@ enum TipeMutasiStok: string
             self::Penyesuaian => 'blue',
             self::Opname => 'green',
             self::Impor => 'gray',
+            self::PartServis => 'red',
         };
     }
 }

@@ -1,5 +1,14 @@
 # Changelog — SIRC
 
+## [P3 Akuntansi — poles hasil review] — Integritas servis & jurnal
+### Diperbaiki
+- **POS kini menagih `totalBiaya()` servis (jasa + part)** — sebelumnya hanya `biaya_service`, padahal halaman servis, pesan WA, dan cek servis publik menjanjikan total termasuk part (bug kurang tagih).
+- **Mutasi stok part servis lewat `StokService`** (tipe baru `Part Servis`): pasang part & batalkan part kini tercatat di riwayat mutasi — sebelumnya decrement/increment langsung (melanggar aturan satu-pintu §4.6).
+- **Snapshot `harga_modal`** di `item_transaksi` & `part_service` saat transaksi/pasang part — HPP jurnal tidak lagi berubah retroaktif saat harga modal diedit atau produk dihapus; jurnal membaca snapshot (fallback terdokumentasi untuk data lama).
+- **HPP part servis ikut dijurnal** (pasangan HPP ↔ Persediaan) — saldo Persediaan di buku tidak lagi menyimpang dari stok fisik saat servis berpart dibayar.
+- Ekspor jurnal & produk memakai `lazy()` (bukan `cursor()` yang diam-diam mengabaikan eager load — N+1); periode jurnal dibatasi 1 tahun + validasi tanggal (galat ramah, bukan 500); baris kas 0 tidak ditulis; quote-prefix formula-injection kini di semua sheet; sheet Info memperingatkan void-setelah-ekspor.
+- 3 test baru + 2 diperkuat — total 94 test / 343 assertion.
+
 ## [P3 Akuntansi] — Ekspor Jurnal Akuntansi (.xlsx)
 ### Ditambahkan
 - **Ekspor Jurnal Akuntansi** di Analytics (Owner): jurnal umum **double-entry per transaksi** siap dipetakan ke software akuntansi (Accurate/Zahir/Jurnal.id) — `JurnalExcelService` (PhpSpreadsheet, pola sama dengan ekspor produk termasuk mitigasi formula-injection).

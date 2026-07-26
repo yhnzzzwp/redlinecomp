@@ -155,10 +155,19 @@ final class AnalyticsController extends Controller
      * Ekspor Jurnal Akuntansi (.xlsx): jurnal umum double-entry per transaksi
      * pada periode terpilih — lihat JurnalExcelService untuk pemetaan akun.
      */
-    public function exportJurnal(Request $request): StreamedResponse
+    public function exportJurnal(Request $request): StreamedResponse|\Illuminate\Http\RedirectResponse
     {
+        // Tanggal tak valid → kembali dengan galat (bukan 500); periode dibatasi
+        // 1 tahun karena seluruh workbook dibangun di memori (PhpSpreadsheet).
+        $request->validate(['dari' => ['nullable', 'date'], 'sampai' => ['nullable', 'date']]);
+
         $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->string('dari')->toString())->startOfDay() : now()->startOfMonth();
         $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->string('sampai')->toString())->endOfDay() : now()->endOfMonth();
+
+        if ($dari->diffInDays($sampai, true) > 366) {
+            return redirect()->route('analytics', $request->only(['dari', 'sampai']))
+                ->with('error', 'Periode Jurnal Akuntansi maksimal 1 tahun — persempit rentang tanggal lalu ekspor lagi.');
+        }
 
         $spreadsheet = $this->jurnal->ekspor($dari, $sampai);
         $nama = 'Jurnal-Akuntansi-'.$dari->format('Ymd').'-'.$sampai->format('Ymd').'.xlsx';

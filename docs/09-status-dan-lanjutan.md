@@ -73,6 +73,8 @@ _(PWA untuk POS ✅ selesai di `c3ca92d` + `4668b32`; yang tersisa dari ide PWA 
 evaluasi service-worker/offline — lihat ide pasca-P3.)_
 
 ### Ide pasca-P3 (dari laporan evaluasi, belum diprioritaskan)
+- Jurnal balik otomatis untuk Void/Refund lintas periode di Ekspor Jurnal Akuntansi
+  (sekarang: Void dikecualikan + peringatan di sheet Info; koreksi lintas periode manual).
 - Service worker/offline untuk PWA POS (manifest+ikon sudah ada; hati-hati CSP —
   jangan longgarkan `unsafe-eval`, dan cache offline berisiko stok basi di kasir).
 - Notifikasi WA otomatis saat ganti status (sekarang: tombol manual by design, tanpa API).
