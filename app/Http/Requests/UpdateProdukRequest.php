@@ -30,7 +30,6 @@ class UpdateProdukRequest extends FormRequest
             'jumlah_produk' => ['required', 'integer', 'min:0', 'max:1000000'],
             'deskripsi_produk' => ['nullable', 'string', 'max:5000'],
             'show_katalog' => ['boolean'],
-            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ];
     }
 
@@ -41,8 +40,6 @@ class UpdateProdukRequest extends FormRequest
             'harga.required' => 'Harga wajib diisi.',
             'jumlah_produk.required' => 'Stok wajib diisi.',
             'sku.unique' => 'SKU sudah dipakai produk lain.',
-            'foto.max' => 'Ukuran foto maksimal 2 MB.',
-            'foto.mimes' => 'Foto harus JPG, PNG, atau WEBP.',
         ];
     }
 }

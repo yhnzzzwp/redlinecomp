@@ -17,7 +17,7 @@
     <div class="rl-side__brand">
         <span class="rl-logo">REDL<i>INE</i></span><span class="rl-stripe"></span>
     </div>
-    <div class="rl-ticks {{ $portal === \App\Support\Portal::Admin ? 'rl-ticks--dark' : '' }}"></div>
+    <div class="rl-ticks"></div>
     <div class="rl-portal-chip">{{ $portal === \App\Support\Portal::Admin ? 'Admin Console' : 'Portal Karyawan' }}</div>
 
     @foreach ($nav as [$key, $label, $url, $ownerOnly, $path])

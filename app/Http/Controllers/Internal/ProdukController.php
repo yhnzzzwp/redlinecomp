@@ -106,7 +106,7 @@ final class ProdukController extends Controller
 
     public function store(StoreProdukRequest $request): RedirectResponse
     {
-        $this->service->create($request->safe()->except('foto'), $request->file('foto'));
+        $this->service->create($request->validated());
 
         return redirect()->route('produk.index')->with('success', 'Produk berhasil ditambahkan.');
     }
@@ -121,7 +121,7 @@ final class ProdukController extends Controller
 
     public function update(UpdateProdukRequest $request, Produk $produk): RedirectResponse
     {
-        $this->service->update($produk, $request->safe()->except('foto'), $request->file('foto'));
+        $this->service->update($produk, $request->validated());
 
         return redirect()->route('produk.index')->with('success', 'Produk berhasil diperbarui.');
     }

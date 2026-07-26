@@ -9,7 +9,6 @@ use App\Models\Produk;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 final class ProdukCrudTest extends TestCase
@@ -33,21 +32,15 @@ final class ProdukCrudTest extends TestCase
         $this->get(route('produk.index'))->assertRedirect(route('login'));
     }
 
-    public function test_staff_bisa_menambah_produk_dengan_foto(): void
+    public function test_staff_bisa_menambah_produk(): void
     {
-        Storage::fake('public');
-
         $response = $this->actingAs($this->staff)->post(route('produk.store'), [
             'nama_produk' => 'RTX 5090', 'sku' => 'RL-NV-5090', 'harga' => 30_000_000,
             'jumlah_produk' => 4, 'show_katalog' => '1',
-            'foto' => UploadedFile::fake()->image('rtx.jpg'),
         ]);
 
         $response->assertRedirect(route('produk.index'));
         $this->assertDatabaseHas('produk', ['sku' => 'RL-NV-5090', 'harga' => 30_000_000, 'jumlah_produk' => 4]);
-        $produk = Produk::query()->where('sku', 'RL-NV-5090')->first();
-        $this->assertNotNull($produk->foto_produk);
-        Storage::disk('public')->assertExists($produk->foto_produk);
     }
 
     public function test_sku_otomatis_di_generate_jika_dikosongkan(): void

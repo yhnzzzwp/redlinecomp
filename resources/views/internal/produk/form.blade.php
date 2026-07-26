@@ -55,14 +55,6 @@
             <x-form.textarea name="deskripsi_produk" label="Deskripsi" rows="3">{{ $produk->deskripsi_produk }}</x-form.textarea>
         </div>
 
-        <div class="mb-3">
-            <label class="rl-label d-block mb-1">Foto Produk <span class="rl-text-muted rl-text-xs fw-normal">(JPG/PNG/WEBP, maks 2MB)</span></label>
-            @if ($produk->foto_produk)
-                <img src="{{ asset('storage/'.$produk->foto_produk) }}" alt="" class="rl-product-thumb mb-2 d-block">
-            @endif
-            <input type="file" name="foto" accept="image/*" class="rl-input w-100">
-        </div>
-
         <div class="mb-4">
             <label class="rl-checkbox-label d-flex align-items-center gap-2 rl-text-sm">
                 <input type="checkbox" name="show_katalog" value="1" @checked(old('show_katalog', $produk->show_katalog ?? true))>

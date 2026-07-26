@@ -7,7 +7,6 @@
             'harga' => (int) $p->harga,
             'stok' => (int) $p->jumlah_produk,
             'kategori' => $p->kategori?->nama_kategori ?? 'Lainnya',
-            'foto' => $p->foto_produk ? asset('storage/'.$p->foto_produk) : null,
             'tipe' => 'produk'
         ]);
         $serviceData = $services->map(fn ($s) => [
@@ -17,7 +16,6 @@
             'harga' => (int) $s->biaya_service,
             'stok' => 1,
             'kategori' => 'Servis',
-            'foto' => null,
             'tipe' => 'service'
         ]);
         $allItemData = $produkData->concat($serviceData)->values();
@@ -91,9 +89,6 @@
                         <div class="col-md-4">
                             <div class="rl-card p-3 h-100 d-flex flex-direction-column justify-content-between">
                                 <div>
-                                    <template x-if="p.foto">
-                                        <img :src="p.foto" :alt="p.nama" class="img-fluid rounded mb-2 w-100" style="height: 120px; object-fit: cover;">
-                                    </template>
                                     <div class="fw-bold rl-text-sm mb-1" x-text="p.nama"></div>
                                     <div class="tnum text-danger fw-bold mb-2" x-text="rp(p.harga)"></div>
                                 </div>

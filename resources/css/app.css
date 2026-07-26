@@ -230,20 +230,6 @@ body {
 }
 .rl-portal-chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 3px var(--red-glow); }
 
-/* Varian admin: sidebar carbon. */
-body.portal-admin .rl-side {
-  --side-bg: var(--carbon-950);
-  --side-line: var(--carbon-line);
-  --side-item: #98a1ad;
-  --side-item-hover: rgba(255, 255, 255, .06);
-  --side-active-bg: rgba(222, 31, 38, .16);
-  --side-active-ink: #ff9298;
-  background-image: var(--noise);
-}
-body.portal-admin .rl-side .rl-logo { color: #f2f3f6; }
-body.portal-admin .rl-side .rl-ticks { --tick: var(--carbon-line); }
-body.portal-admin .rl-portal-chip { color: #c6ccd6; border-color: var(--carbon-line); }
-
 /* ---- Area utama ---- */
 .rl-main { display: flex; flex-direction: column; min-width: 0; }
 .rl-topbar {
@@ -258,10 +244,10 @@ body.portal-admin .rl-portal-chip { color: #c6ccd6; border-color: var(--carbon-l
 
 .rl-avatar {
   width: 38px; height: 38px; border-radius: 10px; flex: 0 0 auto;
-  background: linear-gradient(135deg, var(--carbon-800), var(--carbon-950));
-  border: 1px solid var(--carbon-800);
+  background: var(--red-soft);
+  border: 1px solid #f5d4d4;
   display: inline-flex; align-items: center; justify-content: center;
-  color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .06em;
+  color: var(--red-strong); font-family: var(--font-display); font-weight: 700; font-size: 14px; letter-spacing: .06em;
 }
 
 /* ---- Pencarian topbar ---- */
@@ -341,11 +327,6 @@ body.portal-admin .rl-portal-chip { color: #c6ccd6; border-color: var(--carbon-l
 .rl-table tbody tr:hover { background: #fafbfc; }
 .rl-table th.text-end, .rl-table td.text-end { text-align: right; }
 .rl-table th.text-center, .rl-table td.text-center { text-align: center; }
-.rl-table-thumb {
-  width: 46px !important; height: 46px !important; min-width: 46px !important;
-  object-fit: cover; border-radius: 8px; border: 1px solid var(--line);
-  background: var(--bg); flex-shrink: 0;
-}
 
 /* ============================================================
    6 · FORM
@@ -451,37 +432,8 @@ input[type="radio"] { accent-color: var(--red); }
 /* ============================================================
    9 · PRODUK / POS / KATALOG
    ============================================================ */
-.rl-product-thumb, .rl-hardware-thumb {
-  height: 100%; min-height: 140px;
-  background:
-    radial-gradient(90% 90% at 50% 0%, rgba(222, 31, 38, .16), transparent 62%),
-    linear-gradient(160deg, var(--carbon-850), var(--carbon-950));
-  border-bottom: 2px solid var(--red);
-  display: flex; align-items: center; justify-content: center; color: #fff;
-  position: relative; overflow: hidden; border-radius: 8px 8px 0 0;
-}
-.rl-hardware-thumb.pos { height: 90px; min-height: 90px; border-radius: 8px; margin-bottom: 8px; border-bottom: none; border-top: 2px solid var(--red); }
-.rl-hardware-thumb svg { width: 48px; height: 48px; stroke: #58606d; opacity: .9; }
-.rl-hardware-thumb.pos svg { width: 32px; height: 32px; }
-.rl-hardware-thumb__tag {
-  position: absolute; top: 10px; left: 10px;
-  background: rgba(7, 9, 12, .72); backdrop-filter: blur(4px); color: #dfe3e9;
-  font-family: var(--font-display); font-size: 10.5px; font-weight: 700; padding: 3px 8px;
-  border-radius: 4px; text-transform: uppercase; letter-spacing: .1em;
-}
-.rl-hardware-thumb::after {
-  content: ""; position: absolute; top: 0; left: -60%; width: 45%; height: 100%;
-  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .13), transparent);
-  transform: skewX(-18deg); transition: left .65s var(--ease); pointer-events: none;
-}
-.rl-card:hover .rl-hardware-thumb::after { left: 120%; }
-
+.rl-card:hover 
 .rl-pos-bill { position: sticky; top: 20px; }
-.rl-catalogue-img-wrap { height: 180px; background: var(--bg); display: flex; align-items: center; justify-content: center; }
-.rl-catalogue-img-lg { height: 400px; background: var(--bg); display: flex; align-items: center; justify-content: center; }
-.rl-catalogue-img-sm { height: 140px; background: var(--bg); display: flex; align-items: center; justify-content: center; }
-.rl-catalogue-img { max-height: 100%; max-width: 100%; object-fit: contain; }
-.rl-catalogue-placeholder { font-size: 32px; color: var(--muted); }
 .rl-catalogue-title { font-size: 15.5px; line-height: 1.4; font-weight: 700; }
 
 /* Grid spesifikasi (detail produk & halaman publik). */
@@ -492,16 +444,6 @@ input[type="radio"] { accent-color: var(--red); }
 .rl-trust { display: flex; gap: 22px; flex-wrap: wrap; }
 .rl-trust__item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink); font-weight: 600; }
 .rl-trust__ico { width: 38px; height: 38px; border-radius: 10px; background: var(--red-soft); color: var(--red-strong); display: grid; place-items: center; flex: 0 0 38px; }
-.rl-detail-media {
-  position: relative; overflow: hidden;
-  background: radial-gradient(120% 120% at 30% 10%, var(--carbon-800), var(--carbon-950));
-  border: 1px solid var(--carbon-800);
-}
-.rl-detail-media .rl-hardware-thumb { min-height: 400px; background: transparent; border-bottom: 0; }
-.rl-detail-media::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(60% 40% at 50% 0%, rgba(222, 31, 38, .2), transparent 70%);
-}
 
 /* ============================================================
    10 · PROMO & CHART
@@ -727,17 +669,53 @@ input[type="radio"] { accent-color: var(--red); }
 /* ============================================================
    14 · RESPONSIVE
    ============================================================ */
+/* ---- Ponsel: mayoritas customer mengakses lewat HP ---- */
+@media (max-width: 767.98px) {
+  /* Menu publik saat ditumpuk: target sentuh lega (≥44px) & mudah dijangkau ibu jari. */
+  .rl-pubnav > div a { padding: 11px 0; width: 100%; }
+  .rl-pubnav > div a.active::after { display: none; }
+  .rl-pubnav > div a.active { color: var(--red-strong); }
+
+  /* Strip readout hero disusun vertikal — tidak berdesakan. */
+  .rl-hero-stats { flex-direction: column; gap: 18px; margin-top: 34px; }
+  .rl-hero-stat { border-left: 0; padding: 0; }
+
+  /* Tabel data digulir horizontal DI DALAM kartunya — halaman tidak pernah
+     ikut menggulir ke samping. */
+  .rl-card:has(.rl-table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .rl-table { min-width: 560px; }
+}
+
 @media (max-width: 640px) {
   .rl-topbar { padding: 10px 16px; }
   .rl-body { padding: 16px; }
   .rl-pubnav { padding: 12px 16px; gap: 14px; flex-wrap: wrap; }
   .rl-hero { padding: 48px 16px 40px; }
-  .rl-hero-stat { padding: 0 18px; }
+  .rl-hero-desc { font-size: 14.5px; }
   .rl-footer { padding: 28px 16px 18px; }
   .rl-page-header { flex-direction: column; }
   .rl-table { font-size: 12.5px; }
   .rl-table thead th, .rl-table tbody td { padding: 10px 12px; }
   .rl-spec-grid { grid-template-columns: 1fr; }
+  .rl-public-header { padding: 40px 16px 12px; }
+  .rl-login__brand { padding: 26px 20px; min-height: 220px; }
+  .rl-login-card { padding: 24px 20px; }
+  .rl-carousel-item { flex: 0 0 200px; }
+
+  /* iOS melakukan zoom otomatis pada input berhuruf < 16px — cegah. */
+  .rl-input, .rl-select, .rl-textarea, .rl-field input { font-size: 16px; }
+
+  /* Tombol utama nyaman dijangkau jari. */
+  .btn-redline, .btn-ghost { padding-block: 12px; }
+}
+
+/* Filter katalog: dilipat di layar kecil, selalu terbuka di desktop. */
+.rl-filter-toggle { display: none; }
+@media (max-width: 991.98px) {
+  .rl-filter-toggle { display: inline-flex; width: 100%; justify-content: space-between; }
+  .rl-filter-body { display: none; }
+  .rl-filter-body.open { display: block; margin-top: 14px; }
+  .rl-filter-sticky { position: static; }
 }
 
 @media (max-width: 991px) {
@@ -816,11 +794,6 @@ input, select, textarea, a {
 /* Kartu produk — angkat saat hover. */
 a.rl-card, .rl-carousel-item .rl-card { transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease); }
 a.rl-card:hover, .rl-carousel-item .rl-card:hover { transform: translateY(-6px); box-shadow: 0 18px 44px rgba(13, 16, 22, .16); }
-.rl-hardware-thumb svg, .rl-catalogue-img { transition: transform .55s var(--ease); }
-.rl-card:hover .rl-hardware-thumb svg,
-.rl-card:hover .rl-catalogue-img { transform: scale(1.09); }
-.rl-card:has(.rl-catalogue-img-wrap) { transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
-.rl-card:has(.rl-catalogue-img-wrap):hover { transform: translateY(-6px); }
 
 /* Aksesibilitas — hormati preferensi kurangi gerak. */
 @media (prefers-reduced-motion: reduce) {

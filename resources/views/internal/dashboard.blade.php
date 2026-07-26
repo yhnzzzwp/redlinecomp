@@ -124,11 +124,6 @@
             @forelse ($criticalStock as $p)
                 <div class="col-md-4">
                     <div class="d-flex align-items-center gap-3 p-2 rounded bg-light border">
-                        @if ($p->foto_produk)
-                            <img src="{{ asset('storage/'.$p->foto_produk) }}" alt="" class="rl-product-thumb">
-                        @else
-                            <x-ui.hardware-thumb :kategori="$p->kategori?->nama_kategori" :isPos="true" />
-                        @endif
                         <div class="flex-fill">
                             <div class="fw-semibold rl-text-sm text-truncate" style="max-width: 150px;">{{ $p->nama_produk }}</div>
                             <div class="rl-text-muted rl-text-xs rl-mono">{{ $p->sku ?? '—' }}</div>

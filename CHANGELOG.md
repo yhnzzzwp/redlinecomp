@@ -1,5 +1,16 @@
 # Changelog — SIRC
 
+## [Tanpa Gambar + Mobile] — Portal serba terang, bebas gambar, responsif HP
+### Diubah
+- **Sidebar portal admin ikut bertema terang** (varian carbon dihapus) — kini seluruh navbar/sidebar owner & karyawan terang; avatar topbar menyesuaikan.
+- **Seluruh aplikasi tidak lagi menampilkan/mengunggah gambar**: kolom `foto_produk` & `foto_promo` di-drop dari skema (migrasi baru), upload foto dihapus dari form produk, thumbnail dihapus dari tabel produk/POS/dashboard, komponen `hardware-thumb` & CSS gambar dibuang, `ProductService` disederhanakan.
+- **Responsif mobile menyeluruh** (mayoritas customer memakai HP — iOS/Android/laptop):
+  - Input 16px di layar kecil (mencegah auto-zoom iOS saat fokus form).
+  - Filter katalog dilipat di HP (tombol toggle), selalu terbuka di desktop.
+  - Tabel data digulir horizontal di dalam kartunya — halaman tidak pernah menggulir ke samping.
+  - Strip statistik hero tersusun vertikal; tombol hero membungkus; target sentuh menu publik ≥44px.
+  - Padding header/login/carousel disesuaikan untuk layar sempit.
+
 ## [Impor Excel] — Input data produk via Excel (menggantikan CSV)
 ### Ditambahkan
 - **Impor produk .xlsx/.xls** (revisi permintaan): `ProdukExcelService` berbasis PhpSpreadsheet 5 — header fleksibel (alias `Barang`/`Kode Barang`/`QTY`/`HPP` dsb.), format "Rp 3.100.000" diterima, upsert ber-kunci SKU, kategori dibuat otomatis, batas 2.000 baris.

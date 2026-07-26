@@ -96,13 +96,6 @@
                     <tr>
                         <td>
                             <div class="d-flex align-items-center gap-3">
-                                @if ($p->foto_produk)
-                                    <img src="{{ asset('storage/'.$p->foto_produk) }}" alt="{{ $p->nama_produk }}" class="rl-table-thumb">
-                                @else
-                                    <div class="rl-table-thumb d-flex align-items-center justify-content-center bg-light text-secondary rounded border">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect width="18" height="12" x="3" y="4" rx="2" ry="2"/><line x1="2" x2="22" y1="20" y2="20"/></svg>
-                                    </div>
-                                @endif
                                 <div>
                                     <div class="fw-semibold rl-text-sm">{{ $p->nama_produk }}</div>
                                     <div class="rl-text-muted rl-text-xs rl-mono">SKU: {{ $p->sku ?? '—' }}</div>

@@ -13,7 +13,7 @@ class Produk extends Model
 
     protected $fillable = [
         'kategori_id', 'sku', 'nama_produk', 'jumlah_produk',
-        'harga', 'harga_modal', 'deskripsi_produk', 'show_katalog', 'foto_produk',
+        'harga', 'harga_modal', 'deskripsi_produk', 'show_katalog',
     ];
 
     protected $casts = [
