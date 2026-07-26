@@ -5,33 +5,55 @@
                 <h1 class="rl-page-title mb-1">Manajemen Produk</h1>
                 <p class="rl-page-desc mb-0">Kelola stok &amp; katalog hardware toko &mdash; Total {{ number_format($total, 0, ',', '.') }} produk.</p>
             </div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="{{ route('produk.export') }}" class="btn-ghost text-decoration-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Ekspor Excel
+                </a>
                 <button type="button" class="btn-ghost" @click="showImport = !showImport">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    Import CSV
+                    Impor Excel
                 </button>
                 <a href="{{ route('produk.create') }}" class="btn-redline">+ Tambah Produk</a>
             </div>
         </div>
 
-        {{-- Form Upload CSV --}}
-        <div x-show="showImport" x-cloak class="rl-card p-4 mb-3 border-danger shadow-sm">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="rl-section-title mb-0">Import Data Produk Massal via CSV</h3>
-                <a href="{{ route('produk.template') }}" class="btn-ghost btn-sm text-decoration-none">
+        {{-- Panel Impor Excel --}}
+        <div x-show="showImport || {{ ($errors->has('file_excel') || session('import_baris_gagal')) ? 'true' : 'false' }}" x-cloak class="rl-card p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h3 class="rl-section-title mb-0">Impor Data Produk via Excel</h3>
+                <a href="{{ route('produk.template') }}" class="btn-ghost rl-btn-sm text-decoration-none">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Unduh Format CSV
+                    Unduh Template
                 </a>
             </div>
             <p class="rl-text-xs text-muted mb-3">
-                Unggah file CSV dengan kolom header: <code>nama_produk</code>, <code>sku</code>, <code>kategori</code>, <code>harga</code>, <code>harga_modal</code>, <code>jumlah_produk</code>, <code>deskripsi</code>.
+                Alur: <b>Ekspor Excel</b> &rarr; sesuaikan data di Excel &rarr; unggah kembali di sini (format <code>.xlsx</code>).
+                Kolom: <code>nama_produk</code>, <code>sku</code>, <code>kategori</code>, <code>harga</code>, <code>harga_modal</code>, <code>jumlah_produk</code>, <code>deskripsi</code>.
+                SKU yang cocok akan memperbarui produk; bila ada baris bermasalah, seluruh impor dibatalkan.
             </p>
+
+            @if ($errors->has('file_excel'))
+                <div class="rl-alert rl-alert--error mb-3">{{ $errors->first('file_excel') }}</div>
+            @endif
+            @if (session('import_baris_gagal'))
+                <div class="rl-card p-3 mb-3 rl-border-light" style="max-height:180px;overflow-y:auto">
+                    <div class="rl-text-xs fw-bold text-danger mb-2">Perbaiki baris berikut lalu unggah ulang — belum ada data yang diimpor:</div>
+                    <ul class="rl-text-xs text-muted mb-0 ps-3">
+                        @foreach (session('import_baris_gagal') as $galat)
+                            <li>{{ $galat }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('produk.import') }}" enctype="multipart/form-data" class="d-flex align-items-center gap-2 flex-wrap">
                 @csrf
                 <div class="flex-grow-1">
-                    <input type="file" name="file_csv" accept=".csv,text/csv" required class="rl-input w-100">
+                    <label for="file_excel" class="visually-hidden">File Excel</label>
+                    <input type="file" id="file_excel" name="file_excel" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" required class="rl-input w-100">
                 </div>
-                <button type="submit" class="btn-redline">Proses Import CSV</button>
+                <button type="submit" class="btn-redline">Proses Impor</button>
                 <button type="button" class="btn-ghost" @click="showImport = false">Batal</button>
             </form>
         </div>

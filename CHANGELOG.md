@@ -1,5 +1,19 @@
 # Changelog — SIRC
 
+## [Impor Excel] — Input data produk via Excel (menggantikan CSV)
+### Ditambahkan
+- **Impor produk .xlsx/.xls** (revisi permintaan): `ProdukExcelService` berbasis PhpSpreadsheet 5 — header fleksibel (alias `Barang`/`Kode Barang`/`QTY`/`HPP` dsb.), format "Rp 3.100.000" diterima, upsert ber-kunci SKU, kategori dibuat otomatis, batas 2.000 baris.
+- Impor bersifat **all-or-nothing**: seluruh baris divalidasi dulu; bila ada yang bermasalah, tidak ada yang diimpor dan galat per baris ditampilkan (`Baris N: …`).
+- **Ekspor Produk (.xlsx)** — alur kerja Owner: ekspor → sesuaikan di Excel → impor kembali.
+- **Template .xlsx** dengan baris contoh, sheet "Petunjuk", dropdown kategori (data validation), header beku.
+- Mitigasi formula injection: semua sel teks ditulis bertipe string eksplisit + quote-prefix untuk sel berawalan `= + - @`.
+- 6 test baru (impor sukses, alias header + rupiah, upsert SKU, all-or-nothing, CSV ditolak, unduh template/ekspor).
+### Diubah
+- Route `produk.template`/`produk.import` kini melayani Excel (path `template-excel`/`import-excel`); tambah `produk.export`.
+- Logika impor dipindah dari controller ke service (melunasi refactor T3); `ProdukController` menyusut ±100 baris.
+### Dihapus
+- Impor & template CSV — **CSV tidak lagi diterima** (pesan galat mengarahkan ke template Excel).
+
 ## [Tema Terang] — Zona publik terang + beranda katalog
 ### Diubah
 - Tema utama zona publik menjadi **terang**; carbon gelap tersisa hanya di hero beranda (banner brand) dan panel login portal.

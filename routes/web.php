@@ -67,8 +67,9 @@ Route::middleware('portal:internal')->group(function () {
 
         Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
 
-        Route::get('/produk/template-csv', [ProdukController::class, 'templateCsv'])->name('produk.template');
-        Route::post('/produk/import-csv', [ProdukController::class, 'importCsv'])->name('produk.import');
+        Route::get('/produk/template-excel', [ProdukController::class, 'template'])->name('produk.template');
+        Route::get('/produk/export-excel', [ProdukController::class, 'export'])->name('produk.export');
+        Route::post('/produk/import-excel', [ProdukController::class, 'import'])->name('produk.import');
         Route::resource('produk', ProdukController::class)->except(['show']);
 
         Route::get('/service', [ServiceController::class, 'index'])->name('service');

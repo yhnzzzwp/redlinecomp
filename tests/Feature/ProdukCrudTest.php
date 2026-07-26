@@ -98,68 +98,109 @@ final class ProdukCrudTest extends TestCase
         $this->assertDatabaseMissing('produk', ['id' => $produk->id]);
     }
 
-    public function test_staff_dan_owner_bisa_unduh_template_csv(): void
+    public function test_staff_bisa_unduh_template_dan_ekspor_excel(): void
     {
-        $this->actingAs($this->staff)
-            ->get(route('produk.template'))
-            ->assertOk()
-            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
+        $xlsxMime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+        $this->actingAs($this->staff)->get(route('produk.template'))
+            ->assertOk()->assertHeader('Content-Type', $xlsxMime);
+
+        $this->actingAs($this->staff)->get(route('produk.export'))
+            ->assertOk()->assertHeader('Content-Type', $xlsxMime);
     }
 
-    public function test_staff_bisa_impor_produk_massal_via_csv(): void
+    public function test_staff_bisa_impor_produk_massal_via_excel(): void
     {
-        $csvContent = "nama_produk,sku,kategori,harga,harga_modal,jumlah_produk,deskripsi\n".
-            "Keyboard Mechanical RGB,RL-KEY-001,Aksesori,450000,350000,15,Keyboard Mechanical Switch Blue\n".
-            "Mouse Gaming Wireless,RL-MOU-002,Aksesori,250000,180000,20,Mouse Optik 16000 DPI\n";
+        $file = $this->buatFileExcel(
+            ['nama_produk', 'sku', 'kategori', 'harga', 'harga_modal', 'jumlah_produk', 'deskripsi'],
+            [
+                ['Keyboard Mechanical RGB', 'RL-KEY-001', 'Aksesori', 450000, 380000, 15, 'Switch blue'],
+                ['Mouse Gaming Wireless', 'RL-MOU-002', 'Aksesori', 250000, 200000, 20, '16000 DPI'],
+            ],
+        );
 
-        $file = UploadedFile::fake()->createWithContent('produk.csv', $csvContent);
-
-        $response = $this->actingAs($this->staff)->post(route('produk.import'), [
-            'file_csv' => $file,
-        ]);
+        $response = $this->actingAs($this->staff)->post(route('produk.import'), ['file_excel' => $file]);
 
         $response->assertRedirect(route('produk.index'));
         $response->assertSessionHas('success');
 
-        $this->assertDatabaseHas('produk', [
-            'nama_produk' => 'Keyboard Mechanical RGB',
-            'sku' => 'RL-KEY-001',
-            'harga' => 450000,
-            'jumlah_produk' => 15,
-        ]);
+        $this->assertDatabaseHas('produk', ['nama_produk' => 'Keyboard Mechanical RGB', 'sku' => 'RL-KEY-001', 'harga' => 450000, 'jumlah_produk' => 15]);
+        $this->assertDatabaseHas('produk', ['nama_produk' => 'Mouse Gaming Wireless', 'sku' => 'RL-MOU-002', 'harga' => 250000, 'jumlah_produk' => 20]);
+        $this->assertDatabaseHas('kategori_produk', ['nama_kategori' => 'Aksesori']);
+    }
+
+    public function test_impor_excel_toleran_header_alias_dan_format_rupiah(): void
+    {
+        $file = $this->buatFileExcel(
+            ['Barang', 'Kode Barang', 'Jenis', 'Harga Jual', 'HPP', 'QTY', 'Keterangan'],
+            [['Headset Gaming 7.1', 'HS-009', 'Audio', 'Rp 350.000', 'Rp 250.000', 12, 'Surround Sound']],
+        );
+
+        $this->actingAs($this->staff)->post(route('produk.import'), ['file_excel' => $file])
+            ->assertRedirect(route('produk.index'))
+            ->assertSessionHas('success');
 
         $this->assertDatabaseHas('produk', [
-            'nama_produk' => 'Mouse Gaming Wireless',
-            'sku' => 'RL-MOU-002',
-            'harga' => 250000,
-            'jumlah_produk' => 20,
-        ]);
-
-        $this->assertDatabaseHas('kategori_produk', [
-            'nama_kategori' => 'Aksesori',
+            'nama_produk' => 'Headset Gaming 7.1', 'sku' => 'HS-009',
+            'harga' => 350000, 'harga_modal' => 250000, 'jumlah_produk' => 12,
         ]);
     }
 
-    public function test_impor_csv_dengan_format_header_berbeda_dan_pemisah_titik_koma(): void
+    public function test_impor_excel_memperbarui_produk_dengan_sku_sama(): void
     {
-        $csvContent = "Barang;Kode Barang;Jenis;Harga Jual;HPP;QTY;Keterangan\n".
-            "Headset Gaming 7.1;HS-009;Audio;Rp 350.000;Rp 250.000;12;Surround Sound\n";
+        Produk::create(['nama_produk' => 'SSD Lama', 'sku' => 'RL-SSD-01', 'harga' => 500000, 'jumlah_produk' => 5, 'show_katalog' => true]);
 
-        $file = UploadedFile::fake()->createWithContent('supplier.csv', $csvContent);
+        $file = $this->buatFileExcel(
+            ['nama_produk', 'sku', 'kategori', 'harga', 'harga_modal', 'jumlah_produk', 'deskripsi'],
+            [['SSD Samsung 980 500GB', 'RL-SSD-01', '', 850000, 700000, 9, '']],
+        );
 
-        $response = $this->actingAs($this->staff)->post(route('produk.import'), [
-            'file_csv' => $file,
-        ]);
+        $this->actingAs($this->staff)->post(route('produk.import'), ['file_excel' => $file])
+            ->assertSessionHas('success');
 
-        $response->assertRedirect(route('produk.index'));
-        $response->assertSessionHas('success');
+        $this->assertDatabaseCount('produk', 1);
+        $this->assertDatabaseHas('produk', ['sku' => 'RL-SSD-01', 'nama_produk' => 'SSD Samsung 980 500GB', 'harga' => 850000, 'jumlah_produk' => 9]);
+    }
 
-        $this->assertDatabaseHas('produk', [
-            'nama_produk' => 'Headset Gaming 7.1',
-            'sku' => 'HS-009',
-            'harga' => 350000,
-            'harga_modal' => 250000,
-            'jumlah_produk' => 12,
-        ]);
+    public function test_impor_excel_dibatalkan_seluruhnya_bila_ada_baris_bermasalah(): void
+    {
+        $file = $this->buatFileExcel(
+            ['nama_produk', 'sku', 'kategori', 'harga', 'harga_modal', 'jumlah_produk', 'deskripsi'],
+            [
+                ['Produk Valid', 'RL-OK-01', '', 100000, 90000, 5, ''],
+                ['', 'RL-NO-NAME', '', 50000, 40000, 2, 'tanpa nama'],
+            ],
+        );
+
+        $response = $this->actingAs($this->staff)->post(route('produk.import'), ['file_excel' => $file]);
+
+        $response->assertSessionHasErrors('file_excel');
+        $response->assertSessionHas('import_baris_gagal');
+        $this->assertDatabaseCount('produk', 0);
+    }
+
+    public function test_impor_menolak_file_csv_karena_sudah_diganti_excel(): void
+    {
+        $csv = UploadedFile::fake()->createWithContent('produk.csv', "nama_produk,sku\nTes,SKU-1\n");
+
+        $this->actingAs($this->staff)->post(route('produk.import'), ['file_excel' => $csv])
+            ->assertSessionHasErrors('file_excel');
+
+        $this->assertDatabaseCount('produk', 0);
+    }
+
+    private function buatFileExcel(array $header, array $rows): UploadedFile
+    {
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->fromArray($header, null, 'A1');
+        if ($rows !== []) {
+            $sheet->fromArray($rows, null, 'A2');
+        }
+
+        $path = tempnam(sys_get_temp_dir(), 'uji-produk') . '.xlsx';
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save($path);
+
+        return new UploadedFile($path, 'produk.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
     }
 }
