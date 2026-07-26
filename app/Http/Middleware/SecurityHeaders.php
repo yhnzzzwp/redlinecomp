@@ -71,7 +71,9 @@ class SecurityHeaders
             'connect-src '.implode(' ', $connect),
             "img-src 'self' data:",
             "font-src 'self' data:",
-            "worker-src 'self'", // service worker PWA POS (public/sw.js)
+            // Service worker PWA POS hanya milik portal internal; zona publik
+            // tidak memakai worker sama sekali — kunci dengan 'none'.
+            "worker-src ".($portal === \App\Support\Portal::Publik ? "'none'" : "'self'"),
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",

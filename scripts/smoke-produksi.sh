@@ -51,6 +51,7 @@ echo "== PORTAL KARYAWAN ($SCHEME://$STAFF$PORT) =="
 cek "/login karyawan 200"         '^200$' "$(ambil_status "$SCHEME://$STAFF$PORT/login")"
 cek "manifest PWA 200"            '^200$' "$(ambil_status "$SCHEME://$STAFF$PORT/manifest.webmanifest")"
 cek "service worker 200"          '^200$' "$(ambil_status "$SCHEME://$STAFF$PORT/sw.js")"
+cek "sw.js MIME javascript"       'javascript' "$(ambil_header "$SCHEME://$STAFF$PORT/sw.js" | grep -i '^content-type' || echo 'TIDAK-ADA')"
 
 if [ "$SCHEME" = "https" ]; then
     echo "== KHUSUS PRODUKSI (HTTPS) =="

@@ -109,31 +109,48 @@ final class PwaTest extends TestCase
         foreach (['/build/', '/fonts/', '/icons/'] as $prefix) {
             $this->assertStringContainsString($prefix, $sw, "sw.js tidak meng-cache {$prefix}");
         }
-        // Jaga keputusan desain: HTML/data tidak di-cache — navigasi via jaringan.
+        // Jaga keputusan desain: HTML/data tidak di-cache (navigasi via jaringan)
+        // dan POST/checkout tidak pernah disentuh service worker.
         $this->assertStringContainsString("req.mode === 'navigate'", $sw);
+        $this->assertStringContainsString("req.method !== 'GET'", $sw, 'Guard non-GET hilang — checkout offline tidak boleh didukung');
+        // HTML hasil redirect tidak boleh masuk cache aset.
+        $this->assertStringContainsString('res.redirected', $sw);
 
-        // Halaman offline mandiri: tanpa <script>, tanpa aset eksternal.
+        // Halaman offline mandiri: tanpa script & tanpa referensi aset apa pun.
         $offline = (string) file_get_contents(public_path('offline.html'));
         $this->assertStringNotContainsString('<script', $offline);
-        $this->assertStringNotContainsString('http://', $offline);
-        $this->assertStringNotContainsString('https://', $offline);
+        $this->assertStringNotContainsString('src=', $offline);
+        $this->assertStringNotContainsString('<link', $offline);
+        $this->assertStringNotContainsString('url(', $offline);
     }
 
-    public function test_csp_internal_mengizinkan_worker_self(): void
+    public function test_csp_worker_src_per_portal(): void
     {
-        $this->usePortal('staff');
+        // Parse per-direktif (urutan direktif CSP tidak signifikan).
+        $direktif = function (string $url): array {
+            $csp = (string) $this->get($url)->headers->get('Content-Security-Policy');
 
-        $csp = (string) $this->get(route('login'))->headers->get('Content-Security-Policy');
-        $this->assertStringContainsString("worker-src 'self'", $csp);
-        $this->assertStringNotContainsString('unsafe-eval', explode('worker-src', $csp)[1] ?? '');
+            return array_map('trim', explode(';', $csp));
+        };
+
+        $this->usePortal('staff');
+        $this->assertContains("worker-src 'self'", $direktif(route('login')));
+
+        $this->usePortal('public');
+        $this->assertContains("worker-src 'none'", $direktif(route('landing')));
     }
 
     public function test_halaman_publik_tanpa_tag_pwa(): void
     {
         $this->usePortal('public');
 
-        $this->get(route('landing'))
-            ->assertOk()
-            ->assertDontSee('manifest.webmanifest');
+        // Semua halaman publik: tanpa link manifest = SW tidak pernah terdaftar
+        // di zona publik (registrasi di app.js ter-gate keberadaan link ini).
+        foreach ([route('landing'), route('about'), route('cek.servis')] as $url) {
+            $this->get($url)
+                ->assertOk()
+                ->assertDontSee('manifest.webmanifest')
+                ->assertDontSee('rel="manifest"', false);
+        }
     }
 }

@@ -1,5 +1,12 @@
 # Changelog — SIRC
 
+## [PWA Offline] — Service worker offline shell untuk POS
+### Ditambahkan
+- **Service worker** (`public/sw.js`, vanilla tanpa build step): `/build` cache-first (hash Vite, immutable), `/fonts` + `/icons` stale-while-revalidate (nama tetap — pembaruan file tetap sampai), **navigasi selalu jaringan** dengan fallback `offline.html` bermerek saat koneksi putus.
+- **Keputusan dijaga test**: HTML terautentikasi & data POS tidak pernah di-cache, non-GET tidak disentuh (**checkout offline sengaja tidak didukung** — risiko stok basi/oversell), respons redirect tidak boleh masuk cache aset.
+- Registrasi di `app.js` ter-gate link manifest (= hanya portal internal); CSP `worker-src` per portal: internal `'self'`, **publik `'none'`** (least-privilege). Kompatibel iOS ≥ 11.3.
+- Smoke +2 cek (sw.js 200 + MIME javascript — register gagal diam-diam bila MIME salah) — 16 cek lokal; 2 test baru + guard diperkuat — total 89 test.
+
 ## [UI Mobile] — Kategori POS scroll samping + drawer menu publik
 ### Diubah
 - **POS (HP):** chip filter Kategori kini satu baris yang digulir ke samping (scrollbar tersembunyi, target sentuh tetap lega) — tidak lagi wrap bertumpuk memakan layar.
@@ -37,7 +44,7 @@
 - Smoke test produksi: +3 cek (manifest 200 di portal karyawan & admin, 404 di host publik) — kini 14 cek lokal.
 - 7 test baru (manifest per portal, 404 publik, ikon ada **+ dimensi cocok deklarasi `sizes`**, tag di layout internal & login, publik bersih) — total 87 test.
 ### Catatan
-- Service worker/offline **sengaja belum dibuat** (CSP ketat; dievaluasi belakangan sesuai docs/09 §3).
+- Service worker/offline saat itu sengaja ditunda — **kini sudah dibuat**, lihat entri [PWA Offline] di atas.
 
 ## [P3 Stok] — Stok opname + riwayat mutasi stok (jejak audit barang)
 ### Ditambahkan
