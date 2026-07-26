@@ -39,6 +39,10 @@ Route::middleware('portal:public')->group(function () {
     Route::get('/catalogue/{produk}', [PublicController::class, 'detailProduk'])->name('catalogue.show');
     Route::get('/cek-servis', [PublicController::class, 'cekServis'])->middleware('throttle:10,1')->name('cek.servis');
     Route::get('/cek-nota', [PublicController::class, 'cekNota'])->middleware('throttle:10,1')->name('cek.nota');
+    Route::get('/nota/{kode}/pdf', [PublicController::class, 'notaPdf'])
+        ->middleware('throttle:10,1')
+        ->where('kode', '[A-Za-z0-9\-]{1,32}')
+        ->name('nota.pdf');
 });
 
 /*

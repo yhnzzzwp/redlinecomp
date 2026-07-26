@@ -9,8 +9,10 @@ use App\Models\KategoriProduk;
 use App\Models\Produk;
 use App\Models\Service;
 use App\Models\Transaksi;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 final class PublicController extends Controller
 {
@@ -118,5 +120,21 @@ final class PublicController extends Controller
     public function about(): View
     {
         return view('public.about');
+    }
+
+    /**
+     * Nota PDF untuk customer, diakses dengan kode nota (bukan id) —
+     * setara akses struk fisik yang memuat kode yang sama. PDF tidak
+     * memuat data sensitif (tanpa nomor HP); route dibatasi throttle.
+     */
+    public function notaPdf(string $kode): Response
+    {
+        $transaksi = Transaksi::query()
+            ->with(['items', 'promo', 'pegawai'])
+            ->where('kode_nota', $kode)
+            ->firstOrFail();
+
+        return Pdf::loadView('pdf.nota', ['t' => $transaksi])
+            ->stream("nota-{$transaksi->kode_nota}.pdf");
     }
 }

@@ -80,4 +80,35 @@ final class PublicZoneTest extends TestCase
     {
         $this->get(route('about'))->assertOk()->assertSee('Tentang Kami');
     }
+
+    public function test_nota_pdf_publik_bisa_diunduh_dengan_kode(): void
+    {
+        $pegawai = \App\Models\Pegawai::create([
+            'nama_pegawai' => 'Test', 'username' => 'test3', 'email' => 'test3@uji.test', 'password' => 'pass', 'role' => 'Karyawan', 'masih_bekerja' => true,
+        ]);
+        Transaksi::create([
+            'kode_nota' => 'INV-777', 'pegawai_id' => $pegawai->id, 'subtotal' => 100, 'total' => 100, 'bayar' => 100, 'kembalian' => 0,
+        ]);
+
+        $this->get(route('nota.pdf', ['kode' => 'INV-777']))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf');
+
+        $this->get(route('nota.pdf', ['kode' => 'TIDAK-ADA']))->assertNotFound();
+    }
+
+    public function test_halaman_cek_nota_menautkan_pdf_publik_bukan_route_internal(): void
+    {
+        $pegawai = \App\Models\Pegawai::create([
+            'nama_pegawai' => 'Test', 'username' => 'test4', 'email' => 'test4@uji.test', 'password' => 'pass', 'role' => 'Karyawan', 'masih_bekerja' => true,
+        ]);
+        $transaksi = Transaksi::create([
+            'kode_nota' => 'INV-778', 'pegawai_id' => $pegawai->id, 'subtotal' => 100, 'total' => 100, 'bayar' => 100, 'kembalian' => 0,
+        ]);
+
+        $this->get(route('cek.nota', ['nota' => 'INV-778']))
+            ->assertOk()
+            ->assertSee(route('nota.pdf', ['kode' => 'INV-778']), false)
+            ->assertDontSee(route('pos.nota', $transaksi), false);
+    }
 }

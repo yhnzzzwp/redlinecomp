@@ -105,7 +105,7 @@
             </div>
             
             <div class="text-center mt-3">
-                <a href="{{ route('pos.nota', $transaksi) }}" target="_blank" class="btn-ghost">Unduh PDF Nota</a>
+                <a href="{{ route('nota.pdf', ['kode' => $transaksi->kode_nota]) }}" target="_blank" rel="noopener" class="btn-ghost">Unduh PDF Nota</a>
             </div>
         @endif
     </div>
