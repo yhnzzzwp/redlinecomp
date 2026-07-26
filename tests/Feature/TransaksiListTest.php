@@ -18,6 +18,7 @@ final class TransaksiListTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->usePortal('staff');
         $this->karyawan = Pegawai::create([
             'nama_pegawai' => 'Karyawan', 'username' => 'kar', 'email' => 'kar@uji.test',
             'password' => Hash::make('password'), 'role' => 'Karyawan', 'masih_bekerja' => true,

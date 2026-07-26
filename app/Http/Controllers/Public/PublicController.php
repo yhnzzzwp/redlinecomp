@@ -14,6 +14,18 @@ use Illuminate\Http\Request;
 
 final class PublicController extends Controller
 {
+    public function landing(): View
+    {
+        return view('public.landing', [
+            'unggulan' => Produk::query()
+                ->where('show_katalog', true)
+                ->with('kategori')
+                ->latest()
+                ->limit(10)
+                ->get(),
+        ]);
+    }
+
     public function catalogue(Request $request): View
     {
         $query = Produk::query()->where('show_katalog', true)->with('kategori')->latest();

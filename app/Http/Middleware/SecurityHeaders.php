@@ -23,7 +23,13 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('X-XSS-Protection', '0');
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
         $response->headers->set('Content-Security-Policy', $this->contentSecurityPolicy());
+
+        // Subdomain portal (admin/karyawan) tidak boleh diindeks mesin pencari.
+        if (\App\Support\Portal::fromRequest($request) !== \App\Support\Portal::Publik) {
+            $response->headers->set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+        }
 
         // HSTS hanya relevan (dan hanya dihormati browser) di atas HTTPS.
         if ($request->isSecure()) {

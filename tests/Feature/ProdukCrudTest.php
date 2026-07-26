@@ -21,6 +21,7 @@ final class ProdukCrudTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->usePortal('staff');
         $this->staff = Pegawai::create([
             'nama_pegawai' => 'Staff Uji', 'username' => 'staff', 'email' => 'staff@uji.test',
             'password' => Hash::make('password'), 'role' => 'Karyawan', 'masih_bekerja' => true,

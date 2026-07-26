@@ -21,6 +21,7 @@ final class ServiceTicketTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->usePortal('staff');
         $this->staff = Pegawai::create([
             'nama_pegawai' => 'Teknisi Uji', 'username' => 'teknisi', 'email' => 'teknisi@uji.test',
             'password' => Hash::make('password'), 'role' => 'Karyawan', 'masih_bekerja' => true,

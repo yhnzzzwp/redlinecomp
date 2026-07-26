@@ -20,13 +20,29 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
+        // Tolak Host header di luar tiga host portal (anti host-header injection;
+        // pembentukan URL absolut — reset link, redirect — tak bisa diracuni).
+        $middleware->trustHosts(at: fn (): array => [
+            preg_quote((string) config('redline.hosts.public'), '#'),
+            preg_quote((string) config('redline.hosts.staff'), '#'),
+            preg_quote((string) config('redline.hosts.admin'), '#'),
+        ], subdomains: false);
+
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,
         ]);
 
         $middleware->alias([
             'owner' => \App\Http\Middleware\EnsureOwner::class,
+            'portal' => \App\Http\Middleware\EnsurePortal::class,
         ]);
+
+        // Cek host portal harus berjalan SEBELUM auth: rute internal yang
+        // diakses dari host publik mesti 404 (tersembunyi), bukan redirect login.
+        $middleware->prependToPriorityList(
+            \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+            \App\Http\Middleware\EnsurePortal::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

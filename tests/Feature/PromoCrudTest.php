@@ -22,6 +22,7 @@ final class PromoCrudTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->usePortal('admin');
         $this->owner = Pegawai::create([
             'nama_pegawai' => 'Owner', 'username' => 'owner', 'email' => 'owner@uji.test',
             'password' => Hash::make('password'), 'role' => 'Owner', 'masih_bekerja' => true,
@@ -51,6 +52,7 @@ final class PromoCrudTest extends TestCase
 
     public function test_karyawan_tidak_boleh_akses_promo(): void
     {
+        $this->usePortal('staff');
         $this->actingAs($this->karyawan)->get(route('promo.index'))->assertForbidden();
         $this->actingAs($this->karyawan)->post(route('promo.store'), $this->payload())->assertForbidden();
         $this->assertDatabaseCount('promo', 0);
