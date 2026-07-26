@@ -10,10 +10,17 @@ docker compose exec app php artisan migrate --seed
 ```
 | Layanan | URL |
 |---------|-----|
-| Aplikasi | http://localhost:8080 |
+| Situs publik (customer) | http://localhost:8080 |
+| **Portal Karyawan** (login karyawan) | http://karyawan.localhost:8080 |
+| **Admin Console** (login owner) | http://admin.localhost:8080 |
 | Adminer (GUI DB) | http://localhost:8081 |
 | phpMyAdmin (GUI DB ala XAMPP) | http://localhost:8082 |
 | MySQL (host) | 127.0.0.1:3307 |
+
+> `*.localhost` otomatis mengarah ke `127.0.0.1` di browser modern (Chrome/Edge/Firefox).
+> Bila browser/OS lawas menolak, tambahkan ke `/etc/hosts`:
+> `127.0.0.1 admin.localhost karyawan.localhost`.
+> Login **tidak tersedia** di host publik — halaman `/login` sengaja 404 di sana.
 
 Build asset (Bootstrap 5 + Alpine via Vite):
 ```bash

@@ -1,5 +1,19 @@
 # Changelog — SIRC
 
+## [Portal & Redesign] — Pemisahan subdomain + design system v2
+### Ditambahkan
+- **Arsitektur tiga portal per subdomain**: publik (`localhost`), karyawan (`karyawan.localhost`), admin (`admin.localhost`) — config `redline.hosts`, enum `App\Support\Portal`, middleware `EnsurePortal` (prioritas sebelum `Authenticate`).
+- Login per portal: role wajib cocok (Owner ↔ admin, Karyawan ↔ karyawan), pesan galat generik, rate-limit per portal+username+IP, log login gagal.
+- Zona internal tersembunyi dari host publik (404); halaman publik di host portal dialihkan ke login; sesi terisolasi per host (cookie host-only).
+- Keamanan: `TrustHosts` (produksi), `X-Robots-Tag: noindex` + `robots.txt` dinamis di host portal, `Cross-Origin-Opener-Policy`, font self-hosted (CSP `font-src 'self'` tanpa CDN).
+- **Design system v2 "Instrument Panel"** (`resources/css/app.css` ditulis ulang): tipografi Barlow + Barlow Condensed + IBM Plex Mono (self-host, subset latin), motif tick tachometer & stripe livery, zona publik gelap carbon, portal kerja terang, identitas sidebar per portal (admin = carbon, karyawan = terang) + chip portal.
+- Redesign seluruh view publik (landing hero baru + stat readout, katalog, detail, cek servis/nota, about, 404, soon), login split-panel sadar-portal, sidebar/topbar, aksen mono untuk SKU/resi/nota di view internal.
+- Test baru `PortalSeparationTest` (6 skenario lintas portal); total 57 test lulus, Larastan 0 error.
+### Diperbaiki
+- Reveal-on-scroll: elemen yang terlewat scroll cepat kini tetap muncul (rootMargin atas besar).
+- View transition menggantung saat tab tersembunyi: guard `pageswap`/`pagereveal` + watchdog `skipTransition`.
+- Glyph unduh `⭳` (tofu di font baru) diganti ikon SVG.
+
 ## [Unreleased]
 ### Ditambahkan
 - Setup proyek Laravel 13 + Docker stack (PHP-FPM, Nginx, MySQL 8, Adminer).

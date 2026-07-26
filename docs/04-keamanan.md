@@ -9,15 +9,23 @@ Pertahanan berlapis. Target: tidak bisa ditembus dengan tools umum (SQLi, XSS, C
 | XSS | Blade `{{ }}` **auto-escape**; `{!! !!}` hanya untuk konten tepercaya | ✅ bawaan |
 | CSRF | `@csrf` di semua form POST/PUT/DELETE; token diverifikasi middleware | ✅ bawaan |
 | Password | disimpan **bcrypt** (cast `hashed`, `BCRYPT_ROUNDS=12`) | ✅ |
-| Brute-force login | **rate limit** 5 percobaan/menit per IP+username (throttle) | ⏳ task auth |
+| Brute-force login | **rate limit** 5 percobaan/menit per **portal+username+IP** + throttle route 10/menit; login gagal dicatat ke log | ✅ |
+| Pemisahan permukaan serangan | **login admin & karyawan di subdomain terpisah** (`admin.*` / `karyawan.*`); zona internal 404 dari host publik; role wajib cocok dengan portal saat login **dan** di tiap request (`EnsurePortal`) | ✅ |
+| Enumerasi akun lintas portal | login role lain di portal yang salah → pesan galat **generik** yang sama | ✅ |
 | Mass assignment | `$fillable` eksplisit di semua model (tidak ada `$guarded=[]`) | ✅ |
-| Otorisasi (role) | **enforcement di server** via middleware `EnsureOwner` + Policy, bukan sekadar sembunyikan menu (§3.5) | ⏳ task auth |
-| IDOR | route-model binding + Policy cek kepemilikan/role | ⏳ |
-| Session hijack | cookie `HttpOnly` + `SameSite=Lax` + `Secure`(prod); timeout **30 menit** (§3.5); regenerate id saat login | ✅/⏳ |
-| Clickjacking | header `X-Frame-Options: SAMEORIGIN` | ✅ nginx + middleware |
+| Otorisasi (role) | **enforcement di server**: `EnsurePortal` (portal ↔ role) + `EnsureOwner` (fitur owner), bukan sekadar sembunyikan menu (§3.5) | ✅ |
+| IDOR | route-model binding + pemisahan portal per role | ✅ |
+| Session hijack | cookie `HttpOnly` + `SameSite=Lax` + `Secure`(prod) + **host-only** (`SESSION_DOMAIN=null`) → sesi antar subdomain terisolasi; timeout **30 menit** (§3.5); regenerate id saat login | ✅ |
+| Host-header injection | `TrustHosts` — hanya tiga host portal yang diterima (aktif otomatis di non-local) | ✅ |
+| Clickjacking | header `X-Frame-Options: SAMEORIGIN` + CSP `frame-ancestors` | ✅ |
 | MIME sniffing | `X-Content-Type-Options: nosniff` | ✅ |
+| Pengindeksan portal | `X-Robots-Tag: noindex` + `robots.txt` dinamis (`Disallow: /` di host portal) + `<meta name="robots">` di login | ✅ |
+| Supply-chain font/CDN | font **self-host** di `public/fonts` — tanpa CDN pihak ketiga, CSP `font-src 'self'` | ✅ |
 | Info leak | `APP_DEBUG=false` + `expose_php=Off` di produksi; file `.env/.sql/.log` diblok nginx | ✅ |
 | Upload berbahaya | validasi mime & ukuran di Form Request; simpan di luar webroot | ⏳ saat fitur upload |
+
+Header tambahan: `Content-Security-Policy` (nonce Vite), `Referrer-Policy`,
+`Permissions-Policy`, `Cross-Origin-Opener-Policy: same-origin`, HSTS (saat HTTPS).
 
 ## Tools audit yang dijalankan
 ```bash

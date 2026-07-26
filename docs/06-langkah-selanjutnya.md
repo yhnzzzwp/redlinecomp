@@ -10,12 +10,16 @@ Panduan meneruskan proyek SIRC sampai selesai & siap deploy.
 | Manajemen Produk (CRUD) | ✅ |
 | Manajemen Servis + riwayat | ✅ |
 | Manajemen Promo (Owner) | ✅ |
-| Akun Pegawai (Owner) | ⏳ |
-| Laporan Penjualan / Analytics (Owner) | ⏳ |
-| Daftar Transaksi | ⏳ |
-| Publik: Katalog, Detail, Cek Servis, Cek Nota, About, 404 | ⏳ |
+| Akun Pegawai (Owner) | ✅ |
+| Laporan Penjualan / Analytics (Owner) | ✅ |
+| Daftar Transaksi | ✅ |
+| Publik: Katalog, Detail, Cek Servis, Cek Nota, About, 404 | ✅ |
+| Portal subdomain (publik / karyawan / admin) + isolasi sesi | ✅ |
+| Design system v2 "Instrument Panel" (semua UI dirombak) | ✅ |
 
-Kualitas: 21 feature test lulus, Larastan level 5 = 0 error.
+Kualitas: 57 feature test lulus, Larastan level 5 = 0 error, `composer audit` & `npm audit` bersih.
+
+Akses lokal: publik `http://localhost:8080` · karyawan `http://karyawan.localhost:8080` · admin `http://admin.localhost:8080`.
 
 ## B. Alur kerja harian (WAJIB dikuasai)
 ```bash
@@ -72,6 +76,9 @@ dan `service` (nama/nomor HP customer), sesuai ERD.
 
 ## D. Sebelum deploy (checklist keamanan & produksi)
 - [ ] `.env` produksi: `APP_ENV=production`, `APP_DEBUG=false`, `APP_KEY` baru & rahasia.
+- [ ] DNS: buat record `admin.<domain>` & `karyawan.<domain>` → server yang sama; isi `REDLINE_PUBLIC_HOST`, `REDLINE_STAFF_HOST`, `REDLINE_ADMIN_HOST` (TrustHosts aktif otomatis di production).
+- [ ] Sertifikat TLS mencakup subdomain (wildcard `*.<domain>` atau SAN per host).
+- [ ] `server_name` nginx diisi eksplisit tiga host (lihat komentar `docker/nginx/default.conf`).
 - [ ] Password DB kuat (ganti `redline_secret` / `root_secret`).
 - [ ] HTTPS aktif → set `SESSION_SECURE_COOKIE=true`.
 - [ ] `docker compose exec app php artisan config:cache route:cache view:cache`.
