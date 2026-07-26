@@ -83,7 +83,7 @@
                                 @endif
                                 <div>
                                     <div class="fw-semibold rl-text-sm">{{ $p->nama_produk }}</div>
-                                    <div class="rl-text-muted rl-text-xs font-monospace">SKU: {{ $p->sku ?? '—' }}</div>
+                                    <div class="rl-text-muted rl-text-xs rl-mono">SKU: {{ $p->sku ?? '—' }}</div>
                                 </div>
                             </div>
                         </td>

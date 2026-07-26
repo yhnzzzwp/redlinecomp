@@ -1,14 +1,16 @@
 @props(['active' => '', 'title' => null])
+@php $portal = \App\Support\Portal::fromRequest(request()); @endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ? $title.' · ' : '' }}Redline Komputer</title>
+    <meta name="robots" content="noindex, nofollow">
+    <title>{{ $title ? $title.' · ' : '' }}{{ $portal->label() }} · Redline Komputer</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body x-data="{ mobileNav: false }">
+<body x-data="{ mobileNav: false }" class="portal-{{ $portal->value }}">
     <div class="rl-drawer-overlay" :class="mobileNav ? 'open' : ''" @click="mobileNav = false"></div>
     <div class="rl-app">
         <div class="rl-side-wrapper" :class="mobileNav ? 'open' : ''">

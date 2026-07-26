@@ -4,8 +4,10 @@
     @endphp
 
     <div class="rl-public-header">
+        <div class="rl-kicker mb-2">Spec-sheet <b>lengkap</b></div>
         <h1 class="rl-page-title">Katalog Produk</h1>
         <p class="rl-page-desc">Jelajahi koleksi hardware dan periferal premium kami. Temukan komponen terbaik untuk kebutuhan PC Anda.</p>
+        <div class="rl-ticks rl-ticks--dark"></div>
     </div>
 
     <div class="rl-body rl-container-lg">
@@ -57,17 +59,11 @@
                     @forelse ($produk as $p)
                         <div class="col-md-6 col-xl-4" data-reveal style="--reveal-d: {{ ($loop->index % 3) * 80 }}ms">
                             <div class="rl-card h-100 overflow-hidden d-flex flex-column">
-                                <div class="rl-catalogue-img-wrap">
-                                    @if ($p->foto_produk)
-                                        <img src="{{ Storage::url($p->foto_produk) }}" alt="{{ $p->nama_produk }}" class="rl-catalogue-img">
-                                    @else
-                                        <x-ui.hardware-thumb :kategori="$p->kategori?->nama_kategori" />
-                                    @endif
-                                </div>
                                 <div class="p-3 d-flex flex-column flex-fill">
-                                    <div class="rl-text-caption mb-1">{{ $p->kategori?->nama_kategori ?? 'Umum' }} &middot; {{ $p->sku }}</div>
+                                    <div class="rl-text-caption mb-1">{{ $p->kategori?->nama_kategori ?? 'Umum' }} &middot; <span class="rl-mono">{{ $p->sku }}</span></div>
                                     <h3 class="rl-catalogue-title mb-2"><a href="{{ route('catalogue.show', $p) }}" class="text-decoration-none text-dark">{{ $p->nama_produk }}</a></h3>
-                                    
+                                    <p class="rl-text-sm rl-text-muted mb-0">{{ Str::limit($p->deskripsi_produk, 90) ?: 'Belum ada deskripsi untuk produk ini.' }}</p>
+
                                     <div class="mt-auto pt-3">
                                         <div class="rl-text-total mb-2">{{ $rp($p->harga) }}</div>
                                         <div class="d-flex align-items-center justify-content-between">

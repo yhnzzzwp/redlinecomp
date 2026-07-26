@@ -4,8 +4,10 @@
     @endphp
 
     <div class="rl-public-header">
+        <div class="rl-kicker mb-2">Bukti <b>transaksi</b></div>
         <h1 class="rl-page-title">Cek Nota Transaksi</h1>
         <p class="rl-page-desc">Verifikasi detail pembelian Anda di Redline Komputer.</p>
+        <div class="rl-ticks rl-ticks--dark"></div>
     </div>
 
     <div class="rl-body rl-container-700 my-5 pb-5">

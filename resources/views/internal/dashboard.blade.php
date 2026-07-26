@@ -9,13 +9,16 @@
             <p class="rl-page-desc mb-0">Metrik kinerja real-time Redline Komputer.</p>
         </div>
         @if (auth()->user()?->isOwner())
-            <a href="{{ route('analytics.cetak') }}" target="_blank" class="btn-redline text-decoration-none">⭳ Ekspor Laporan</a>
+            <a href="{{ route('analytics.cetak') }}" target="_blank" class="btn-redline text-decoration-none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rl-icon-16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+                Ekspor Laporan
+            </a>
         @endif
     </div>
 
     {{-- KPI bento --}}
     <div class="row g-3">
-        <div class="col-6 col-lg-3" data-reveal>
+        <div class="col-6 col-lg-3">
             <div class="rl-card rl-kpi h-100">
                 <div class="rl-kpi__ico mb-3 bg-danger bg-opacity-10 text-danger">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
@@ -25,7 +28,7 @@
                 <div class="rl-text-xs text-muted mt-1">Omzet bersih terakumulasi</div>
             </div>
         </div>
-        <div class="col-6 col-lg-3" data-reveal>
+        <div class="col-6 col-lg-3">
             <div class="rl-card rl-kpi h-100">
                 <div class="rl-kpi__ico mb-3 bg-success bg-opacity-10 text-success">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
@@ -35,7 +38,7 @@
                 <div class="rl-text-xs text-muted mt-1">{{ $todayCount }} transaksi hari ini</div>
             </div>
         </div>
-        <div class="col-6 col-lg-3" data-reveal>
+        <div class="col-6 col-lg-3">
             <div class="rl-card rl-kpi h-100">
                 <div class="rl-kpi__ico mb-3 bg-primary bg-opacity-10 text-primary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M14 6a4 4 0 005 5l-8 8-3-3 6-6a4 4 0 010-4z"/></svg>
@@ -45,7 +48,7 @@
                 <div class="rl-text-xs text-muted mt-1">Dalam proses perbaikan</div>
             </div>
         </div>
-        <div class="col-6 col-lg-3" data-reveal>
+        <div class="col-6 col-lg-3">
             <div class="rl-card rl-kpi h-100">
                 <div class="rl-kpi__ico mb-3 bg-warning bg-opacity-10 text-warning">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7"/></svg>
@@ -91,7 +94,7 @@
                     @forelse ($recent as $t)
                         <div class="d-flex align-items-center justify-content-between px-2 py-2 border-bottom rl-divider-light">
                             <div>
-                                <div class="fw-semibold rl-text-sm">Nota #{{ $t->kode_nota }}</div>
+                                <div class="fw-semibold rl-text-sm rl-mono">#{{ $t->kode_nota }}</div>
                                 <div class="rl-text-muted rl-text-xs">{{ $t->nama_pembeli ?? 'Umum' }} &middot; {{ $t->pegawai?->nama_pegawai ?? 'Kasir' }} &middot; {{ $t->created_at?->format('d M H:i') }}</div>
                             </div>
                             <div class="text-end">
@@ -128,7 +131,7 @@
                         @endif
                         <div class="flex-fill">
                             <div class="fw-semibold rl-text-sm text-truncate" style="max-width: 150px;">{{ $p->nama_produk }}</div>
-                            <div class="rl-text-muted rl-text-xs">{{ $p->sku ?? '—' }}</div>
+                            <div class="rl-text-muted rl-text-xs rl-mono">{{ $p->sku ?? '—' }}</div>
                         </div>
                         <div class="text-end">
                             <div class="fw-bold text-danger rl-text-sm tnum">{{ $p->jumlah_produk }} Tersisa</div>

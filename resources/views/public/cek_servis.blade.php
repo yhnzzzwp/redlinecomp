@@ -4,8 +4,10 @@
     @endphp
 
     <div class="rl-public-header">
+        <div class="rl-kicker mb-2">Pit stop <b>servis</b></div>
         <h1 class="rl-page-title">Lacak Status Servis</h1>
         <p class="rl-page-desc">Pantau perkembangan perbaikan perangkat Anda secara real-time.</p>
+        <div class="rl-ticks rl-ticks--dark"></div>
     </div>
 
     <div class="rl-body rl-container-700 my-5 pb-5">

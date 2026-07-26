@@ -32,7 +32,7 @@
             <tbody>
                 @forelse ($service as $s)
                     <tr>
-                        <td><b class="tnum rl-text-sm">{{ $s->nomor_resi }}</b></td>
+                        <td><b class="rl-mono rl-text-sm">{{ $s->nomor_resi }}</b></td>
                         <td>
                             <div class="fw-semibold rl-text-sm">{{ $s->nama_customer }}</div>
                             <div class="rl-text-muted rl-text-xs">{{ $s->nama_barang }}</div>

@@ -11,7 +11,7 @@
             <div>
                 <h1 class="rl-page-title mb-1">{{ $service->nama_barang }}</h1>
                 <p class="rl-page-desc mb-0">
-                    <b class="tnum text-danger">{{ $service->nomor_resi }}</b>
+                    <b class="rl-mono text-danger">{{ $service->nomor_resi }}</b>
                     &middot; {{ $service->nama_customer }} @if ($service->nomor_hp_customer) &middot; {{ $service->nomor_hp_customer }} @endif
                 </p>
             </div>

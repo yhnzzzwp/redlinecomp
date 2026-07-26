@@ -1,6 +1,7 @@
 @props(['active' => ''])
 @php
     $user = auth()->user();
+    $portal = \App\Support\Portal::fromRequest(request());
     $nav = [
         ['dashboard', 'Dashboard', route('dashboard'), false, 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z'],
         ['pos', 'POS', route('pos'), false, 'M3 4h18v12H3zM3 20h18'],
@@ -14,14 +15,17 @@
 @endphp
 <aside class="rl-side" role="navigation">
     <div class="rl-side__brand">
-        <span class="rl-logo fs-5">REDL<i>INE</i></span><span class="rl-stripe"></span>
+        <span class="rl-logo">REDL<i>INE</i></span><span class="rl-stripe"></span>
     </div>
+    <div class="rl-ticks {{ $portal === \App\Support\Portal::Admin ? 'rl-ticks--dark' : '' }}"></div>
+    <div class="rl-portal-chip">{{ $portal === \App\Support\Portal::Admin ? 'Admin Console' : 'Portal Karyawan' }}</div>
 
     @foreach ($nav as [$key, $label, $url, $ownerOnly, $path])
         @if (! $ownerOnly || ($user && $user->isOwner()))
             <a href="{{ $url }}" @click="mobileNav = false" class="rl-nav-item {{ $active === $key ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $path }}"/></svg>
                 <span>{{ $label }}</span>
+                @if ($ownerOnly)<span class="rl-nav-owner">Owner</span>@endif
             </a>
         @endif
     @endforeach

@@ -8,17 +8,7 @@
         <a href="{{ route('catalogue') }}" class="rl-back-link mb-4">&larr; Kembali ke Katalog</a>
 
         <div class="row g-4 mb-5">
-            <div class="col-md-6" data-reveal>
-                <div class="rl-card rl-detail-media overflow-hidden rl-catalogue-img-lg">
-                    @if ($produk->foto_produk)
-                        <img src="{{ Storage::url($produk->foto_produk) }}" alt="{{ $produk->nama_produk }}" class="rl-catalogue-img">
-                    @else
-                        <x-ui.hardware-thumb :kategori="$produk->kategori?->nama_kategori" />
-                    @endif
-                </div>
-            </div>
-
-            <div class="col-md-6" data-reveal style="--reveal-d: 120ms">
+            <div class="col-md-8 mx-auto" data-reveal style="--reveal-d: 120ms">
                 <div class="d-flex flex-column h-100">
                     <div class="rl-text-caption mb-2">
                         {{ $produk->kategori?->nama_kategori ?? 'Umum' }} &middot; SKU: <span class="tnum">{{ $produk->sku ?? '—' }}</span>
@@ -91,15 +81,9 @@
                     @foreach ($lainnya as $p)
                         <div class="rl-carousel-item">
                             <a href="{{ route('catalogue.show', $p) }}" class="rl-card h-100 overflow-hidden d-block text-decoration-none text-dark">
-                                <div class="rl-catalogue-img-sm">
-                                    @if ($p->foto_produk)
-                                        <img src="{{ Storage::url($p->foto_produk) }}" alt="{{ $p->nama_produk }}" class="rl-catalogue-img">
-                                    @else
-                                        <x-ui.hardware-thumb :kategori="$p->kategori?->nama_kategori" />
-                                    @endif
-                                </div>
                                 <div class="p-3">
                                     <div class="fw-semibold text-truncate mb-1 rl-text-sm">{{ $p->nama_produk }}</div>
+                                    <p class="rl-text-sm rl-text-muted text-truncate mb-2">{{ $p->deskripsi_produk ?: 'Belum ada deskripsi untuk produk ini.' }}</p>
                                     <div class="fw-bold rl-text-total">{{ $rp($p->harga) }}</div>
                                 </div>
                             </a>
