@@ -1,5 +1,16 @@
 # Changelog — SIRC
 
+## [P2 Persiapan Go-Live] — Backup, deploy, CSP ketat, aksesibilitas
+### Ditambahkan
+- **Backup harian** `scripts/backup-db.sh` (mysqldump single-transaction, validasi isi, retensi otomatis 30 hari — SRS §3.5) + `scripts/restore-db.sh` (dengan konfirmasi untuk DB utama). **Restore teruji**: dipulihkan ke DB uji, jumlah baris seluruh tabel identik.
+- **`scripts/smoke-produksi.sh`** — verifikasi otomatis pasca-deploy: perilaku tiga portal, noindex, robots, CSP, HSTS, cookie Secure/HttpOnly, penolakan Host asing.
+- **`docs/08-deploy-produksi.md`** — prosedur lengkap: DNS tiga record, Caddy/certbot TLS, .env produksi, cache, firewall, cron backup, update rutin, pemulihan bencana.
+- Test regresi CSP per portal di `PortalSeparationTest`.
+### Diubah
+- **CSP zona publik kini TANPA `unsafe-eval`** — interaksi publik (menu, filter katalog) ditulis ulang ke vanilla JS; portal internal (di balik login + noindex) tetap memakai Alpine.
+- Kebijakan password pegawai: minimal 8 karakter **wajib huruf + angka**.
+- Aksesibilitas: tautan "Lewati ke konten utama" di kedua layout, stepper servis diberi `role="list"` + `aria-current="step"`.
+
 ## [P1 Kualitas Inti] — Roadmap P1 laporan evaluasi
 ### Ditambahkan
 - `App\Support\Uang::rupiah()` — format mata uang terpusat; 9 view kini delegasi ke satu sumber (fungsi global `rl_rp()` yang rawan redeclare dihapus).

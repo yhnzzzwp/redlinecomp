@@ -39,16 +39,17 @@
         <div class="row g-4">
             {{-- Filter (dilipat di layar kecil) --}}
             <div class="col-lg-3">
-                <div class="rl-card p-4 rl-filter-sticky" x-data="{ open: false }">
-                    <button type="button" class="btn-ghost rl-filter-toggle" @click="open = !open" :aria-expanded="open">
+                <div class="rl-card p-4 rl-filter-sticky">
+                    <button type="button" class="btn-ghost rl-filter-toggle" data-filter-toggle
+                            aria-controls="filter-katalog" aria-expanded="false">
                         <span class="d-inline-flex align-items-center gap-2">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
                             Filter Produk
                         </span>
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" :style="open ? 'transform:rotate(180deg)' : ''"><path d="M6 9l6 6 6-6"/></svg>
+                        <svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
                     </button>
                     <h3 class="rl-section-title d-none d-lg-block">Filter Produk</h3>
-                    <div class="rl-filter-body" :class="open ? 'open' : ''">
+                    <div id="filter-katalog" class="rl-filter-body">
                     <form method="GET" action="{{ route('landing') }}">
                         <div class="rl-form-group">
                             <label class="rl-label" for="f-cari">Cari Nama</label>

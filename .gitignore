@@ -31,3 +31,6 @@ Thumbs.db
 /redline
 *.sqlite
 *.sqlite-journal
+
+# Hasil backup database (jangan di-commit)
+/backups/

@@ -46,4 +46,31 @@ const initReveal = () => {
     els.forEach((el) => io.observe(el));
 };
 
-document.addEventListener('DOMContentLoaded', initReveal);
+// Interaksi zona publik dalam vanilla JS — zona ini berjalan di bawah CSP
+// ketat tanpa 'unsafe-eval', jadi tidak boleh bergantung pada Alpine.
+const initPublik = () => {
+    const navBtn = document.querySelector('[data-nav-toggle]');
+    const menu = document.getElementById('menu-publik');
+    if (navBtn && menu) {
+        navBtn.addEventListener('click', () => {
+            const terbuka = menu.classList.toggle('d-flex');
+            menu.classList.toggle('d-none', ! terbuka);
+            navBtn.setAttribute('aria-expanded', String(terbuka));
+        });
+    }
+
+    const filterBtn = document.querySelector('[data-filter-toggle]');
+    const filterBody = document.getElementById('filter-katalog');
+    if (filterBtn && filterBody) {
+        filterBtn.addEventListener('click', () => {
+            const terbuka = filterBody.classList.toggle('open');
+            filterBtn.classList.toggle('open', terbuka);
+            filterBtn.setAttribute('aria-expanded', String(terbuka));
+        });
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    initReveal();
+    initPublik();
+});

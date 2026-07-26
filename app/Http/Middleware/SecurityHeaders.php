@@ -24,7 +24,7 @@ class SecurityHeaders
         $response->headers->set('X-XSS-Protection', '0');
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
-        $response->headers->set('Content-Security-Policy', $this->contentSecurityPolicy());
+        $response->headers->set('Content-Security-Policy', $this->contentSecurityPolicy(\App\Support\Portal::fromRequest($request)));
 
         // Subdomain portal (admin/karyawan) tidak boleh diindeks mesin pencari.
         if (\App\Support\Portal::fromRequest($request) !== \App\Support\Portal::Publik) {
@@ -39,14 +39,19 @@ class SecurityHeaders
         return $response;
     }
 
-    private function contentSecurityPolicy(): string
+    private function contentSecurityPolicy(\App\Support\Portal $portal): string
     {
         $nonce = Vite::cspNonce();
 
-        // 'unsafe-eval' dibutuhkan Alpine.js (ekspresi x-data/@click dievaluasi
-        // lewat Function constructor). 'unsafe-inline' pada style karena Bootstrap
-        // dan sejumlah atribut style= di blade.
-        $script = ["'self'", "'nonce-{$nonce}'", "'unsafe-eval'"];
+        // Zona publik (permukaan anonim yang diindeks) berjalan TANPA
+        // 'unsafe-eval' — interaksinya vanilla JS. Portal internal (di balik
+        // login + noindex) masih memakai Alpine.js yang butuh 'unsafe-eval'
+        // (ekspresi dievaluasi lewat Function constructor). 'unsafe-inline'
+        // pada style karena Bootstrap dan sejumlah atribut style= di blade.
+        $script = ["'self'", "'nonce-{$nonce}'"];
+        if ($portal !== \App\Support\Portal::Publik) {
+            $script[] = "'unsafe-eval'";
+        }
         $style = ["'self'", "'unsafe-inline'"];
         $connect = ["'self'"];
 

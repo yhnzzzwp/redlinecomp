@@ -95,6 +95,17 @@ final class PortalSeparationTest extends TestCase
         $this->actingAs($this->karyawan)->get(route('dashboard'))->assertForbidden();
     }
 
+    public function test_csp_publik_ketat_tanpa_unsafe_eval(): void
+    {
+        $this->usePortal('public');
+        $cspPublik = (string) $this->get(route('landing'))->headers->get('Content-Security-Policy');
+        $this->assertStringNotContainsString('unsafe-eval', $cspPublik);
+
+        $this->usePortal('admin');
+        $cspAdmin = (string) $this->get(route('login'))->headers->get('Content-Security-Policy');
+        $this->assertStringContainsString('unsafe-eval', $cspAdmin);
+    }
+
     public function test_host_portal_tidak_diindeks_mesin_pencari(): void
     {
         $this->usePortal('admin');

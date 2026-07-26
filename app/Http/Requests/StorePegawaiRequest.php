@@ -23,7 +23,7 @@ class StorePegawaiRequest extends FormRequest
             'username' => ['required', 'string', 'max:50', 'alpha_dash', Rule::unique('pegawai', 'username')],
             'email' => ['required', 'email', 'max:255', Rule::unique('pegawai', 'email')],
             'role' => ['required', Rule::enum(RolePegawai::class)],
-            'password' => ['required', 'string', Password::min(8)],
+            'password' => ['required', 'string', Password::min(8)->letters()->numbers()],
             'nomor_hp' => ['nullable', 'string', 'max:20'],
             'alamat_pegawai' => ['nullable', 'string', 'max:500'],
             'tanggal_masuk' => ['nullable', 'date'],

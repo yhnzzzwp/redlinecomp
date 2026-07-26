@@ -10,8 +10,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="rl-public d-flex flex-column min-vh-100">
+    <a href="#konten" class="rl-skip-link">Lewati ke konten utama</a>
     <x-ui.public-nav :active="$active" />
-    <main class="flex-grow-1">
+    <main id="konten" class="flex-grow-1">
         {{ $slot }}
     </main>
     <x-ui.public-footer />

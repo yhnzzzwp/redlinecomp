@@ -709,8 +709,18 @@ input[type="radio"] { accent-color: var(--red); }
   .btn-redline, .btn-ghost { padding-block: 12px; }
 }
 
+/* Tautan lewati-ke-konten — tampil hanya saat fokus keyboard. */
+.rl-skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 2000;
+  background: var(--ink); color: #fff; padding: 10px 16px;
+  border-radius: 0 0 10px 0; font-weight: 700; font-size: 13px; text-decoration: none;
+}
+.rl-skip-link:focus { left: 0; color: #fff; outline: 2px solid var(--red); }
+
 /* Filter katalog: dilipat di layar kecil, selalu terbuka di desktop. */
 .rl-filter-toggle { display: none; }
+.rl-filter-toggle .chev { transition: transform .2s var(--ease); }
+.rl-filter-toggle.open .chev { transform: rotate(180deg); }
 @media (max-width: 991.98px) {
   .rl-filter-toggle { display: inline-flex; width: 100%; justify-content: space-between; }
   .rl-filter-body { display: none; }

@@ -11,6 +11,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body x-data="{ mobileNav: false }" class="portal-{{ $portal->value }}">
+    <a href="#konten" class="rl-skip-link">Lewati ke konten utama</a>
     <div class="rl-drawer-overlay" :class="mobileNav ? 'open' : ''" @click="mobileNav = false"></div>
     <div class="rl-app">
         <div class="rl-side-wrapper" :class="mobileNav ? 'open' : ''">
@@ -70,7 +71,7 @@
                 </div>
                 <div class="rl-avatar d-none d-lg-inline-flex">{{ \Illuminate\Support\Str::of(auth()->user()->nama_pegawai)->explode(' ')->map(fn($w)=>$w[0]??'')->take(2)->implode('') }}</div>
             </div>
-            <div class="rl-body" role="main">
+            <div id="konten" class="rl-body" role="main">
                 <x-ui.toast />
                 {{ $slot }}
             </div>

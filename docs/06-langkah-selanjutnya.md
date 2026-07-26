@@ -84,7 +84,7 @@ dan `service` (nama/nomor HP customer), sesuai ERD.
 - [ ] `docker compose exec app php artisan config:cache route:cache view:cache`.
 - [ ] `composer audit` && `npm audit` → bersih.
 - [ ] `php artisan test` → semua hijau.
-- [ ] Backup DB terjadwal (SRS: harian, retensi ≥30 hari) — mis. `mysqldump` via cron.
+- [x] Backup DB terjadwal (SRS: harian, retensi ≥30 hari) — `scripts/backup-db.sh` + cron (lihat docs/08), restore teruji via `scripts/restore-db.sh`.
 - [ ] Jangan expose port MySQL (3307) & phpMyAdmin (8082) ke publik — hanya web (8080/443).
 
 ## E. Push ke GitHub (opsional, direkomendasikan)
