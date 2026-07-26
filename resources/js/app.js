@@ -49,13 +49,24 @@ const initReveal = () => {
 // Interaksi zona publik dalam vanilla JS — zona ini berjalan di bawah CSP
 // ketat tanpa 'unsafe-eval', jadi tidak boleh bergantung pada Alpine.
 const initPublik = () => {
+    // Drawer menu HP: meluncur dari kanan; tutup via overlay, tombol X, atau Escape.
     const navBtn = document.querySelector('[data-nav-toggle]');
     const menu = document.getElementById('menu-publik');
-    if (navBtn && menu) {
-        navBtn.addEventListener('click', () => {
-            const terbuka = menu.classList.toggle('d-flex');
-            menu.classList.toggle('d-none', ! terbuka);
-            navBtn.setAttribute('aria-expanded', String(terbuka));
+    const overlay = document.querySelector('[data-nav-overlay]');
+    const closeBtn = document.querySelector('[data-nav-close]');
+    if (navBtn && menu && overlay) {
+        const setDrawer = (buka) => {
+            menu.classList.toggle('open', buka);
+            overlay.classList.toggle('open', buka);
+            navBtn.setAttribute('aria-expanded', String(buka));
+            document.body.classList.toggle('rl-no-scroll', buka);
+            if (buka) menu.querySelector('a')?.focus();
+        };
+        navBtn.addEventListener('click', () => setDrawer(! menu.classList.contains('open')));
+        overlay.addEventListener('click', () => setDrawer(false));
+        closeBtn?.addEventListener('click', () => setDrawer(false));
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && menu.classList.contains('open')) setDrawer(false);
         });
     }
 

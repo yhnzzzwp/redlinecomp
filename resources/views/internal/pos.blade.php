@@ -43,7 +43,7 @@
         <div class="col-lg-8 d-flex flex-column gap-3">
             <div>
                 <h2 class="rl-section-title mb-3">Kategori</h2>
-                <div class="d-flex gap-2 flex-wrap">
+                <div class="d-flex gap-2 flex-wrap rl-chip-row">
                     <button type="button" class="btn-sm" :class="kategoriAktif === null ? 'btn-redline' : 'btn-ghost'"
                             @click="kategoriAktif = null">Semua</button>
                     <template x-for="k in kategori" :key="k">

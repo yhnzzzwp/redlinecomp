@@ -547,6 +547,12 @@ input[type="radio"] { accent-color: var(--red); }
   position: sticky; top: 0; z-index: 50;
   display: flex; align-items: center; gap: 26px; padding: 15px 34px;
   border-bottom: 1px solid var(--line);
+}
+/* Efek kaca di pseudo-element, BUKAN di nav-nya: backdrop-filter membuat
+   elemen jadi containing block untuk descendant position:fixed — drawer
+   menu HP akan terkurung setinggi navbar bila filter dipasang di nav. */
+.rl-pubnav::before {
+  content: ''; position: absolute; inset: 0; z-index: -1;
   background: rgba(255, 255, 255, .86);
   backdrop-filter: blur(12px);
 }
@@ -670,9 +676,33 @@ input[type="radio"] { accent-color: var(--red); }
    14 · RESPONSIVE
    ============================================================ */
 /* ---- Ponsel: mayoritas customer mengakses lewat HP ---- */
+/* Menu publik: baris biasa di desktop, drawer dari kanan di HP. */
+.rl-pubnav-menu { display: flex; align-items: center; gap: 26px; margin-left: 26px; }
+.rl-pubnav-menu__head { display: none; }
+.rl-pubnav-overlay {
+  position: fixed; inset: 0; z-index: 1040;
+  background: rgba(11, 13, 17, .55);
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease;
+}
+.rl-pubnav-overlay.open { opacity: 1; pointer-events: auto; }
+.rl-no-scroll { overflow: hidden; }
+
 @media (max-width: 767.98px) {
-  /* Menu publik saat ditumpuk: target sentuh lega (≥44px) & mudah dijangkau ibu jari. */
-  .rl-pubnav > div a { padding: 11px 0; width: 100%; }
+  /* Drawer: meluncur dari kanan, target sentuh lega (≥44px). */
+  .rl-pubnav-menu {
+    position: fixed; top: 0; right: 0; bottom: 0; z-index: 1050;
+    width: min(300px, 84vw);
+    margin: 0; padding: 16px 22px 22px;
+    display: flex; flex-direction: column; align-items: stretch; gap: 2px;
+    background: var(--surface); border-left: 1px solid var(--line);
+    box-shadow: -18px 0 44px rgba(11, 13, 17, .22);
+    transform: translateX(100%);
+    transition: transform .28s cubic-bezier(.22, .7, .3, 1);
+  }
+  .rl-pubnav-menu.open { transform: translateX(0); }
+  .rl-pubnav-menu__head { display: flex; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+  .rl-pubnav > div a { padding: 12px 2px; width: 100%; border-bottom: 1px solid var(--carbon-line-2); }
   .rl-pubnav > div a.active::after { display: none; }
   .rl-pubnav > div a.active { color: var(--red-strong); }
 
@@ -684,6 +714,18 @@ input[type="radio"] { accent-color: var(--red); }
      ikut menggulir ke samping. */
   .rl-card:has(.rl-table) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .rl-table { min-width: 560px; }
+
+  /* Chip kategori (POS): satu baris yang digulir ke samping, bukan wrap
+     bertumpuk — hemat layar & pola yang akrab di aplikasi kasir mobile. */
+  .rl-chip-row {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;            /* Firefox */
+    padding-bottom: 4px;              /* ruang jari, cegah fokus-ring terpotong */
+  }
+  .rl-chip-row::-webkit-scrollbar { display: none; }
+  .rl-chip-row > * { flex: 0 0 auto; white-space: nowrap; }
 }
 
 @media (max-width: 640px) {

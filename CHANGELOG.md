@@ -1,5 +1,12 @@
 # Changelog — SIRC
 
+## [UI Mobile] — Kategori POS scroll samping + drawer menu publik
+### Diubah
+- **POS (HP):** chip filter Kategori kini satu baris yang digulir ke samping (scrollbar tersembunyi, target sentuh tetap lega) — tidak lagi wrap bertumpuk memakan layar.
+- **Navbar publik (HP):** menu hamburger kini **drawer meluncur dari kanan** (logo + tombol X, overlay gelap, kunci scroll halaman; tutup via overlay/X/Escape) — menggantikan blok menu yang mendorong konten ke bawah. Tetap vanilla JS (CSP publik tanpa `unsafe-eval`).
+### Diperbaiki
+- `backdrop-filter` dipindah ke pseudo-element `.rl-pubnav::before` — di elemen nav ia menjadikan nav *containing block* sehingga drawer `position:fixed` terkurung setinggi navbar.
+
 ## [Penyederhanaan] — Fitur 2FA TOTP Owner dihapus
 ### Dihapus
 - **Seluruh fitur 2FA TOTP** atas keputusan Owner: halaman & menu Keamanan, tantangan login 2FA, `TotpController`, `App\Support\Totp`, kolom `totp_secret`/`totp_recovery` (migrasi drop — berisi rahasia, tidak dibiarkan yatim), dependensi `pragmarx/google2fa`, dan 7 test TOTP. Login Owner kembali username + password (throttle + sesi host-only tetap berlaku). Total 87 test.
