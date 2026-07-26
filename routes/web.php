@@ -72,6 +72,11 @@ Route::middleware('portal:internal')->group(function () {
 
         Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
 
+        // Sesi aktif: semua staf mengelola sesi MILIKNYA sendiri.
+        Route::get('/sesi', [\App\Http\Controllers\Internal\SesiController::class, 'index'])->name('sesi');
+        Route::delete('/sesi/{id}', [\App\Http\Controllers\Internal\SesiController::class, 'keluarkan'])->where('id', '[A-Za-z0-9]+')->name('sesi.keluarkan');
+        Route::post('/sesi/keluarkan-lain', [\App\Http\Controllers\Internal\SesiController::class, 'keluarkanLain'])->name('sesi.keluarkan-lain');
+
         Route::get('/produk/template-excel', [ProdukController::class, 'template'])->name('produk.template');
         Route::get('/produk/export-excel', [ProdukController::class, 'export'])->name('produk.export');
         Route::post('/produk/import-excel', [ProdukController::class, 'import'])->name('produk.import');
