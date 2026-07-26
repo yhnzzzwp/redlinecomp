@@ -165,7 +165,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ Vite::cspNonce() }}">
         function partSearch(dbProducts) {
             return {
                 query: '',

@@ -203,7 +203,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="{{ Vite::cspNonce() }}">
         function pos(produk, kategori, promos) {
             return {
                 produk, kategori, promos,

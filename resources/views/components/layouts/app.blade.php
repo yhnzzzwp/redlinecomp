@@ -87,7 +87,7 @@
             </div>
         </div>
     </div>
-    <script>
+    <script nonce="{{ Vite::cspNonce() }}">
         function topbarSearch(services, routes) {
             return {
                 services: services,
