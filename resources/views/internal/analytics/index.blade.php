@@ -10,6 +10,7 @@
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('analytics.cetak', ['dari' => request('dari'), 'sampai' => request('sampai')]) }}" class="btn-ghost" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rl-icon-16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> PDF</a>
+            <a href="{{ route('analytics.jurnal', ['dari' => request('dari'), 'sampai' => request('sampai')]) }}" class="btn-ghost" title="Jurnal umum double-entry (.xlsx) siap dipetakan ke software akuntansi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rl-icon-16"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Jurnal Akuntansi</a>
             <a href="{{ route('analytics.export', ['dari' => request('dari'), 'sampai' => request('sampai')]) }}" class="btn-redline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rl-icon-16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export CSV</a>
         </div>
     </div>

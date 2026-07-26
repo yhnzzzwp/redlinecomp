@@ -1,5 +1,14 @@
 # Changelog — SIRC
 
+## [P3 Akuntansi] — Ekspor Jurnal Akuntansi (.xlsx)
+### Ditambahkan
+- **Ekspor Jurnal Akuntansi** di Analytics (Owner): jurnal umum **double-entry per transaksi** siap dipetakan ke software akuntansi (Accurate/Zahir/Jurnal.id) — `JurnalExcelService` (PhpSpreadsheet, pola sama dengan ekspor produk termasuk mitigasi formula-injection).
+- Per transaksi Normal: debit Kas/Bank/QRIS (per metode bayar) + debit Diskon Penjualan, kredit Pendapatan Penjualan Produk / Pendapatan Jasa Servis, plus pasangan **HPP ↔ Persediaan** dari `harga_modal` — setiap blok dijamin **seimbang** (debit = kredit); Void/Refund dikecualikan.
+- 3 sheet: **Jurnal** (baris per akun + baris TOTAL), **Rekap Akun** (neraca percobaan periode), **Info** (periode, catatan HPP-0 bila `harga_modal` kosong).
+- **Bagan akun dapat disesuaikan** akuntan tanpa menyentuh kode: `config/redline.php` bagian `akun` (kode + nama per akun).
+- Route `analytics/export-jurnal` (grup Owner) + tombol "Jurnal Akuntansi" di halaman Analytics (ikut filter periode).
+- 4 test baru (jurnal seimbang & nilai per akun pada penjualan campuran produk+servis+promo, Void & luar-periode dikecualikan, file kosong tetap valid, Karyawan 403) — total 91 test.
+
 ## [P3 PWA] — POS dapat di-install (Add to Home Screen)
 ### Ditambahkan
 - **Manifest PWA** (`/manifest.webmanifest`) disajikan via route di grup `portal:internal` — dari host publik **404** (zona internal tetap tersembunyi), nama aplikasi mengikuti portal (`SIRC POS · Portal Karyawan` / `· Admin Console`), `start_url` ke `/pos`, tampil `standalone`; tanpa auth karena browser mengambil manifest tanpa cookie sesi.

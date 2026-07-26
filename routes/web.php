@@ -100,6 +100,7 @@ Route::middleware('portal:internal')->group(function () {
             Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
             Route::get('/analytics/cetak', [AnalyticsController::class, 'cetak'])->name('analytics.cetak');
             Route::get('/analytics/export-csv', [AnalyticsController::class, 'exportCsv'])->name('analytics.export');
+            Route::get('/analytics/export-jurnal', [AnalyticsController::class, 'exportJurnal'])->name('analytics.jurnal');
             Route::resource('promo', PromoController::class)->except(['show']);
             Route::resource('pegawai', PegawaiController::class)->except(['show']);
         });

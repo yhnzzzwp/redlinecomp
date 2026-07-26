@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class AnalyticsController extends Controller
 {
+    public function __construct(private readonly \App\Services\JurnalExcelService $jurnal) {}
+
     public function index(Request $request): View
     {
         $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->string('dari')->toString())->startOfDay() : now()->startOfMonth();
@@ -147,6 +149,23 @@ final class AnalyticsController extends Controller
             ->orderByDesc('laba')
             ->limit(10)
             ->get();
+    }
+
+    /**
+     * Ekspor Jurnal Akuntansi (.xlsx): jurnal umum double-entry per transaksi
+     * pada periode terpilih — lihat JurnalExcelService untuk pemetaan akun.
+     */
+    public function exportJurnal(Request $request): StreamedResponse
+    {
+        $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->string('dari')->toString())->startOfDay() : now()->startOfMonth();
+        $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->string('sampai')->toString())->endOfDay() : now()->endOfMonth();
+
+        $spreadsheet = $this->jurnal->ekspor($dari, $sampai);
+        $nama = 'Jurnal-Akuntansi-'.$dari->format('Ymd').'-'.$sampai->format('Ymd').'.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet): void {
+            (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
+        }, $nama, ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
     }
 
     public function exportCsv(Request $request): StreamedResponse
