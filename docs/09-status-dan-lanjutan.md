@@ -4,8 +4,8 @@
 > berisi semua yang SUDAH dikerjakan, yang BELUM, keputusan desain yang wajib dipertahankan,
 > dan cara memulai lagi.
 >
-> Pembaruan terakhir: **27 Juli 2026** · commit `c3ca92d` · branch `main`
-> (`origin` github.com/yhnzzzwp/redlinecomp) · **86 test lulus** · Larastan level 5 = 0 error.
+> Pembaruan terakhir: **27 Juli 2026** · commit `4668b32` · branch `main`
+> (`origin` github.com/yhnzzzwp/redlinecomp) · **87 test lulus** · Larastan level 5 = 0 error.
 
 ---
 
@@ -54,9 +54,11 @@ Total perubahan sejak `32ba211`: **±4.956 baris tambah / 1.802 hapus** dalam 12
 | `4367840` | **P2 go-live**: `scripts/backup-db.sh` (harian, retensi 30 hari, **restore teruji** via `scripts/restore-db.sh`), `docs/08-deploy-produksi.md`, `scripts/smoke-produksi.sh` (lulus 11/11 lokal), **CSP publik tanpa `unsafe-eval`** (nav+filter publik = vanilla JS), password pegawai wajib huruf+angka, skip-link + aria stepper |
 | `605d86b` | **P3.1–P3.4**: tombol **Kirim Update WA** servis (`App\Support\Wa`, wa.me tanpa API), **2FA TOTP Owner** (halaman Keamanan, tantangan login, 6 kode pemulihan hash, secret terenkripsi), **struk thermal 80mm** (`/pos/struk/{trx}`), **Laba per Produk** di Analytics+PDF |
 | `d69c3cf` | **P3.5 Stok opname + mutasi stok**: tabel `mutasi_stok`, `StokService` satu pintu, tercatat dari 5 titik (POS/void/edit/impor/opname), halaman Opname (selisih live) + Riwayat Mutasi (filter) + tombol Riwayat per produk |
-| `c3ca92d` | **P3.6 PWA POS**: manifest via route `portal:internal` (404 dari publik, nama per portal, `start_url` `/pos`), ikon RL digenerate lokal (`scripts/buat-ikon-pwa.php`, GD + font self-host), meta pemasangan di layout internal, smoke +2 cek — **service worker sengaja belum** (CSP ketat, evaluasi belakangan) |
+| `c3ca92d` | **P3.6 PWA POS**: manifest via route `portal:internal` (404 dari publik, nama per portal, `start_url` `/pos`), ikon RL digenerate lokal (`scripts/buat-ikon-pwa.php`, GD + font self-host), meta pemasangan di layout internal — **service worker sengaja belum** (CSP ketat, evaluasi belakangan) |
+| `d184761` | fix: hint password form pegawai menyebut aturan min 8 huruf+angka |
+| `4668b32` | **Poles PWA hasil review adversarial**: link manifest di halaman login/2FA (install dari perangkat baru), meta modern `mobile-web-app-capable`, smoke cek manifest karyawan+admin+publik (14 cek lokal), test dimensi PNG vs deklarasi `sizes` |
 
-Kualitas terkunci otomatis: **86 test / 306 assertion**, Larastan bersih, CI GitHub Actions
+Kualitas terkunci otomatis: **87 test / 312 assertion**, Larastan bersih, CI GitHub Actions
 (test+phpstan+audit PHP · npm audit+build), `composer audit` & `npm audit` bersih.
 
 ---
@@ -67,8 +69,8 @@ Kualitas terkunci otomatis: **86 test / 306 assertion**, Larastan bersih, CI Git
 1. **Ekspor akuntansi** — dasar sudah ada (`analytics.export` CSV per item + HPP + profit);
    tinggal dibentuk ulang bila format akuntan spesifik dibutuhkan.
 
-_(PWA untuk POS ✅ selesai di `c3ca92d`; yang tersisa dari ide PWA hanya evaluasi
-service-worker/offline — lihat ide pasca-P3.)_
+_(PWA untuk POS ✅ selesai di `c3ca92d` + `4668b32`; yang tersisa dari ide PWA hanya
+evaluasi service-worker/offline — lihat ide pasca-P3.)_
 
 ### Ide pasca-P3 (dari laporan evaluasi, belum diprioritaskan)
 - Service worker/offline untuk PWA POS (manifest+ikon sudah ada; hati-hati CSP —
