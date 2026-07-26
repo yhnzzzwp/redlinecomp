@@ -1,6 +1,6 @@
 <x-layouts.app active="analytics" title="Analisis Penjualan">
     @php
-        $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
+        $rp = \App\Support\Uang::rupiah(...);
     @endphp
 
     <div class="rl-page-header d-flex align-items-start justify-content-between flex-wrap gap-2 mb-3">

@@ -1,6 +1,6 @@
 <x-layouts.public active="Catalogue" :title="$produk->nama_produk">
     @php
-        $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
+        $rp = \App\Support\Uang::rupiah(...);
         $stok = (int) $produk->jumlah_produk;
     @endphp
 

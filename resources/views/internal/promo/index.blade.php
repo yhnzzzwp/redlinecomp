@@ -1,6 +1,6 @@
 <x-layouts.app active="promo" title="Manajemen Promo">
     @php
-        $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
+        $rp = \App\Support\Uang::rupiah(...);
         $besaran = fn ($p) => $p->tipe_promo === \App\Enums\TipePromo::Persen ? $p->besar_promo.'%' : $rp($p->besar_promo);
     @endphp
 

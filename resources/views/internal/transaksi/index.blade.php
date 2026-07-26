@@ -1,6 +1,6 @@
 <x-layouts.app active="transaksi" title="Daftar Transaksi">
     @php
-        $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
+        $rp = \App\Support\Uang::rupiah(...);
     @endphp
 
     <div class="rl-page-header">

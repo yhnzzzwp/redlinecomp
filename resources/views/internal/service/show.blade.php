@@ -1,6 +1,6 @@
 <x-layouts.app active="service" :title="'Servis '.$service->nomor_resi">
     @php
-        $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
+        $rp = \App\Support\Uang::rupiah(...);
         $urutan = \App\Enums\StatusService::cases();
         $now = array_search($service->status, $urutan, true);
     @endphp

@@ -77,7 +77,9 @@ final class PosService
                 throw new PembayaranKurangException($total, $data->bayar);
             }
 
-            $transaksi = Transaksi::query()->create([
+            // Kode nota acak bisa bentrok di index unik pada checkout bersamaan —
+            // ulangi dengan kode baru, jangan gagalkan transaksi kasir.
+            $transaksi = \App\Support\CobaUlang::unik(fn (): Transaksi => Transaksi::query()->create([
                 'kode_nota' => $this->kodeGenerator->nota(),
                 'pegawai_id' => $kasir->id,
                 'promo_id' => $promo?->promoId,
@@ -89,7 +91,7 @@ final class PosService
                 'kembalian' => $data->bayar - $total,
                 'nama_pembeli' => $data->namaPembeli,
                 'nomor_hp_pembeli' => $data->nomorHpPembeli,
-            ]);
+            ]));
 
             foreach ($baris as $b) {
                 $transaksi->items()->create([

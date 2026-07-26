@@ -1,6 +1,6 @@
 <x-layouts.public active="Service" title="Cek Status Servis">
     @php
-        $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
+        $rp = \App\Support\Uang::rupiah(...);
     @endphp
 
     <div class="rl-public-header">

@@ -5,15 +5,15 @@
     <title>Laporan Penjualan</title>
     <style>
         body { font-family: sans-serif; font-size: 12px; color: #333; }
-        .header { text-align: center; border-bottom: 2px solid #c1272c; margin-bottom: 20px; padding-bottom: 10px; }
-        .header h1 { margin: 0; color: #c1272c; font-size: 24px; }
+        .header { text-align: center; border-bottom: 2px solid #de1f26; margin-bottom: 20px; padding-bottom: 10px; }
+        .header h1 { margin: 0; color: #de1f26; font-size: 24px; }
         .header p { margin: 5px 0 0; color: #666; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f4f5f7; color: #333; }
+        th { background-color: #f3f4f6; color: #333; }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
-        .total-row th { background-color: #ffeaea; color: #c1272c; }
+        .total-row th { background-color: #fcebeb; color: #de1f26; }
         .footer { margin-top: 50px; text-align: right; }
     </style>
 </head>

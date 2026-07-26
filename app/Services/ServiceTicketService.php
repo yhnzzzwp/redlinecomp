@@ -17,7 +17,8 @@ final class ServiceTicketService
     public function buat(array $data, Pegawai $pegawai): Service
     {
         return DB::transaction(function () use ($data, $pegawai): Service {
-            $service = Service::query()->create([
+            // Nomor resi acak bisa bentrok di index unik — ulangi dengan resi baru.
+            $service = \App\Support\CobaUlang::unik(fn (): Service => Service::query()->create([
                 'nomor_resi' => $this->kodeGenerator->resi(),
                 'pegawai_id' => $pegawai->id,
                 'nama_customer' => $data['nama_customer'],
@@ -29,7 +30,7 @@ final class ServiceTicketService
                 'tanggal_masuk' => now(),
                 'estimasi_selesai' => $data['estimasi_selesai'] ?? null,
                 'teknisi_id' => $data['teknisi_id'] ?? null,
-            ]);
+            ]));
 
             $service->riwayat()->create([
                 'pegawai_id' => $pegawai->id,

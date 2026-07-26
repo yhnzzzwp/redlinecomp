@@ -1,6 +1,6 @@
 <x-layouts.app active="dashboard" title="Dashboard">
     @php
-        function rl_rp($n) { return 'Rp '.number_format((int)$n, 0, ',', '.'); }
+        $rp = \App\Support\Uang::rupiah(...);
     @endphp
 
     <div class="rl-page-header d-flex align-items-start justify-content-between flex-wrap gap-2">
@@ -24,7 +24,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
                 </div>
                 <div class="rl-kpi__label">Total Penjualan</div>
-                <div class="rl-kpi__val tnum">{{ rl_rp($totalSales) }}</div>
+                <div class="rl-kpi__val tnum">{{ $rp($totalSales) }}</div>
                 <div class="rl-text-xs text-muted mt-1">Omzet bersih terakumulasi</div>
             </div>
         </div>
@@ -34,7 +34,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </div>
                 <div class="rl-kpi__label">Penjualan Hari Ini</div>
-                <div class="rl-kpi__val tnum text-success">{{ rl_rp($todaySales) }}</div>
+                <div class="rl-kpi__val tnum text-success">{{ $rp($todaySales) }}</div>
                 <div class="rl-text-xs text-muted mt-1">{{ $todayCount }} transaksi hari ini</div>
             </div>
         </div>
@@ -74,7 +74,7 @@
                 <div class="rl-chart-bar-wrap">
                     @foreach ($trend as $t)
                         <div class="rl-chart-bar">
-                            <div class="rl-chart-bar__fill rounded-top" title="{{ $t['label'] }}: {{ rl_rp($t['total']) }}"
+                            <div class="rl-chart-bar__fill rounded-top" title="{{ $t['label'] }}: {{ $rp($t['total']) }}"
                                  style="height:{{ max(6, (int)($t['total']/$max*100)) }}%;"></div>
                             <small class="rl-chart-bar__label">{{ $t['label'] }}</small>
                         </div>
@@ -98,7 +98,7 @@
                                 <div class="rl-text-muted rl-text-xs">{{ $t->nama_pembeli ?? 'Umum' }} &middot; {{ $t->pegawai?->nama_pegawai ?? 'Kasir' }} &middot; {{ $t->created_at?->format('d M H:i') }}</div>
                             </div>
                             <div class="text-end">
-                                <div class="fw-bold tnum rl-text-sm">{{ rl_rp($t->total) }}</div>
+                                <div class="fw-bold tnum rl-text-sm">{{ $rp($t->total) }}</div>
                                 @if(($t->status->value ?? $t->status) === 'Batal')
                                     <span class="rl-pill red rl-text-xs">BATAL</span>
                                 @else

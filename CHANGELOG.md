@@ -1,5 +1,16 @@
 # Changelog — SIRC
 
+## [P1 Kualitas Inti] — Roadmap P1 laporan evaluasi
+### Ditambahkan
+- `App\Support\Uang::rupiah()` — format mata uang terpusat; 9 view kini delegasi ke satu sumber (fungsi global `rl_rp()` yang rawan redeclare dihapus).
+- `App\Support\CobaUlang::unik()` — insert kode nota / nomor resi diulang otomatis saat tabrakan index unik (checkout bersamaan tidak lagi bisa gagal karena kode acak bentrok).
+- `TopbarSearchComposer` — query servis aktif pindah dari blok `@php` di layout ke View Composer (view bebas logika data).
+- CI: job `frontend` (npm ci + `npm audit --audit-level=high` + build Vite), `composer audit`, dan `--memory-limit=1G` untuk PHPStan.
+### Diubah
+- PDF nota & laporan analytics diselaraskan palet design system v2 (carbon `#15181e`, merah `#de1f26`); sisa gaya QR dihapus.
+### Catatan roadmap
+- "Refactor impor ke Service" telah lunas lewat fitur Impor Excel; "storage:link otomatis" gugur karena fitur unggah gambar dihapus.
+
 ## [Tanpa Gambar + Mobile] — Portal serba terang, bebas gambar, responsif HP
 ### Diubah
 - **Sidebar portal admin ikut bertema terang** (varian carbon dihapus) — kini seluruh navbar/sidebar owner & karyawan terang; avatar topbar menyesuaikan.

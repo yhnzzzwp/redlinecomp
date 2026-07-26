@@ -26,21 +26,8 @@
                 </div>
                 <div class="rl-avatar" style="width:34px;height:34px;font-size:12px;">{{ \Illuminate\Support\Str::of(auth()->user()->nama_pegawai)->explode(' ')->map(fn($w)=>$w[0]??'')->take(2)->implode('') }}</div>
             </div>
-            @php
-                $activeServices = \App\Models\Service::query()
-                    ->whereNotIn('status', [\App\Enums\StatusService::Selesai, \App\Enums\StatusService::SudahDiambil])
-                    ->latest('id')
-                    ->get(['id', 'nomor_resi', 'nama_barang', 'status'])
-                    ->map(fn ($s) => [
-                        'id' => $s->id,
-                        'resi' => $s->nomor_resi,
-                        'barang' => $s->nama_barang,
-                        'status' => $s->status->value,
-                    ])
-                    ->values();
-            @endphp
             <div class="rl-topbar">
-                <div x-data="topbarSearch(@js($activeServices), {
+                <div x-data="topbarSearch(@js($servisAktif), {
                         produk: @js(route('produk.index')),
                         service: @js(route('service')),
                         transaksi: @js(route('transaksi.index')),

@@ -1,20 +1,20 @@
-@php($rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.'))
+@php($rp = \App\Support\Uang::rupiah(...))
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="utf-8">
 <style>
     * { font-family: DejaVu Sans, sans-serif; box-sizing: border-box; }
-    body { margin: 0; color: #1b1e23; font-size: 13px; }
+    body { margin: 0; color: #15181e; font-size: 13px; }
     .wrap { width: 100%; margin: 0 auto; padding: 30px; }
-    .header { width: 100%; border-bottom: 3px solid #0b1c30; padding-bottom: 16px; margin-bottom: 24px; }
+    .header { width: 100%; border-bottom: 3px solid #15181e; padding-bottom: 16px; margin-bottom: 24px; }
     .header td { vertical-align: top; }
-    .header-logo { font-size: 28px; font-weight: 800; font-style: italic; color: #0b1c30; }
-    .stripe { display: inline-block; width: 18px; height: 18px; background: #c1272c; margin: 0 6px; position: relative; top: 2px; }
+    .header-logo { font-size: 28px; font-weight: 800; font-style: italic; color: #15181e; }
+    .stripe { display: inline-block; width: 18px; height: 18px; background: #de1f26; margin: 0 6px; position: relative; top: 2px; }
     .subtitle { font-size: 14px; color: #6b7280; font-weight: bold; margin-top: 6px; }
     .contact { font-size: 12px; color: #6b7280; margin-top: 4px; }
     .title-box { text-align: right; }
-    .title-text { font-size: 24px; font-weight: bold; color: #0b1c30; letter-spacing: 1px; }
+    .title-text { font-size: 24px; font-weight: bold; color: #15181e; letter-spacing: 1px; }
     .nota-number { font-size: 14px; color: #6b7280; margin-top: 4px; }
     
     .meta-table { width: 100%; margin-bottom: 24px; }
@@ -22,8 +22,8 @@
     .meta-label { color: #6b7280; width: 90px; display: inline-block; font-weight: bold; }
     
     .items-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-    .items-table th { text-align: left; background: #f4f5f7; padding: 12px; font-size: 11px; color: #6b7280; text-transform: uppercase; border-bottom: 1px solid #e9e9ec; border-top: 1px solid #e9e9ec; }
-    .items-table td { padding: 12px; border-bottom: 1px solid #e9e9ec; font-size: 12px; }
+    .items-table th { text-align: left; background: #f3f4f6; padding: 12px; font-size: 11px; color: #6b7280; text-transform: uppercase; border-bottom: 1px solid #e6e8ec; border-top: 1px solid #e6e8ec; }
+    .items-table td { padding: 12px; border-bottom: 1px solid #e6e8ec; font-size: 12px; }
     .items-table th.r, .items-table td.r { text-align: right; }
     
     .bottom-section { width: 100%; }
@@ -32,11 +32,7 @@
     .totals-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
     .totals-table td { padding: 6px 12px; text-align: right; font-size: 13px; }
     .totals-table td:first-child { width: 60%; color: #6b7280; font-weight: bold; }
-    .grand td { font-size: 18px; font-weight: bold; color: #af101a; border-top: 2px solid #0b1c30; padding-top: 12px; padding-bottom: 12px; }
-    
-    .qr-container { text-align: right; }
-    .qr-container img { width: 90px; height: 90px; border: 1px solid #e9e9ec; padding: 6px; background: #fff; border-radius: 6px; }
-    .qr-text { font-size: 10px; color: #8a8f98; margin-top: 8px; }
+    .grand td { font-size: 18px; font-weight: bold; color: #b01218; border-top: 2px solid #15181e; padding-top: 12px; padding-bottom: 12px; }
     
     .footer-notes { font-size: 11px; color: #8a8f98; line-height: 1.5; margin-top: 40px; }
 </style>

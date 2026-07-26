@@ -9,16 +9,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: pdo_sqlite, mbstring, bcmath, gd, zip, intl
+
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
+
+      - name: Audit dependensi PHP (CVE)
+        run: composer audit
+
       - name: Generate key
         run: cp .env.example .env && php artisan key:generate
+
       - name: Run tests
         run: php artisan test
+
       - name: PHPStan
-        run: ./vendor/bin/phpstan analyse --no-progress
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit dependensi JS (CVE level tinggi)
+        run: npm audit --audit-level=high
+
+      - name: Build assets (Vite)
+        run: npm run build
