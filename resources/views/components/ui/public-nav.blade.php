@@ -10,11 +10,7 @@
 
     <div :class="open ? 'd-flex' : 'd-none'" class="w-100 d-md-flex align-items-center flex-column flex-md-row ms-md-4 mt-3 mt-md-0 gap-3 gap-md-4">
         <a href="{{ route('landing') }}" @class(['active' => $active === 'Home'])>Beranda</a>
-        <a href="{{ route('catalogue') }}" @class(['active' => $active === 'Catalogue'])>Katalog</a>
         <a href="{{ route('cek.servis') }}" @class(['text-nowrap', 'active' => $active === 'Service'])>Lacak Servis</a>
-        <a href="{{ route('cek.nota') }}" @class(['text-nowrap', 'active' => $active === 'Nota'])>Cek Nota</a>
         <a href="{{ route('about') }}" @class(['text-nowrap', 'active' => $active === 'About Us'])>Tentang Kami</a>
-
-        <a href="{{ route('cek.servis') }}" class="ms-md-auto btn-redline rl-btn-sm mt-3 mt-md-0">Servis Sekarang</a>
     </div>
 </nav>

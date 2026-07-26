@@ -5,7 +5,7 @@
     @endphp
 
     <div class="rl-body rl-container-md pt-5">
-        <a href="{{ route('catalogue') }}" class="rl-back-link mb-4">&larr; Kembali ke Katalog</a>
+        <a href="{{ route('landing') }}#katalog" class="rl-back-link mb-4">&larr; Kembali ke Katalog</a>
 
         <div class="row g-4 mb-5">
             <div class="col-md-8 mx-auto" data-reveal style="--reveal-d: 120ms">

@@ -32,17 +32,16 @@ Route::get('/robots.txt', function () {
 | Diakses lewat host admin/karyawan → dialihkan ke login portal tersebut.
 */
 Route::middleware('portal:public')->group(function () {
+    // Beranda langsung menampilkan katalog (hero + grid produk).
     Route::get('/', [PublicController::class, 'landing'])->name('landing');
     Route::get('/about', [PublicController::class, 'about'])->name('about');
     Route::view('/toko-ikan', 'public.soon', ['judul' => 'Toko Ikan Redline', 'aktif' => 'Toko Ikan'])->name('toko-ikan');
-    Route::get('/catalogue', [PublicController::class, 'catalogue'])->name('catalogue');
+
+    // Alamat lama /catalogue dialihkan ke beranda (bookmark tetap hidup).
+    Route::get('/catalogue', fn (\Illuminate\Http\Request $r) => redirect()->route('landing', $r->query()))->name('catalogue');
     Route::get('/catalogue/{produk}', [PublicController::class, 'detailProduk'])->name('catalogue.show');
+
     Route::get('/cek-servis', [PublicController::class, 'cekServis'])->middleware('throttle:10,1')->name('cek.servis');
-    Route::get('/cek-nota', [PublicController::class, 'cekNota'])->middleware('throttle:10,1')->name('cek.nota');
-    Route::get('/nota/{kode}/pdf', [PublicController::class, 'notaPdf'])
-        ->middleware('throttle:10,1')
-        ->where('kode', '[A-Za-z0-9\-]{1,32}')
-        ->name('nota.pdf');
 });
 
 /*

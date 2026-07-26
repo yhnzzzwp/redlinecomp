@@ -1,5 +1,15 @@
 # Changelog — SIRC
 
+## [Tema Terang] — Zona publik terang + beranda katalog
+### Diubah
+- Tema utama zona publik menjadi **terang**; carbon gelap tersisa hanya di hero beranda (banner brand) dan panel login portal.
+- **Beranda langsung menampilkan katalog** (hero + filter + grid produk + pagination); `/catalogue` dialihkan permanen ke beranda.
+- Navbar publik disederhanakan menjadi tiga menu: Beranda, Lacak Servis, Tentang Kami.
+- Halaman Tentang Kami: seksi Visi & Misi dirombak (daftar misi bernomor mono, jarak antar butir rapat, tanda baca dirapikan); ikon emoji 📍/💬 diganti ikon SVG stroke konsisten; ikon 🐟 kartu Toko Ikan dihapus.
+### Dihapus
+- Fitur publik **Cek Nota** beserta route PDF nota publik (nota tetap tersedia dari daftar transaksi internal).
+- QR verifikasi di PDF nota (menunjuk halaman yang dihapus dan memanggil layanan QR pihak ketiga).
+
 ## [Portal & Redesign] — Pemisahan subdomain + design system v2
 ### Ditambahkan
 - **Arsitektur tiga portal per subdomain**: publik (`localhost`), karyawan (`karyawan.localhost`), admin (`admin.localhost`) — config `redline.hosts`, enum `App\Support\Portal`, middleware `EnsurePortal` (prioritas sebelum `Authenticate`).

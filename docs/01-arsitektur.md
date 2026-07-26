@@ -17,7 +17,7 @@ Zona SRS §2.1 dipetakan ke **host terpisah** (config `redline.hosts`, env `REDL
 
 | Portal | Host lokal | Isi | Role login |
 |--------|-----------|-----|------------|
-| Publik | `localhost:8080` | landing, katalog, detail produk, cek servis, cek nota | — (tanpa login) |
+| Publik | `localhost:8080` | beranda (hero + katalog langsung), detail produk, lacak servis | — (tanpa login) |
 | Karyawan | `karyawan.localhost:8080` | dashboard, POS, produk, servis, transaksi | `Karyawan` |
 | Admin | `admin.localhost:8080` | semua fitur karyawan **+** analytics, promo, akun pegawai, void/export | `Owner` |
 

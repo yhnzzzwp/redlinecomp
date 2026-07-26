@@ -4,8 +4,8 @@
    Bahasa desain: tachometer / spec-sheet motorsport.
    - Tipografi  : Barlow Condensed (display) + Barlow (UI)
                   + IBM Plex Mono (kode, angka, readout) — self-hosted.
-   - Warna      : satu merah sinyal di atas carbon (publik, gelap)
-                  dan kertas teknis (portal kerja, terang).
+   - Warna      : satu merah sinyal di atas kertas teknis terang;
+                  carbon gelap disisakan untuk hero & aksen brand.
    - Motif      : tick-mark tachometer, stripe miring 18°, nomor tabular.
    - Basis      : Bootstrap 5 (grid + utilitas) di bawah lapisan rl-*.
    ============================================================ */
@@ -38,7 +38,7 @@
   --red-soft: #fcebeb;
   --red-glow: rgba(222, 31, 38, .32);
 
-  /* Carbon (permukaan gelap — showroom publik & sidebar admin). */
+  /* Carbon (permukaan gelap — hero & aksen brand). */
   --carbon-950: #0b0d11;
   --carbon-900: #12151b;
   --carbon-850: #161a21;
@@ -46,7 +46,7 @@
   --carbon-line: rgba(255, 255, 255, .09);
   --carbon-line-2: rgba(255, 255, 255, .05);
 
-  /* Kertas teknis (permukaan terang — portal kerja). */
+  /* Kertas teknis (permukaan terang — tema utama). */
   --bg: #f3f4f6;
   --surface: #ffffff;
   --ink: #15181e;
@@ -61,7 +61,7 @@
   --navy: #0b1c30;   /* kompat lama — dipetakan ke carbon */
   --pink: var(--red-soft);
 
-  /* Teks di atas permukaan gelap. */
+  /* Teks di atas permukaan gelap (hero, panel login). */
   --pub-ink: #edeff3;
   --pub-muted: #9aa3b0;
 
@@ -74,7 +74,7 @@
   --font-display: 'Barlow Condensed', 'Barlow', ui-sans-serif, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Tekstur: grain halus + garis diagonal carbon. */
+  /* Tekstur: grain halus untuk permukaan carbon. */
   --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
 
   --ease: cubic-bezier(.4, 0, .2, 1);
@@ -84,6 +84,7 @@
 }
 
 * { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
   font-family: var(--font);
   font-size: 14px;
@@ -593,88 +594,30 @@ input[type="radio"] { accent-color: var(--red); }
 .rl-err { color: var(--red-strong); font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
 
 /* ============================================================
-   13 · ZONA PUBLIK — showroom carbon (gelap)
+   13 · ZONA PUBLIK — etalase terang
+   ------------------------------------------------------------
+   Tema utama terang; carbon hanya tersisa di hero (banner brand).
    ============================================================ */
-.rl-public { background: var(--carbon-950); color: var(--pub-ink); }
-.rl-public::before {
-  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background: var(--noise);
-}
-.rl-public main { position: relative; z-index: 1; }
-
-/* Pemetaan utilitas Bootstrap yang tersisa di zona gelap. */
-.rl-public .text-dark { color: var(--pub-ink) !important; }
-.rl-public .text-muted { color: var(--pub-muted) !important; }
-.rl-public .rl-body { background: transparent; }
-.rl-public .bg-light { background: var(--carbon-900) !important; }
-
-/* Kartu di zona publik → carbon. */
-.rl-public .rl-card {
-  background: linear-gradient(180deg, var(--carbon-850), var(--carbon-900));
-  border: 1px solid var(--carbon-line);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .04) inset, 0 14px 34px rgba(0, 0, 0, .35);
-  color: var(--pub-ink);
-}
-.rl-public .rl-catalogue-title { color: var(--pub-ink); }
-.rl-public .rl-text-total, .rl-public .rl-text-price, .rl-public .rl-text-total-lg { color: var(--red-bright); }
-.rl-public .rl-text-red { color: var(--red-bright); }
-.rl-public .rl-text-caption, .rl-public .rl-text-muted, .rl-public .rl-text-desc { color: var(--pub-muted); }
-.rl-public .rl-section-title { color: var(--pub-ink); }
-.rl-public .rl-divider, .rl-public .rl-divider-light { border-color: var(--carbon-line); }
-.rl-public .rl-catalogue-img-wrap, .rl-public .rl-catalogue-img-lg, .rl-public .rl-catalogue-img-sm { background: var(--carbon-900); }
-.rl-public .rl-spec { background: var(--carbon-900); border-color: var(--carbon-line); }
-.rl-public .rl-spec__value { color: var(--pub-ink); }
-.rl-public .rl-trust__item { color: var(--pub-ink); }
-.rl-public .rl-trust__ico { background: rgba(222, 31, 38, .14); color: var(--red-bright); }
-.rl-public .rl-input, .rl-public .rl-select, .rl-public .rl-textarea {
-  background: var(--carbon-900); border-color: var(--carbon-line); color: var(--pub-ink);
-}
-.rl-public .rl-input::placeholder { color: #6b7482; }
-.rl-public .rl-input:focus, .rl-public .rl-select:focus { background: var(--carbon-850); border-color: var(--red); }
-.rl-public .rl-label { color: var(--pub-ink); }
-.rl-public .btn-ghost { color: var(--pub-ink); border-color: var(--carbon-line); }
-.rl-public .btn-ghost:hover { border-color: var(--pub-ink); color: #fff; }
-.rl-public .rl-back-link { color: var(--pub-muted); }
-.rl-public .rl-back-link:hover { color: var(--pub-ink); }
-.rl-public .rl-empty-state h4 { color: var(--pub-ink); }
-.rl-public .rl-page-title { color: var(--pub-ink); }
-.rl-public .rl-kicker { color: var(--pub-muted); }
-.rl-public .rl-kicker b, .rl-public .rl-kicker--red { color: var(--red-bright); }
-.rl-public .rl-step-wrap { background: var(--carbon-900); border-color: var(--carbon-line); }
-.rl-public .rl-step { color: var(--pub-muted); }
-.rl-public .rl-step.now { color: var(--red-bright); }
-.rl-public .rl-step__dot { background: var(--carbon-800); }
-.rl-public .rl-step::after { background: var(--carbon-800); }
-.rl-public .rl-timeline__item::after { background: var(--carbon-line); }
-.rl-public .rl-alert--success, .rl-public .rl-alert--error { background: var(--carbon-900); border-color: var(--carbon-line); }
-.rl-public .rl-form-errors { color: var(--red-bright); }
-.rl-public .pagination .page-link { background: var(--carbon-900); border-color: var(--carbon-line); color: var(--pub-ink); }
-.rl-public .pagination .page-link:hover { background: var(--carbon-800); }
-.rl-public .pagination .page-item.active .page-link { background: var(--red); border-color: var(--red); }
-.rl-public .pagination .page-item.disabled .page-link { background: var(--carbon-900); color: #5a6270; border-color: var(--carbon-line-2); }
-.rl-public .rl-table thead th { background: var(--carbon-900); color: var(--pub-muted); border-color: var(--carbon-line); }
-.rl-public .rl-table tbody td { border-color: var(--carbon-line-2); }
-.rl-public .rl-table tbody tr:hover { background: var(--carbon-850); }
+.rl-public { background: var(--bg); color: var(--ink); }
 
 /* ---- Navigasi publik ---- */
 .rl-pubnav {
   position: sticky; top: 0; z-index: 50;
   display: flex; align-items: center; gap: 26px; padding: 15px 34px;
-  border-bottom: 1px solid var(--carbon-line);
-  background: rgba(11, 13, 17, .82);
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, .86);
   backdrop-filter: blur(12px);
 }
-.rl-pubnav .rl-logo { color: #f2f3f6; }
-.rl-pubnav a { font-size: 13.5px; font-weight: 600; color: var(--pub-muted); text-decoration: none; letter-spacing: .02em; }
-.rl-pubnav a:hover { color: var(--pub-ink); }
-.rl-pubnav a.active { color: var(--pub-ink); position: relative; }
+.rl-pubnav a { font-size: 13.5px; font-weight: 600; color: var(--muted); text-decoration: none; letter-spacing: .02em; }
+.rl-pubnav a:hover { color: var(--ink); }
+.rl-pubnav a.active { color: var(--ink); position: relative; }
 .rl-pubnav a.active::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 2px;
   background: var(--red); transform: skewX(-18deg);
 }
 
-/* ---- Hero landing — panel instrumen raksasa ---- */
-.rl-hero { position: relative; overflow: hidden; background: var(--carbon-950); color: #fff; padding: 84px 34px 74px; }
+/* ---- Hero — banner carbon (satu-satunya blok gelap di tema terang) ---- */
+.rl-hero { position: relative; overflow: hidden; background: var(--carbon-950); color: #fff; padding: 76px 34px 66px; }
 .rl-hero > * { position: relative; z-index: 2; }
 .rl-hero::before {
   content: ""; position: absolute; inset: -25%; z-index: 0; pointer-events: none;
@@ -696,6 +639,8 @@ input[type="radio"] { accent-color: var(--red); }
   from { transform: translate3d(0, 0, 0) scale(1); }
   to { transform: translate3d(2.5%, -2.5%, 0) scale(1.08); }
 }
+.rl-hero .rl-kicker { color: var(--pub-muted); }
+.rl-hero .rl-kicker b { color: var(--red-bright); }
 .rl-hero-title {
   font-family: var(--font-display); font-style: italic; font-weight: 800;
   font-size: clamp(44px, 6.4vw, 78px); line-height: .95; letter-spacing: .005em;
@@ -703,32 +648,50 @@ input[type="radio"] { accent-color: var(--red); }
 }
 .rl-hero-title i { color: var(--red-bright); font-style: inherit; }
 .rl-hero-desc { max-width: 54ch; color: var(--pub-muted); font-size: 15px; margin: 0 auto; margin-top: 16px; line-height: 1.75; }
+.rl-hero .btn-ghost { color: var(--pub-ink); border-color: var(--carbon-line); }
+.rl-hero .btn-ghost:hover { border-color: var(--pub-ink); color: #fff; }
 .rl-hero-title { animation: rl-rise .8s var(--ease) both; }
 .rl-hero-desc { animation: rl-rise .8s var(--ease) .12s both; }
 .rl-hero .d-flex { animation: rl-rise .8s var(--ease) .24s both; }
 @keyframes rl-rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
 
 /* Strip readout di bawah hero (angka layanan). */
-.rl-hero-stats { display: flex; gap: 0; justify-content: center; flex-wrap: wrap; margin-top: 44px; }
+.rl-hero-stats { display: flex; gap: 0; justify-content: center; flex-wrap: wrap; margin-top: 40px; }
 .rl-hero-stat { padding: 0 34px; text-align: center; border-left: 1px solid var(--carbon-line); }
 .rl-hero-stat:first-child { border-left: 0; }
 .rl-hero-stat__val { font-family: var(--font-mono); font-weight: 600; font-size: 24px; color: #fff; }
 .rl-hero-stat__val i { color: var(--red-bright); font-style: normal; }
 .rl-hero-stat__label { font-family: var(--font-display); font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--pub-muted); margin-top: 4px; }
 
-/* Header halaman publik (katalog, cek servis, dst.). */
-.rl-public-header { position: relative; overflow: hidden; background: transparent; color: #fff; padding: 58px 24px 22px; text-align: center; margin-bottom: 26px; }
-.rl-public-header .rl-page-title { font-size: clamp(30px, 4vw, 40px); font-style: italic; letter-spacing: .01em; margin-bottom: 10px; color: #fff; }
-.rl-public-header .rl-page-desc { color: var(--pub-muted); font-size: 15px; max-width: 580px; margin: 0 auto; line-height: 1.7; }
+/* Header halaman publik (lacak servis, tentang kami). */
+.rl-public-header { padding: 52px 24px 16px; text-align: center; margin-bottom: 22px; }
+.rl-public-header .rl-page-title { font-size: clamp(30px, 4vw, 40px); font-style: italic; letter-spacing: .01em; margin-bottom: 10px; color: var(--ink); }
+.rl-public-header .rl-page-desc { color: var(--muted); font-size: 15px; max-width: 580px; margin: 0 auto; line-height: 1.7; }
 .rl-public-header .rl-ticks { max-width: 320px; margin: 18px auto 0; }
 
-.rl-hero-sm { background: var(--carbon-900); color: #fff; padding: 40px 34px; text-align: center; border-block: 1px solid var(--carbon-line); }
-.rl-about-section { padding: 60px 0; border-bottom: 1px solid var(--carbon-line-2); }
+.rl-hero-sm { background: var(--surface); color: var(--ink); padding: 40px 34px; text-align: center; border-block: 1px solid var(--line); }
+.rl-about-section { padding: 60px 0; border-bottom: 1px solid var(--line-2); }
+
+/* Daftar misi — penomoran mono, jarak rapat & profesional. */
+.rl-misi { list-style: none; counter-reset: misi; margin: 0; padding: 0; }
+.rl-misi li {
+  counter-increment: misi; position: relative;
+  padding: 9px 0 9px 42px; border-top: 1px solid var(--line-2);
+  font-size: 14px; line-height: 1.6; color: var(--muted);
+}
+.rl-misi li:first-child { border-top: 0; padding-top: 0; }
+.rl-misi li::before {
+  content: counter(misi, decimal-leading-zero);
+  position: absolute; left: 0; top: 10px;
+  font-family: var(--font-mono); font-weight: 600; font-size: 12.5px;
+  color: var(--red-strong);
+}
+.rl-misi li:first-child::before { top: 1px; }
 
 /* Strip fitur & CTA servis. */
 .rl-feature-ico {
   flex: 0 0 46px; width: 46px; height: 46px; border-radius: 11px;
-  background: rgba(222, 31, 38, .13); color: var(--red-bright);
+  background: var(--red-soft); color: var(--red-strong);
   display: grid; place-items: center;
 }
 .rl-service-cta {
@@ -748,17 +711,17 @@ input[type="radio"] { accent-color: var(--red); }
 .rl-carousel-item { flex: 0 0 230px; scroll-snap-align: start; }
 
 /* Footer. */
-.rl-footer { background: var(--carbon-950); color: var(--pub-muted); padding: 46px 34px 22px; margin-top: auto; border-top: 1px solid var(--carbon-line); position: relative; z-index: 1; }
-.rl-footer h4 { color: #f2f3f6; font-family: var(--font-display); font-size: 14px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
-.rl-footer a { display: block; font-size: 12.5px; color: var(--pub-muted); padding: 4px 0; text-decoration: none; }
-.rl-footer a:hover { color: var(--pub-ink); }
+.rl-footer { background: var(--surface); color: var(--muted); padding: 46px 34px 22px; margin-top: auto; border-top: 1px solid var(--line); }
+.rl-footer h4 { color: var(--ink); font-family: var(--font-display); font-size: 14px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+.rl-footer a { display: block; font-size: 12.5px; color: var(--muted); padding: 4px 0; text-decoration: none; }
+.rl-footer a:hover { color: var(--red-strong); }
 .rl-footer-container { max-width: 1100px; }
-.rl-footer-desc { font-size: 12.5px; color: var(--pub-muted); max-width: 36ch; }
-.rl-footer-copy { font-size: 11.5px; color: #707a88; }
+.rl-footer-desc { font-size: 12.5px; color: var(--muted); max-width: 36ch; }
+.rl-footer-copy { font-size: 11.5px; color: #8a919c; }
 
 /* Halaman error & "segera hadir". */
-.rl-error-page { background: var(--carbon-950); color: #fff; padding: 80px 34px 60px; text-align: center; min-height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-.rl-error-code { font-family: var(--font-mono); font-weight: 600; font-size: 76px; letter-spacing: -.02em; color: var(--red-bright); }
+.rl-error-page { background: var(--bg); color: var(--ink); padding: 80px 34px 60px; text-align: center; min-height: 70vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.rl-error-code { font-family: var(--font-mono); font-weight: 600; font-size: 76px; letter-spacing: -.02em; color: var(--red-strong); }
 .rl-soon-page { min-height: 440px; display: grid; place-items: center; text-align: center; padding: 60px 24px; }
 
 /* ============================================================
@@ -852,8 +815,7 @@ input, select, textarea, a {
 
 /* Kartu produk — angkat saat hover. */
 a.rl-card, .rl-carousel-item .rl-card { transition: transform .3s var(--ease), box-shadow .3s var(--ease), border-color .3s var(--ease); }
-a.rl-card:hover, .rl-carousel-item .rl-card:hover { transform: translateY(-6px); box-shadow: 0 18px 44px rgba(0, 0, 0, .22); }
-.rl-public a.rl-card:hover, .rl-public .rl-carousel-item .rl-card:hover { border-color: rgba(222, 31, 38, .45); box-shadow: 0 18px 44px rgba(0, 0, 0, .5), 0 0 0 1px rgba(222, 31, 38, .2); }
+a.rl-card:hover, .rl-carousel-item .rl-card:hover { transform: translateY(-6px); box-shadow: 0 18px 44px rgba(13, 16, 22, .16); }
 .rl-hardware-thumb svg, .rl-catalogue-img { transition: transform .55s var(--ease); }
 .rl-card:hover .rl-hardware-thumb svg,
 .rl-card:hover .rl-catalogue-img { transform: scale(1.09); }
@@ -862,6 +824,7 @@ a.rl-card:hover, .rl-carousel-item .rl-card:hover { transform: translateY(-6px);
 
 /* Aksesibilitas — hormati preferensi kurangi gerak. */
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
   .rl-hero::before { animation: none; }

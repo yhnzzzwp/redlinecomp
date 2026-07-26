@@ -7,7 +7,6 @@ namespace Tests\Feature;
 use App\Models\KategoriProduk;
 use App\Models\Produk;
 use App\Models\Service;
-use App\Models\Transaksi;
 use App\Enums\StatusService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,16 +15,23 @@ final class PublicZoneTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_katalog_menampilkan_produk_yang_diizinkan(): void
+    public function test_beranda_langsung_menampilkan_katalog_yang_diizinkan(): void
     {
         $kategori = KategoriProduk::create(['nama_kategori' => 'CPU']);
         Produk::create(['kategori_id' => $kategori->id, 'nama_produk' => 'Tampil', 'sku' => 'SKU-1', 'harga' => 1000, 'jumlah_produk' => 10, 'show_katalog' => true]);
         Produk::create(['kategori_id' => $kategori->id, 'nama_produk' => 'Sembunyi', 'sku' => 'SKU-2', 'harga' => 1000, 'jumlah_produk' => 10, 'show_katalog' => false]);
 
-        $this->get(route('catalogue'))
+        $this->get(route('landing'))
             ->assertOk()
+            ->assertSee('Katalog Produk')
             ->assertSee('Tampil')
             ->assertDontSee('Sembunyi');
+    }
+
+    public function test_alamat_catalogue_lama_dialihkan_ke_beranda(): void
+    {
+        $this->get('/catalogue?cari=rtx')
+            ->assertRedirect(route('landing', ['cari' => 'rtx']));
     }
 
     public function test_detail_katalog_bisa_diakses_jika_diizinkan(): void
@@ -58,57 +64,11 @@ final class PublicZoneTest extends TestCase
             ->assertSee('Nomor resi tidak ditemukan');
     }
 
-    public function test_cek_nota_menampilkan_detail_jika_ada(): void
-    {
-        $pegawai = \App\Models\Pegawai::create([
-            'nama_pegawai' => 'Test', 'username' => 'test2', 'email' => 'test2@uji.test', 'password' => 'pass', 'role' => 'Karyawan', 'masih_bekerja' => true
-        ]);
-        $transaksi = Transaksi::create([
-            'kode_nota' => 'INV-001', 'pegawai_id' => $pegawai->id, 'subtotal' => 100, 'total' => 100, 'bayar' => 100, 'kembalian' => 0
-        ]);
-
-        $this->get(route('cek.nota', ['nota' => 'INV-001']))
-            ->assertOk()
-            ->assertSee('INV-001');
-
-        $this->get(route('cek.nota', ['nota' => 'SALAH']))
-            ->assertOk()
-            ->assertSee('Kode nota tidak ditemukan');
-    }
 
     public function test_halaman_about_bisa_diakses(): void
     {
         $this->get(route('about'))->assertOk()->assertSee('Tentang Kami');
     }
 
-    public function test_nota_pdf_publik_bisa_diunduh_dengan_kode(): void
-    {
-        $pegawai = \App\Models\Pegawai::create([
-            'nama_pegawai' => 'Test', 'username' => 'test3', 'email' => 'test3@uji.test', 'password' => 'pass', 'role' => 'Karyawan', 'masih_bekerja' => true,
-        ]);
-        Transaksi::create([
-            'kode_nota' => 'INV-777', 'pegawai_id' => $pegawai->id, 'subtotal' => 100, 'total' => 100, 'bayar' => 100, 'kembalian' => 0,
-        ]);
 
-        $this->get(route('nota.pdf', ['kode' => 'INV-777']))
-            ->assertOk()
-            ->assertHeader('Content-Type', 'application/pdf');
-
-        $this->get(route('nota.pdf', ['kode' => 'TIDAK-ADA']))->assertNotFound();
-    }
-
-    public function test_halaman_cek_nota_menautkan_pdf_publik_bukan_route_internal(): void
-    {
-        $pegawai = \App\Models\Pegawai::create([
-            'nama_pegawai' => 'Test', 'username' => 'test4', 'email' => 'test4@uji.test', 'password' => 'pass', 'role' => 'Karyawan', 'masih_bekerja' => true,
-        ]);
-        $transaksi = Transaksi::create([
-            'kode_nota' => 'INV-778', 'pegawai_id' => $pegawai->id, 'subtotal' => 100, 'total' => 100, 'bayar' => 100, 'kembalian' => 0,
-        ]);
-
-        $this->get(route('cek.nota', ['nota' => 'INV-778']))
-            ->assertOk()
-            ->assertSee(route('nota.pdf', ['kode' => 'INV-778']), false)
-            ->assertDontSee(route('pos.nota', $transaksi), false);
-    }
 }

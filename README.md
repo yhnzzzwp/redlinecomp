@@ -20,7 +20,7 @@ docker compose exec app php artisan migrate --seed
 
 | Portal | URL | Untuk |
 |--------|-----|-------|
-| Situs publik | http://localhost:8080 | Customer (katalog, cek servis/nota) |
+| Situs publik | http://localhost:8080 | Customer (beranda = katalog langsung, lacak servis) |
 | Portal Karyawan | http://karyawan.localhost:8080 | Login karyawan (POS, produk, servis) |
 | Admin Console | http://admin.localhost:8080 | Login owner (semua + analytics, promo, pegawai) |
 

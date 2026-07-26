@@ -8,27 +8,16 @@ use App\Http\Controllers\Controller;
 use App\Models\KategoriProduk;
 use App\Models\Produk;
 use App\Models\Service;
-use App\Models\Transaksi;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 final class PublicController extends Controller
 {
-    public function landing(): View
-    {
-        return view('public.landing', [
-            'unggulan' => Produk::query()
-                ->where('show_katalog', true)
-                ->with('kategori')
-                ->latest()
-                ->limit(10)
-                ->get(),
-        ]);
-    }
-
-    public function catalogue(Request $request): View
+    /**
+     * Beranda = hero + katalog langsung: pengunjung melihat produk
+     * tanpa harus berpindah halaman (permintaan Owner).
+     */
+    public function landing(Request $request): View
     {
         $query = Produk::query()->where('show_katalog', true)->with('kategori')->latest();
 
@@ -48,7 +37,7 @@ final class PublicController extends Controller
             $query->where('nama_produk', 'like', '%' . $request->input('cari') . '%');
         }
 
-        return view('public.catalogue.index', [
+        return view('public.landing', [
             'produk' => $query->paginate(12)->withQueryString(),
             'kategori' => KategoriProduk::all(),
             'kategori_aktif' => $request->input('kategori'),
@@ -97,44 +86,8 @@ final class PublicController extends Controller
         ]);
     }
 
-    public function cekNota(Request $request): View
-    {
-        $transaksi = null;
-        if ($request->filled('nota')) {
-            $transaksi = Transaksi::with(['items', 'pegawai'])->where('kode_nota', $request->input('nota'))->first();
-            if ($transaksi) {
-                if ($transaksi->nomor_hp_pembeli) {
-                    $transaksi->nomor_hp_pembeli = '****' . substr($transaksi->nomor_hp_pembeli, -4);
-                }
-            } else {
-                session()->flash('error', 'Kode nota tidak ditemukan.');
-            }
-        }
-
-        return view('public.cek_nota', [
-            'transaksi' => $transaksi,
-            'nota' => $request->input('nota'),
-        ]);
-    }
-
     public function about(): View
     {
         return view('public.about');
-    }
-
-    /**
-     * Nota PDF untuk customer, diakses dengan kode nota (bukan id) —
-     * setara akses struk fisik yang memuat kode yang sama. PDF tidak
-     * memuat data sensitif (tanpa nomor HP); route dibatasi throttle.
-     */
-    public function notaPdf(string $kode): Response
-    {
-        $transaksi = Transaksi::query()
-            ->with(['items', 'promo', 'pegawai'])
-            ->where('kode_nota', $kode)
-            ->firstOrFail();
-
-        return Pdf::loadView('pdf.nota', ['t' => $transaksi])
-            ->stream("nota-{$transaksi->kode_nota}.pdf");
     }
 }

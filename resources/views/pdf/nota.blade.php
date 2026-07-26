@@ -111,10 +111,6 @@
                     <tr><td>Terbayar</td><td>{{ $rp($t->bayar) }}</td></tr>
                     <tr><td>Kembali</td><td>{{ $rp($t->kembalian) }}</td></tr>
                 </table>
-                <div class="qr-container">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ urlencode(url('/cek-nota?nota='.$t->kode_nota)) }}" alt="QR Code">
-                    <div class="qr-text">Scan untuk verifikasi keaslian dokumen</div>
-                </div>
             </td>
         </tr>
     </table>
