@@ -58,9 +58,17 @@ final class PwaTest extends TestCase
 
         $this->assertNotEmpty($ikon);
         foreach ($ikon as $entri) {
-            $this->assertFileExists(public_path($entri['src']), "Ikon {$entri['src']} tidak ditemukan");
+            $jalur = public_path($entri['src']);
+            $this->assertFileExists($jalur, "Ikon {$entri['src']} tidak ditemukan");
+
+            // Dimensi file nyata harus cocok dengan deklarasi `sizes` di manifest
+            // (menjaga regenerasi via scripts/buat-ikon-pwa.php tetap benar).
+            [$lebar, $tinggi] = getimagesize($jalur) ?: [0, 0];
+            $this->assertSame($entri['sizes'], "{$lebar}x{$tinggi}", "Dimensi {$entri['src']} tidak cocok");
         }
-        $this->assertFileExists(public_path('icons/apple-touch-icon.png'));
+
+        [$lebar, $tinggi] = getimagesize(public_path('icons/apple-touch-icon.png')) ?: [0, 0];
+        $this->assertSame('180x180', "{$lebar}x{$tinggi}");
     }
 
     public function test_layout_internal_memuat_tag_pemasangan_pwa(): void
@@ -77,6 +85,17 @@ final class PwaTest extends TestCase
             ->assertSee('rel="manifest"', false)
             ->assertSee(route('pwa.manifest'))
             ->assertSee('apple-touch-icon');
+    }
+
+    public function test_halaman_login_memuat_link_manifest(): void
+    {
+        $this->usePortal('staff');
+
+        // Kasir bisa memasang POS dari halaman pertama yang ia lihat di perangkat baru.
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee('rel="manifest"', false)
+            ->assertSee(route('pwa.manifest'));
     }
 
     public function test_halaman_publik_tanpa_tag_pwa(): void

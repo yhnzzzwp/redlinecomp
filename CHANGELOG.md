@@ -4,9 +4,9 @@
 ### Ditambahkan
 - **Manifest PWA** (`/manifest.webmanifest`) disajikan via route di grup `portal:internal` — dari host publik **404** (zona internal tetap tersembunyi), nama aplikasi mengikuti portal (`SIRC POS · Portal Karyawan` / `· Admin Console`), `start_url` ke `/pos`, tampil `standalone`; tanpa auth karena browser mengambil manifest tanpa cookie sesi.
 - **Ikon PWA** (`public/icons/`): 192/512 + varian maskable + `apple-touch-icon` — monogram RL Barlow Condensed 800 Italic + bar merah bercelah 18° di atas carbon-950, digenerate lokal via `scripts/buat-ikon-pwa.php` (PHP GD + font self-host proyek; nol aset pihak ketiga).
-- **Meta pemasangan** di layout internal: `theme-color`, `link manifest`, `apple-touch-icon`, `apple-mobile-web-app-*` — layout publik tidak disentuh.
-- Smoke test produksi: +2 cek (manifest 200 di portal karyawan, 404 di host publik) — kini 13 cek lokal.
-- 6 test baru (manifest per portal, 404 publik, ikon benar-benar ada, tag di layout internal, publik bersih) — total 86 test.
+- **Meta pemasangan** di layout internal (`theme-color`, `link manifest`, `apple-touch-icon`, `mobile-web-app-capable` + varian apple) **dan link manifest di halaman login/2FA** — kasir bisa memasang POS dari halaman pertama di perangkat baru; layout publik tidak disentuh.
+- Smoke test produksi: +3 cek (manifest 200 di portal karyawan & admin, 404 di host publik) — kini 14 cek lokal.
+- 7 test baru (manifest per portal, 404 publik, ikon ada **+ dimensi cocok deklarasi `sizes`**, tag di layout internal & login, publik bersih) — total 87 test.
 ### Catatan
 - Service worker/offline **sengaja belum dibuat** (CSP ketat; dievaluasi belakangan sesuai docs/09 §3).
 

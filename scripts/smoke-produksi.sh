@@ -45,6 +45,7 @@ HA="$(ambil_header "$SCHEME://$ADMIN$PORT/login")"
 cek "noindex (X-Robots-Tag)"      'noindex' "$(printf '%s' "$HA" | grep -i 'X-Robots-Tag' || echo 'TIDAK-ADA')"
 cek "robots.txt melarang"         'Disallow: /' "$(curl -sk "$SCHEME://$ADMIN$PORT/robots.txt")"
 cek "cookie sesi HttpOnly"        '[Hh]ttp[Oo]nly' "$(printf '%s' "$HA" | grep -i 'set-cookie' || echo 'TIDAK-ADA')"
+cek "manifest PWA 200"            '^200$' "$(ambil_status "$SCHEME://$ADMIN$PORT/manifest.webmanifest")"
 
 echo "== PORTAL KARYAWAN ($SCHEME://$STAFF$PORT) =="
 cek "/login karyawan 200"         '^200$' "$(ambil_status "$SCHEME://$STAFF$PORT/login")"

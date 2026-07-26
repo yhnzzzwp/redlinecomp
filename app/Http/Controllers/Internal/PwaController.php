@@ -14,7 +14,9 @@ use Illuminate\Http\Request;
  * kasir (Add to Home Screen, tampil standalone).
  *
  * Disajikan lewat route di grup portal:internal, BUKAN file statis, supaya:
- *  - dari host publik manifest ini 404 (keberadaan portal tetap tersembunyi);
+ *  - dari host publik manifest ini 404 (keberadaan portal tetap tersembunyi;
+ *    file ikon di public/icons memang tersaji statis di semua host, sama
+ *    seperti font — isinya hanya monogram brand, tanpa jejak zona internal);
  *  - nama aplikasi mengikuti portal (karyawan vs admin).
  *
  * Sengaja tanpa middleware auth: browser mengambil manifest tanpa membawa

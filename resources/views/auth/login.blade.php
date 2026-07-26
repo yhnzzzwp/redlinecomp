@@ -10,6 +10,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <meta name="theme-color" content="#0b0d11">
+    {{-- PWA: kasir bisa memasang POS langsung dari halaman login (perangkat baru). --}}
+    <link rel="manifest" href="{{ route('pwa.manifest') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icons/apple-touch-icon.png') }}">
     <title>Login · {{ $portal->label() }} · Redline Komputer</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
