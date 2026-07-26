@@ -4,8 +4,8 @@
 > berisi semua yang SUDAH dikerjakan, yang BELUM, keputusan desain yang wajib dipertahankan,
 > dan cara memulai lagi.
 >
-> Pembaruan terakhir: **27 Juli 2026** · commit `af661cb` · branch `main`
-> (`origin` github.com/yhnzzzwp/redlinecomp) · **89 test lulus** · Larastan level 5 = 0 error.
+> Pembaruan terakhir: **27 Juli 2026** · commit `ccca2f6` · branch `main`
+> (`origin` github.com/yhnzzzwp/redlinecomp) · **92 test lulus** · Larastan level 5 = 0 error.
 
 ---
 
@@ -27,7 +27,7 @@ Kredensial demo: `owner`/`password` (portal admin) · `rijal`/`password` (portal
 ### Alur kerja harian
 ```bash
 colima start && docker compose up -d      # nyalakan (macOS)
-php artisan test                          # 89 test — harus selalu hijau
+php artisan test                          # 92 test — harus selalu hijau
 ./vendor/bin/phpstan analyse --memory-limit=1G
 npm run build                             # bila menyentuh CSS/JS
 docker compose exec -T app php artisan migrate --force   # bila ada migrasi baru
@@ -62,8 +62,9 @@ Total perubahan sejak `32ba211`: **±5.343 baris tambah / 1.532 hapus** dalam 23
 | `c2b1db0` | **Fitur 2FA TOTP Owner DIHAPUS** (keputusan Owner): halaman/menu Keamanan, tantangan login, kolom DB (drop), dependensi google2fa — login Owner kembali password saja |
 | `edf0dfb` | **UI mobile**: chip Kategori POS digulir ke samping (bukan wrap), menu publik jadi drawer meluncur dari kanan (overlay+X+Escape, vanilla JS patuh CSP; fix `backdrop-filter` containing-block via `::before`) |
 | `186db79`+`af661cb` | **Service worker offline shell PWA POS**: `/build` cache-first, `/fonts`+`/icons` stale-while-revalidate, navigasi selalu jaringan → fallback `offline.html`; non-GET & HTML terautentikasi TIDAK PERNAH disentuh (**checkout offline sengaja tak didukung** — dijaga test); registrasi ter-gate link manifest; CSP `worker-src` internal `'self'` / publik `'none'` |
+| `ccca2f6` | **WA semi-otomatis saat ganti status** (keputusan Owner, tetap wa.me tanpa API): centang "kirim WA" default aktif → WhatsApp terbuka otomatis berisi pesan status baru, banner tombol = fallback popup-diblokir; template disatukan ke `App\Support\Wa` (estimasi biaya kini hanya di status Selesai — sadar) |
 
-Kualitas terkunci otomatis: **89 test / 322 assertion**, Larastan bersih, CI GitHub Actions
+Kualitas terkunci otomatis: **92 test / 335 assertion**, Larastan bersih, CI GitHub Actions
 (test+phpstan+audit PHP · npm audit+build), `composer audit` & `npm audit` bersih.
 
 ---
@@ -78,7 +79,6 @@ akuntan lewat `config/redline.php` bagian `akun` bila perlu).
 ### Ide pasca-P3 (dari laporan evaluasi, belum diprioritaskan)
 - Jurnal balik otomatis untuk Void/Refund lintas periode di Ekspor Jurnal Akuntansi
   (sekarang: Void dikecualikan + peringatan di sheet Info; koreksi lintas periode manual).
-- Notifikasi WA otomatis saat ganti status (sekarang: tombol manual by design, tanpa API).
 - Manajemen sesi aktif (logout perangkat lain).
 - Audit aksesibilitas formal + Lighthouse budget.
 - Alpine CSP build untuk portal internal (publik sudah tanpa `unsafe-eval`; internal masih pakai
@@ -87,6 +87,8 @@ akuntan lewat `config/redline.php` bagian `akun` bila perlu).
 ### Catatan kecil yang diketahui (bukan bug)
 - Produk hasil impor Excel milik pemakai belum berisi `harga_modal` → kolom Laba tampil 100%.
   Isi via edit produk / ekspor-ubah-impor agar laporan laba bermakna.
+- Pengambilan servis via POS men-set status `SudahDiambil` langsung TANPA menawarkan WA —
+  **by design** (customer sedang berdiri di kasir); tombol manual "Kirim Update WA" tetap ada.
 - `TrustHosts` nonaktif di `APP_ENV=local` & saat test (perilaku bawaan Laravel) — aktif di produksi.
 - Opsi hardening belum diterapkan: `/sw.js`, `/offline.html`, `/icons/*` statis ikut tersaji di host
   publik (isinya generik, registrasi SW publik sudah diblok CSP `worker-src 'none'`); bila ingin nol

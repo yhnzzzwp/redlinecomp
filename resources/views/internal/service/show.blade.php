@@ -76,8 +76,8 @@
             @if (count($allowed) > 0)
             <div class="rl-card p-4">
                 <h3 class="rl-section-title mb-3">Update Status</h3>
-                @if ($errors->has('status'))
-                    <div class="rl-form-errors mb-2 rl-text-sm text-danger">{{ $errors->first('status') }}</div>
+                @if ($errors->any())
+                    <div class="rl-form-errors mb-2 rl-text-sm text-danger">{{ $errors->first() }}</div>
                 @endif
                 <form method="POST" action="{{ route('service.status', $service) }}">
                     @csrf
@@ -95,7 +95,10 @@
                     </div>
                     @if (\App\Support\Wa::normalisasi($service->nomor_hp_customer) !== null)
                         <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" name="kirim_wa" id="kirim_wa" value="1" checked>
+                            {{-- Sticky: bila submit gagal validasi, pilihan staf (termasuk
+                                 sengaja TIDAK mencentang) dipertahankan — WA punya efek keluar. --}}
+                            <input class="form-check-input" type="checkbox" name="kirim_wa" id="kirim_wa" value="1"
+                                   @checked(old('kirim_wa', ! session()->hasOldInput()))>
                             <label class="form-check-label rl-text-sm" for="kirim_wa">
                                 Kirim update WA ke customer setelah disimpan
                             </label>

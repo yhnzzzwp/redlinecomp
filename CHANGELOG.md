@@ -1,5 +1,14 @@
 # Changelog — SIRC
 
+## [Servis] — Notifikasi WA semi-otomatis saat ganti status
+### Ditambahkan
+- **Centang "Kirim update WA"** (default aktif; hanya tampil bila customer punya nomor HP; sticky saat validasi gagal) di form ganti status. Setelah tersimpan, **WhatsApp terbuka otomatis** dengan pesan status terbaru terisi; banner bertombol tetap tampil sebagai fallback 1-klik bila popup diblokir (izinkan popup sekali → selalu otomatis).
+- Tetap **wa.me tanpa API/gateway** (keputusan Owner — aturan nol pihak ketiga utuh): "otomatis" berarti terbuka siap-kirim, bukan terkirim di latar belakang.
+### Diubah
+- Template pesan & normalisasi nomor kini **satu sumber** (`App\Support\Wa`) — `updateStatus` sempat merakit pesan sendiri dengan format berbeda. **Keputusan sadar**: estimasi biaya kini hanya disebut pada status *Selesai* (total bisa berubah selama pengerjaan part; konsisten dengan tombol manual sejak P3.2).
+- Blok galat form status kini menampilkan semua galat validasi (sebelumnya hanya galat `status` — galat catatan/centang gagal diam-diam).
+- 3 test baru + 1 diperkuat — total 92 test / 335 assertion.
+
 ## [PWA Offline] — Service worker offline shell untuk POS
 ### Ditambahkan
 - **Service worker** (`public/sw.js`, vanilla tanpa build step): `/build` cache-first (hash Vite, immutable), `/fonts` + `/icons` stale-while-revalidate (nama tetap — pembaruan file tetap sampai), **navigasi selalu jaringan** dengan fallback `offline.html` bermerek saat koneksi putus.
