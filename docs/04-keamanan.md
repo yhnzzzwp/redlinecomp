@@ -17,6 +17,7 @@ Pertahanan berlapis. Target: tidak bisa ditembus dengan tools umum (SQLi, XSS, C
 | IDOR | route-model binding + pemisahan portal per role | ✅ |
 | Session hijack | cookie `HttpOnly` + `SameSite=Lax` + `Secure`(prod) + **host-only** (`SESSION_DOMAIN=null`) → sesi antar subdomain terisolasi; timeout **30 menit** (§3.5); regenerate id saat login | ✅ |
 | Host-header injection | `TrustHosts` — hanya tiga host portal yang diterima (aktif otomatis di non-local) | ✅ |
+| Pencurian password Owner | **2FA TOTP** (RFC 6238) di Admin Console: login Owner ber-2FA ditahan sampai kode authenticator benar; 6 kode pemulihan sekali-pakai (hash); secret terenkripsi di DB | ✅ opsional per akun |
 | Clickjacking | header `X-Frame-Options: SAMEORIGIN` + CSP `frame-ancestors` | ✅ |
 | MIME sniffing | `X-Content-Type-Options: nosniff` | ✅ |
 | Pengindeksan portal | `X-Robots-Tag: noindex` + `robots.txt` dinamis (`Disallow: /` di host portal) + `<meta name="robots">` di login | ✅ |

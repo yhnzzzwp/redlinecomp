@@ -83,7 +83,7 @@ final class AnalyticsController extends Controller
             'pendapatanKategori',
             'dari',
             'sampai'
-        ));
+        ) + ['labaProduk' => $this->labaPerProduk($dari, $sampai)]);
     }
 
     public function cetak(Request $request): mixed
@@ -118,9 +118,35 @@ final class AnalyticsController extends Controller
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('internal.analytics.pdf', compact(
             'produkTerlaris', 'pendapatanKategori', 'totalPendapatan', 'totalProfit', 'dari', 'sampai'
-        ));
+        ) + ['labaProduk' => $this->labaPerProduk($dari, $sampai)]);
 
         return $pdf->download('Laporan-Penjualan-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Laba per produk pada periode: memanfaatkan harga_modal yang sudah ada
+     * di skema — qty, omzet, modal, laba, terurut laba terbesar.
+     *
+     * @return \Illuminate\Support\Collection<int, ItemTransaksi>
+     */
+    private function labaPerProduk(\Carbon\Carbon $dari, \Carbon\Carbon $sampai): \Illuminate\Support\Collection
+    {
+        return ItemTransaksi::select(
+            'nama_item',
+            DB::raw('SUM(item_transaksi.jumlah) as qty'),
+            DB::raw('SUM(item_transaksi.subtotal) as omzet'),
+            DB::raw('SUM(COALESCE(produk.harga_modal, 0) * item_transaksi.jumlah) as modal'),
+            DB::raw('SUM(item_transaksi.subtotal - (COALESCE(produk.harga_modal, 0) * item_transaksi.jumlah)) as laba'),
+        )
+            ->leftJoin('produk', 'item_transaksi.produk_id', '=', 'produk.id')
+            ->where('item_transaksi.tipe', TipeItem::Produk->value)
+            ->whereHas('transaksi', function ($q) use ($dari, $sampai) {
+                $q->whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
+            })
+            ->groupBy('nama_item')
+            ->orderByDesc('laba')
+            ->limit(10)
+            ->get();
     }
 
     public function exportCsv(Request $request): StreamedResponse

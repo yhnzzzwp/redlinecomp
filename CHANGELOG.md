@@ -1,5 +1,13 @@
 # Changelog — SIRC
 
+## [P3 Fitur Bisnis] — WA servis, 2FA Owner, struk thermal, laba per produk
+### Ditambahkan
+- **Notifikasi WhatsApp status servis** (`App\Support\Wa`): tombol "Kirim Update WA" di halaman servis membuka wa.me dengan pesan terisi sesuai status terkini (template per status, nomor dinormalisasi 0→62, tautan lacak publik) — tanpa API pihak ketiga.
+- **2FA TOTP untuk Owner** di Admin Console (pragmarx/google2fa, RFC 6238): halaman Keamanan (aktifkan via kode, nonaktifkan via password), login ditahan di tantangan 2FA sampai kode benar, **6 kode pemulihan sekali-pakai** (ditampilkan sekali, disimpan sebagai hash), secret terenkripsi; menu sidebar "Keamanan" (Owner).
+- **Struk thermal 80mm** (`/pos/struk/{trx}`): tampilan cetak monospace hemat kertas untuk printer thermal via dialog print browser; tombol "Struk" di daftar transaksi.
+- **Laba per Produk** di Analytics + PDF laporan: qty, omzet, modal (dari `harga_modal`), laba, margin% — terurut laba terbesar.
+- 12 test baru (WA 4 · TOTP 7 · struk 1) + assertion laba; total 73 test.
+
 ## [P2 Persiapan Go-Live] — Backup, deploy, CSP ketat, aksesibilitas
 ### Ditambahkan
 - **Backup harian** `scripts/backup-db.sh` (mysqldump single-transaction, validasi isi, retensi otomatis 30 hari — SRS §3.5) + `scripts/restore-db.sh` (dengan konfirmasi untuk DB utama). **Restore teruji**: dipulihkan ke DB uji, jumlah baris seluruh tabel identik.

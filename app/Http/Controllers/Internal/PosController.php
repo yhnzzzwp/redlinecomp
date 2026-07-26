@@ -54,4 +54,12 @@ final class PosController extends Controller
         return Pdf::loadView('pdf.nota', ['t' => $transaksi])
             ->stream("nota-{$transaksi->kode_nota}.pdf");
     }
+
+    /** Struk 80mm untuk printer thermal — dicetak lewat dialog print browser. */
+    public function struk(Transaksi $transaksi): ViewInstance|View
+    {
+        $transaksi->load(['items', 'promo', 'pegawai']);
+
+        return view('internal.struk', ['t' => $transaksi]);
+    }
 }

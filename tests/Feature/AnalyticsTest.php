@@ -34,7 +34,8 @@ final class AnalyticsTest extends TestCase
     {
         $this->actingAs($this->owner)->get(route('analytics'))
             ->assertOk()
-            ->assertSee('Analisis Penjualan');
+            ->assertSee('Analisis Penjualan')
+            ->assertSee('Laba per Produk');
     }
 
     public function test_owner_bisa_cetak_laporan(): void

@@ -77,6 +77,34 @@
         </tbody>
     </table>
 
+    <h3>Laba per Produk (estimasi dari harga modal saat ini)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Nama Produk</th>
+                <th class="text-center">Qty</th>
+                <th class="text-right">Omzet</th>
+                <th class="text-right">Modal</th>
+                <th class="text-right">Laba</th>
+                <th class="text-right">Margin</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($labaProduk as $p)
+                <tr>
+                    <td>{{ $p->nama_item }}</td>
+                    <td class="text-center">{{ $p->qty }}</td>
+                    <td class="text-right">Rp {{ number_format((int) $p->omzet, 0, ',', '.') }}</td>
+                    <td class="text-right">Rp {{ number_format((int) $p->modal, 0, ',', '.') }}</td>
+                    <td class="text-right"><b>Rp {{ number_format((int) $p->laba, 0, ',', '.') }}</b></td>
+                    <td class="text-right">{{ $p->omzet > 0 ? number_format($p->laba / $p->omzet * 100, 1, ',', '.') : 0 }}%</td>
+                </tr>
+            @empty
+                <tr><td colspan="6" class="text-center">Belum ada data</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+
     <div class="footer">
         <p>Dicetak oleh: {{ auth()->user()->nama_pegawai ?? 'Sistem' }}</p>
         <p>Tanggal: {{ now()->translatedFormat('d F Y, H:i') }}</p>

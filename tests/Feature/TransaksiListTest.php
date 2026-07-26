@@ -36,4 +36,21 @@ final class TransaksiListTest extends TestCase
     {
         $this->get(route('transaksi.index'))->assertRedirect(route('login'));
     }
+
+    public function test_struk_thermal_bisa_dibuka_kasir(): void
+    {
+        $trx = \App\Models\Transaksi::create([
+            'kode_nota' => 'INV-STRUK', 'pegawai_id' => $this->karyawan->id,
+            'subtotal' => 150_000, 'total' => 150_000, 'bayar' => 200_000, 'kembalian' => 50_000,
+        ]);
+
+        $this->actingAs($this->karyawan)->get(route('pos.struk', $trx))
+            ->assertOk()
+            ->assertSee('INV-STRUK')
+            ->assertSee('Cetak Struk')
+            ->assertSee('Rp 150.000');
+
+        auth()->logout();
+        $this->get(route('pos.struk', $trx))->assertRedirect(route('login'));
+    }
 }

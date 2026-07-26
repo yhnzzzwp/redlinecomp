@@ -160,4 +160,38 @@
             </tbody>
         </table>
     </div>
+
+    {{-- Laba per Produk --}}
+    <div class="rl-card mt-3 overflow-hidden">
+        <div class="p-4 border-bottom rl-divider-light">
+            <h3 class="rl-section-title mb-0">Laba per Produk (Periode Ini)</h3>
+            <p class="rl-text-xs rl-text-muted mb-0 mt-1">Estimasi berdasarkan harga modal produk saat ini &mdash; terurut laba terbesar.</p>
+        </div>
+        <table class="rl-table">
+            <thead>
+                <tr>
+                    <th>Nama Produk</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-end">Omzet</th>
+                    <th class="text-end">Modal</th>
+                    <th class="text-end">Laba</th>
+                    <th class="text-end">Margin</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($labaProduk as $p)
+                    <tr>
+                        <td class="fw-semibold">{{ $p->nama_item }}</td>
+                        <td class="text-center tnum">{{ $p->qty }}</td>
+                        <td class="text-end tnum">{{ $rp($p->omzet) }}</td>
+                        <td class="text-end tnum rl-text-muted">{{ $rp($p->modal) }}</td>
+                        <td class="text-end tnum fw-bold {{ $p->laba >= 0 ? 'text-success' : 'text-danger' }}">{{ $rp($p->laba) }}</td>
+                        <td class="text-end tnum">{{ $p->omzet > 0 ? number_format($p->laba / $p->omzet * 100, 1, ',', '.') : 0 }}%</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="6" class="text-center py-4 rl-text-sm text-muted">Belum ada penjualan produk periode ini.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </x-layouts.app>
