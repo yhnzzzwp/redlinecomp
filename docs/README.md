@@ -12,5 +12,6 @@ Dokumen ini ditulis **seiring pembangunan** agar setiap keputusan tercatat.
 | 06 | [Langkah Selanjutnya](06-langkah-selanjutnya.md) | Roadmap sisa fitur, alur kerja, checklist deploy |
 | 07 | [Animasi & Transisi](07-animasi-transisi.md) | Guideline menambah animasi transisi konsisten |
 | 08 | [Deploy Produksi](08-deploy-produksi.md) | VPS + Docker + subdomain, TLS, backup, smoke test |
+| 09 | [Status & Titik Lanjut](09-status-dan-lanjutan.md) | **Serah-terima**: semua yang sudah/belum dikerjakan, keputusan desain, cara melanjutkan |
 
 Riwayat perubahan: [../CHANGELOG.md](../CHANGELOG.md)
