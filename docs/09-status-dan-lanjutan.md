@@ -4,7 +4,7 @@
 > berisi semua yang SUDAH dikerjakan, yang BELUM, keputusan desain yang wajib dipertahankan,
 > dan cara memulai lagi.
 >
-> Pembaruan terakhir: **27 Juli 2026** · commit `4668b32` · branch `main`
+> Pembaruan terakhir: **27 Juli 2026** · commit `edf0dfb` · branch `main`
 > (`origin` github.com/yhnzzzwp/redlinecomp) · **87 test lulus** · Larastan level 5 = 0 error.
 
 ---
@@ -27,7 +27,7 @@ Kredensial demo: `owner`/`password` (portal admin) · `rijal`/`password` (portal
 ### Alur kerja harian
 ```bash
 colima start && docker compose up -d      # nyalakan (macOS)
-php artisan test                          # 80 test — harus selalu hijau
+php artisan test                          # 87 test — harus selalu hijau
 ./vendor/bin/phpstan analyse --memory-limit=1G
 npm run build                             # bila menyentuh CSS/JS
 docker compose exec -T app php artisan migrate --force   # bila ada migrasi baru
@@ -38,7 +38,7 @@ git add -A && git commit && git push origin main
 
 ## 2. SUDAH Dikerjakan (kronologis, per commit)
 
-Total perubahan sejak `32ba211`: **±4.956 baris tambah / 1.802 hapus** dalam 12 commit.
+Total perubahan sejak `32ba211`: **±5.343 baris tambah / 1.532 hapus** dalam 23 commit.
 
 | Commit | Isi |
 |---|---|
@@ -56,21 +56,23 @@ Total perubahan sejak `32ba211`: **±4.956 baris tambah / 1.802 hapus** dalam 12
 | `d69c3cf` | **P3.5 Stok opname + mutasi stok**: tabel `mutasi_stok`, `StokService` satu pintu, tercatat dari 5 titik (POS/void/edit/impor/opname), halaman Opname (selisih live) + Riwayat Mutasi (filter) + tombol Riwayat per produk |
 | `c3ca92d` | **P3.6 PWA POS**: manifest via route `portal:internal` (404 dari publik, nama per portal, `start_url` `/pos`), ikon RL digenerate lokal (`scripts/buat-ikon-pwa.php`, GD + font self-host), meta pemasangan di layout internal — **service worker sengaja belum** (CSP ketat, evaluasi belakangan) |
 | `d184761` | fix: hint password form pegawai menyebut aturan min 8 huruf+angka |
-| `4668b32` | **Poles PWA hasil review adversarial**: link manifest di halaman login/2FA (install dari perangkat baru), meta modern `mobile-web-app-capable`, smoke cek manifest karyawan+admin+publik (14 cek lokal), test dimensi PNG vs deklarasi `sizes` |
+| `4668b32` | **Poles PWA hasil review adversarial**: link manifest di halaman login (install dari perangkat baru), meta modern `mobile-web-app-capable`, smoke cek manifest karyawan+admin+publik (14 cek lokal), test dimensi PNG vs deklarasi `sizes` |
+| `cbcbdcd` | **P3.7 Ekspor Jurnal Akuntansi** (.xlsx, Owner): jurnal umum double-entry per transaksi (Kas/Bank/QRIS · Diskon · Pendapatan Produk/Servis · HPP↔Persediaan), 3 sheet (Jurnal+TOTAL, Rekap Akun, Info), bagan akun konfigurabel di `config/redline.php` |
+| `2d029b0` | **Integritas servis & jurnal (hasil review)**: POS menagih `totalBiaya()` (jasa+part — fix kurang tagih), mutasi part servis via `StokService` (tipe `Part Servis`), snapshot `harga_modal` (HPP tak berubah retroaktif), HPP part dijurnal, `lazy()` anti N+1, cap periode 1 tahun |
+| `c2b1db0` | **Fitur 2FA TOTP Owner DIHAPUS** (keputusan Owner): halaman/menu Keamanan, tantangan login, kolom DB (drop), dependensi google2fa — login Owner kembali password saja |
+| `edf0dfb` | **UI mobile**: chip Kategori POS digulir ke samping (bukan wrap), menu publik jadi drawer meluncur dari kanan (overlay+X+Escape, vanilla JS patuh CSP; fix `backdrop-filter` containing-block via `::before`) |
 
-Kualitas terkunci otomatis: **87 test / 312 assertion**, Larastan bersih, CI GitHub Actions
+Kualitas terkunci otomatis: **87 test / 300 assertion**, Larastan bersih, CI GitHub Actions
 (test+phpstan+audit PHP · npm audit+build), `composer audit` & `npm audit` bersih.
 
 ---
 
 ## 3. BELUM Dikerjakan (titik lanjut berikutnya)
 
-### Sisa roadmap P3 (ringan)
-1. **Ekspor akuntansi** — dasar sudah ada (`analytics.export` CSV per item + HPP + profit);
-   tinggal dibentuk ulang bila format akuntan spesifik dibutuhkan.
-
-_(PWA untuk POS ✅ selesai di `c3ca92d` + `4668b32`; yang tersisa dari ide PWA hanya
-evaluasi service-worker/offline — lihat ide pasca-P3.)_
+### Sisa roadmap P3
+**Tidak ada — roadmap P3 selesai seluruhnya.** PWA POS ✅ (`c3ca92d`+`4668b32`),
+Ekspor Jurnal Akuntansi ✅ (`cbcbdcd`+`2d029b0`; bagan akun tinggal disesuaikan
+akuntan lewat `config/redline.php` bagian `akun` bila perlu).
 
 ### Ide pasca-P3 (dari laporan evaluasi, belum diprioritaskan)
 - Jurnal balik otomatis untuk Void/Refund lintas periode di Ekspor Jurnal Akuntansi
