@@ -4,8 +4,8 @@
 > berisi semua yang SUDAH dikerjakan, yang BELUM, keputusan desain yang wajib dipertahankan,
 > dan cara memulai lagi.
 >
-> Pembaruan terakhir: **27 Juli 2026** · commit `d69c3cf` · branch `main` (sinkron dengan
-> `origin` github.com/yhnzzzwp/redlinecomp) · **80 test lulus** · Larastan level 5 = 0 error.
+> Pembaruan terakhir: **27 Juli 2026** · commit `c3ca92d` · branch `main`
+> (`origin` github.com/yhnzzzwp/redlinecomp) · **86 test lulus** · Larastan level 5 = 0 error.
 
 ---
 
@@ -54,21 +54,25 @@ Total perubahan sejak `32ba211`: **±4.956 baris tambah / 1.802 hapus** dalam 12
 | `4367840` | **P2 go-live**: `scripts/backup-db.sh` (harian, retensi 30 hari, **restore teruji** via `scripts/restore-db.sh`), `docs/08-deploy-produksi.md`, `scripts/smoke-produksi.sh` (lulus 11/11 lokal), **CSP publik tanpa `unsafe-eval`** (nav+filter publik = vanilla JS), password pegawai wajib huruf+angka, skip-link + aria stepper |
 | `605d86b` | **P3.1–P3.4**: tombol **Kirim Update WA** servis (`App\Support\Wa`, wa.me tanpa API), **2FA TOTP Owner** (halaman Keamanan, tantangan login, 6 kode pemulihan hash, secret terenkripsi), **struk thermal 80mm** (`/pos/struk/{trx}`), **Laba per Produk** di Analytics+PDF |
 | `d69c3cf` | **P3.5 Stok opname + mutasi stok**: tabel `mutasi_stok`, `StokService` satu pintu, tercatat dari 5 titik (POS/void/edit/impor/opname), halaman Opname (selisih live) + Riwayat Mutasi (filter) + tombol Riwayat per produk |
+| `c3ca92d` | **P3.6 PWA POS**: manifest via route `portal:internal` (404 dari publik, nama per portal, `start_url` `/pos`), ikon RL digenerate lokal (`scripts/buat-ikon-pwa.php`, GD + font self-host), meta pemasangan di layout internal, smoke +2 cek — **service worker sengaja belum** (CSP ketat, evaluasi belakangan) |
 
-Kualitas terkunci otomatis: **80 test / 288 assertion**, Larastan bersih, CI GitHub Actions
+Kualitas terkunci otomatis: **86 test / 306 assertion**, Larastan bersih, CI GitHub Actions
 (test+phpstan+audit PHP · npm audit+build), `composer audit` & `npm audit` bersih.
 
 ---
 
 ## 3. BELUM Dikerjakan (titik lanjut berikutnya)
 
-### Sisa roadmap P3 (ringan, urut usulan)
-1. **PWA untuk POS** — `manifest.webmanifest` + ikon + meta supaya POS bisa di-install
-   di HP/tablet kasir (evaluasi service-worker/offline belakangan; CSP sudah ketat, hati-hati).
-2. **Ekspor akuntansi** — dasar sudah ada (`analytics.export` CSV per item + HPP + profit);
+### Sisa roadmap P3 (ringan)
+1. **Ekspor akuntansi** — dasar sudah ada (`analytics.export` CSV per item + HPP + profit);
    tinggal dibentuk ulang bila format akuntan spesifik dibutuhkan.
 
+_(PWA untuk POS ✅ selesai di `c3ca92d`; yang tersisa dari ide PWA hanya evaluasi
+service-worker/offline — lihat ide pasca-P3.)_
+
 ### Ide pasca-P3 (dari laporan evaluasi, belum diprioritaskan)
+- Service worker/offline untuk PWA POS (manifest+ikon sudah ada; hati-hati CSP —
+  jangan longgarkan `unsafe-eval`, dan cache offline berisiko stok basi di kasir).
 - Notifikasi WA otomatis saat ganti status (sekarang: tombol manual by design, tanpa API).
 - Manajemen sesi aktif (logout perangkat lain).
 - Audit aksesibilitas formal + Lighthouse budget.
@@ -78,8 +82,6 @@ Kualitas terkunci otomatis: **80 test / 288 assertion**, Larastan bersih, CI Git
 ### Catatan kecil yang diketahui (bukan bug)
 - Produk hasil impor Excel milik pemakai belum berisi `harga_modal` → kolom Laba tampil 100%.
   Isi via edit produk / ekspor-ubah-impor agar laporan laba bermakna.
-- Hint teks di form pegawai belum menyebut aturan password baru (min 8 huruf+angka) — validasi
-  sudah menegakkannya, tinggal perbarui teks bila sempat.
 - `TrustHosts` nonaktif di `APP_ENV=local` & saat test (perilaku bawaan Laravel) — aktif di produksi.
 - Belum go-live: ikuti `docs/08-deploy-produksi.md` + `scripts/smoke-produksi.sh` saat domain/VPS siap.
 
@@ -113,14 +115,16 @@ app/Http/Middleware/    EnsurePortal (pemisah zona) · SecurityHeaders (CSP per 
 app/Services/           PosService · ProdukExcelService · StokService · ProductService ·
                         ServiceTicketService · PromoService · KodeGenerator
 app/Http/Controllers/   AuthController (login per portal + alur 2FA) ·
-  Internal/             TotpController · StokController · PosController (nota+struk) · …
+  Internal/             TotpController · StokController · PosController (nota+struk) ·
+                        PwaController (manifest per portal) · …
 resources/css/app.css   Design system v2 (token → komponen rl-* → responsif → motion)
 resources/js/app.js     Alpine (internal) + vanilla publik + guard view-transition + reveal
 resources/views/
   public/               landing (hero+katalog) · catalogue/show · cek_servis · about · soon
   internal/             dashboard · pos · struk · keamanan · stok/{opname,mutasi} · …
   auth/                 login (split per portal) · totp (tantangan 2FA)
-scripts/                backup-db.sh · restore-db.sh · smoke-produksi.sh
+scripts/                backup-db.sh · restore-db.sh · smoke-produksi.sh ·
+                        buat-ikon-pwa.php (regenerasi ikon public/icons)
 docs/08-deploy-produksi.md   Prosedur go-live lengkap
 docs/LAPORAN-EVALUASI-2026-07-26.md   Laporan evaluasi + roadmap asal (P0–P3)
 ```
