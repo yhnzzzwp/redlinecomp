@@ -7,15 +7,24 @@
             'harga' => (int) $p->harga,
             'stok' => (int) $p->jumlah_produk,
             'kategori' => $p->kategori?->nama_kategori ?? 'Lainnya',
+            'info' => 'Stok: ' . (int) $p->jumlah_produk,
             'tipe' => 'produk'
         ]);
         $serviceData = $services->map(fn ($s) => [
             'id' => 's_'.$s->id,
             'real_id' => $s->id,
             'nama' => 'Servis: ' . $s->nama_barang . ' (' . $s->nomor_resi . ')',
-            'harga' => (int) $s->biaya_service,
+            // WAJIB totalBiaya() (jasa + part), sama persis dengan yang ditagih
+            // PosService saat checkout — kalau di sini hanya biaya_service, kasir
+            // membayar sesuai layar lalu ditolak "pembayaran kurang".
+            'harga' => $s->totalBiaya(),
             'stok' => 1,
             'kategori' => 'Servis',
+            // Kasir harus tahu unit sudah selesai atau belum sebelum menagih —
+            // membayar di POS berarti unit dibawa pulang (status → Sudah Diambil).
+            'info' => $s->status === \App\Enums\StatusService::Selesai
+                ? 'Selesai — siap diambil'
+                : 'Belum selesai (' . $s->status->value . ')',
             'tipe' => 'service'
         ]);
         $allItemData = $produkData->concat($serviceData)->values();
@@ -70,7 +79,7 @@
                                     <button type="button" class="dropdown-item d-flex justify-content-between align-items-center px-3 py-2 text-start w-100 border-0 bg-transparent" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'" @click="if(p.stok > 0) { ubah(p, 1); openProductDropdown = false; }">
                                         <div>
                                             <div class="fw-semibold rl-text-sm" x-text="p.nama"></div>
-                                            <span class="rl-text-xs text-muted" x-text="`${p.kategori} · Stok: ${p.stok}`"></span>
+                                            <span class="rl-text-xs text-muted" x-text="`${p.kategori} · ${p.info}`"></span>
                                         </div>
                                         <div class="text-end ms-2">
                                             <span class="tnum text-danger fw-bold rl-text-xs d-block" x-text="rp(p.harga)"></span>
@@ -94,7 +103,7 @@
                                 </div>
 
                                 <div>
-                                    <div class="rl-text-xs text-muted mb-2" x-text="`Stok: ${p.stok}`"></div>
+                                    <div class="rl-text-xs text-muted mb-2" x-text="p.info"></div>
                                     <template x-if="qty(p.id) === 0">
                                         <button type="button" class="btn-ghost w-100 py-1" :disabled="p.stok === 0" @click="ubah(p, 1)">+ Tambah</button>
                                     </template>

@@ -26,9 +26,15 @@ final class PosController extends Controller
     {
         return view('internal.pos', [
             'produk' => Produk::query()->with('kategori')->orderBy('nama_produk')->get(),
+            // Semua servis yang BELUM diambil boleh ditagih — servis berstatus
+            // Selesai justru kasus utamanya (customer datang mengambil unit), jadi
+            // hanya SudahDiambil yang dikecualikan. Yang Selesai ditaruh paling atas.
             'services' => \App\Models\Service::query()
-                ->whereNotIn('status', [\App\Enums\StatusService::Selesai, \App\Enums\StatusService::SudahDiambil])
-                ->get(),
+                ->with('parts')
+                ->where('status', '!=', \App\Enums\StatusService::SudahDiambil)
+                ->get()
+                ->sortBy(fn (\App\Models\Service $s) => $s->status === \App\Enums\StatusService::Selesai ? 0 : 1)
+                ->values(),
             'kategori' => KategoriProduk::query()->orderBy('nama_kategori')->get(),
             'promo' => Promo::query()->where('aktif', true)->get(),
         ]);

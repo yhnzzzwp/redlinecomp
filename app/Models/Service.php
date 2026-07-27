@@ -31,8 +31,20 @@ class Service extends Model
     public function parts(): HasMany { return $this->hasMany(PartService::class, 'service_id'); }
     public function riwayat(): HasMany { return $this->hasMany(ServiceStatus::class, 'service_id')->latest(); }
 
+    /**
+     * Total yang ditagih ke customer = jasa + seluruh part terpasang.
+     * Satu-satunya sumber kebenaran harga servis (POS, WA, cek servis publik,
+     * halaman servis) — jangan hitung ulang biaya_service saja di tempat lain.
+     *
+     * Memakai relasi yang sudah di-eager-load bila tersedia supaya daftar servis
+     * (POS) tidak menembak satu query per baris.
+     */
     public function totalBiaya(): int
     {
-        return (int) $this->biaya_service + (int) $this->parts()->sum('subtotal');
+        $part = $this->relationLoaded('parts')
+            ? (int) $this->parts->sum('subtotal')
+            : (int) $this->parts()->sum('subtotal');
+
+        return (int) $this->biaya_service + $part;
     }
 }
