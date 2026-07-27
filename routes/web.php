@@ -103,6 +103,8 @@ Route::middleware('portal:internal')->group(function () {
             Route::get('/analytics/export-jurnal', [AnalyticsController::class, 'exportJurnal'])->name('analytics.jurnal');
             Route::resource('promo', PromoController::class)->except(['show']);
             Route::resource('pegawai', PegawaiController::class)->except(['show']);
+            // Owner memutus akses pegawai lain tanpa menonaktifkan akunnya.
+            Route::delete('/pegawai/{pegawai}/sesi', [\App\Http\Controllers\Internal\SesiController::class, 'keluarkanPegawai'])->name('pegawai.sesi.keluarkan');
         });
     });
 });

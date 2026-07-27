@@ -75,6 +75,31 @@ final class SesiController extends Controller
     }
 
     /**
+     * Owner mengeluarkan SELURUH sesi pegawai lain dari halaman Akun Pegawai —
+     * mis. HP karyawan hilang atau akun dipakai orang lain, tanpa harus
+     * menonaktifkan akunnya.
+     *
+     * Token "Ingat perangkat" pegawai itu selalu dirotasi, juga ketika tak ada
+     * baris sesi tersisa: cookie recaller hidup lebih lama daripada sesi, jadi
+     * tanpa rotasi perangkatnya bisa login sendiri lagi setelah sesi kedaluwarsa.
+     */
+    public function keluarkanPegawai(Request $request, \App\Models\Pegawai $pegawai): RedirectResponse
+    {
+        if ($pegawai->id === $request->user()->id) {
+            return back()->with('error', 'Untuk perangkat Anda sendiri, gunakan halaman Sesi Aktif.');
+        }
+
+        $jumlah = DB::table('sessions')->where('user_id', $pegawai->id)->delete();
+
+        $pegawai->setRememberToken(Str::random(60));
+        $pegawai->save();
+
+        return back()->with('success', $jumlah > 0
+            ? "{$jumlah} perangkat {$pegawai->nama_pegawai} dikeluarkan."
+            : "Tidak ada sesi aktif milik {$pegawai->nama_pegawai}; cookie \"Ingat perangkat\"-nya tetap dicabut.");
+    }
+
+    /**
      * Menghapus baris sesi saja TIDAK cukup: perangkat yang login dengan
      * "Ingat perangkat" menyimpan cookie recaller dan akan membuat sesi baru
      * pada request berikutnya. Rotasi remember_token mematikan cookie itu.

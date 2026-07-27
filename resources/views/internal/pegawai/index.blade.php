@@ -18,6 +18,7 @@
                     <th>Role</th>
                     <th>No. HP</th>
                     <th>Status</th>
+                    <th>Perangkat</th>
                     <th class="text-end">Aksi</th>
                 </tr>
             </thead>
@@ -44,9 +45,29 @@
                         <td>
                             <span class="rl-pill {{ $p->masih_bekerja ? 'green' : 'gray' }}">{{ $p->masih_bekerja ? 'Aktif' : 'Nonaktif' }}</span>
                         </td>
+                        @php $perangkat = (int) ($sesiAktif[$p->id] ?? 0); @endphp
+                        <td>
+                            @if ($perangkat > 0)
+                                <span class="rl-pill blue">{{ $perangkat }} login</span>
+                            @else
+                                <span class="rl-text-muted rl-text-xs">—</span>
+                            @endif
+                        </td>
                         <td class="text-end">
                             <div class="d-flex gap-2 justify-content-end">
                                 <a href="{{ route('pegawai.edit', $p) }}" class="btn-ghost btn-sm">Edit</a>
+                                @if ($p->id !== auth()->id())
+                                    {{-- Memutus akses tanpa menonaktifkan akun (mis. HP karyawan hilang). --}}
+                                    <form method="POST" action="{{ route('pegawai.sesi.keluarkan', $p) }}"
+                                          x-data="{ nama: @js($p->nama_pegawai) }"
+                                          @submit.prevent="if (confirm('Keluarkan semua perangkat ' + nama + '? Pegawai itu harus login ulang.')) $el.submit()">
+                                        @csrf @method('DELETE')
+                                        {{-- Sengaja tetap aktif meski 0 perangkat: cookie "Ingat perangkat"
+                                             hidup lebih lama dari sesi, dan justru itu yang perlu dicabut
+                                             saat HP karyawan hilang. --}}
+                                        <button type="submit" class="btn-ghost btn-sm">Keluarkan Sesi</button>
+                                    </form>
+                                @endif
                                 @if ($p->id !== auth()->id())
                                     <form method="POST" action="{{ route('pegawai.destroy', $p) }}"
                                           x-data="{ nama: @js($p->nama_pegawai) }"
@@ -59,7 +80,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="text-center p-4 rl-text-muted">Belum ada data pegawai.</td></tr>
+                    <tr><td colspan="8" class="text-center p-4 rl-text-muted">Belum ada data pegawai.</td></tr>
                 @endforelse
             </tbody>
         </table>

@@ -18,7 +18,26 @@ final class PegawaiController extends Controller
         return view('internal.pegawai.index', [
             'pegawai' => Pegawai::query()->latest()->paginate(12),
             'aktif' => Pegawai::query()->where('masih_bekerja', true)->count(),
+            'sesiAktif' => $this->jumlahSesiPerPegawai(),
         ]);
+    }
+
+    /**
+     * Berapa perangkat yang sedang login per pegawai — dasar tombol
+     * "Keluarkan Sesi" milik Owner. Baris kedaluwarsa (menunggu GC) tidak
+     * dihitung, sama seperti halaman Sesi Aktif.
+     *
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    private function jumlahSesiPerPegawai(): \Illuminate\Support\Collection
+    {
+        return \Illuminate\Support\Facades\DB::table('sessions')
+            ->whereNotNull('user_id')
+            ->where('last_activity', '>=', now()->subMinutes((int) config('session.lifetime'))->getTimestamp())
+            ->groupBy('user_id')
+            ->selectRaw('user_id, COUNT(*) as jumlah')
+            ->pluck('jumlah', 'user_id')
+            ->map(fn ($j) => (int) $j);
     }
 
     public function create(): View
