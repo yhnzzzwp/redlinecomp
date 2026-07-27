@@ -1,5 +1,18 @@
 # Changelog — SIRC
 
+## [POS] — Harga servis di layar = yang ditagih, servis siap diambil bisa dipilih
+### Diperbaiki
+- **Harga servis di layar POS salah**: keranjang menerima `biaya_service` saja sementara server menagih `totalBiaya()` (jasa + part) sejak `2d029b0`. Contoh nyata: layar Rp150.000, server Rp550.000 — kasir membayar sesuai layar lalu ditolak *"pembayaran kurang"*, dan angka kembalian di layar meleset Rp400.000. Layar kini memakai `totalBiaya()`.
+- **Servis berstatus Selesai justru disembunyikan dari POS** (`whereNotIn`) — padahal itulah keadaan yang lazim ditagih (customer datang mengambil unit). Kini hanya *Sudah Diambil* yang dikecualikan dan yang *Selesai* diurutkan paling atas.
+- Kartu servis di POS menampilkan status ("Selesai — siap diambil" / "Belum selesai (…)") menggantikan "Stok: 1" yang tak bermakna, supaya kasir tak salah menagih unit yang belum rampung.
+- `Service::totalBiaya()` memakai relasi `parts` yang sudah di-eager-load bila tersedia — daftar POS tidak lagi menembak satu query per servis.
+- `PosDaftarServisTest` (2 test, diverifikasi gagal pada kode lama) mengunci: harga di payload `x-data` = `totalBiaya()`, dan checkout sebesar angka itu diterima dengan kembalian 0.
+
+## [Sesi] — Owner mengeluarkan perangkat pegawai lain
+### Ditambahkan
+- Kolom **Perangkat** di Akun Pegawai (jumlah sesi yang sedang login per pegawai, satu query agregat) + tombol **Keluarkan Sesi** khusus Owner: menghapus seluruh sesi pegawai itu dan merotasi `remember_token`-nya. Menutup kesenjangan sebelumnya — sesi hanya bisa dikelola sendiri, sehingga HP karyawan hilang berarti harus menonaktifkan akunnya sekalian.
+- Tombol **sengaja tetap aktif saat 0 perangkat**: cookie "Ingat perangkat" hidup lebih lama daripada sesi dan justru itu yang perlu dicabut; sesi Owner sendiri tidak bisa dikeluarkan dari sini (diarahkan ke halaman Sesi Aktif). 5 test baru — total **114 test**.
+
 ## [Integritas] — Riwayat pengambilan via POS + konfirmasi hapus yang benar-benar muncul
 ### Diperbaiki
 - **Pengambilan servis via POS kini tercatat di riwayat status** ("Dibayar & diambil via POS — Nota #…", pegawai = kasir) — sebelumnya timeline bolong (SRS §2.5). Tetap tanpa guard transisi & tanpa WA di jalur ini (by design: bayar = ambil, customer hadir di kasir).

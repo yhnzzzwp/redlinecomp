@@ -4,8 +4,8 @@
 > berisi semua yang SUDAH dikerjakan, yang BELUM, keputusan desain yang wajib dipertahankan,
 > dan cara memulai lagi.
 >
-> Pembaruan terakhir: **27 Juli 2026** · commit `9122b89` · branch `main`
-> (`origin` github.com/yhnzzzwp/redlinecomp) · **107 test lulus** · Larastan level 5 = 0 error.
+> Pembaruan terakhir: **27 Juli 2026** · commit `612ca12` · branch `main`
+> (`origin` github.com/yhnzzzwp/redlinecomp) · **114 test lulus** · Larastan level 5 = 0 error.
 
 ---
 
@@ -27,7 +27,7 @@ Kredensial demo: `owner`/`password` (portal admin) · `rijal`/`password` (portal
 ### Alur kerja harian
 ```bash
 colima start && docker compose up -d      # nyalakan (macOS)
-php artisan test                          # 107 test — harus selalu hijau
+php artisan test                          # 114 test — harus selalu hijau
 ./vendor/bin/phpstan analyse --memory-limit=1G
 npm run build                             # bila menyentuh CSS/JS
 docker compose exec -T app php artisan migrate --force   # bila ada migrasi baru
@@ -67,8 +67,10 @@ Total perubahan sejak `32ba211`: **±6.307 baris tambah / 1.560 hapus** dalam 33
 | `b4c354a` | Riwayat status saat servis diambil via POS (timeline SRS §2.5 tidak bolong) + konfirmasi destruktif dipindah dari `onsubmit` inline (diblokir CSP → dialog tak pernah muncul) ke Alpine |
 | `c6beb85` | **Fix XSS/regresi `@js()`**: `Js::from()` selalu berkutip tunggal → di atribut kutip-tunggal atribut PUTUS (tombol Hapus mati + nama produk bisa jadi atribut `x-init` yang dieksekusi Alpine). Semua pindah ke `x-data="{ nama: @js(...) }"`, dikunci `KonfirmasiDestruktifTest` |
 | `9122b89` | **Pengerasan sesi**: rotasi `remember_token` saat mengeluarkan perangkat (tanpa ini cookie "Ingat perangkat" menghidupkan sesi lagi), `AuthenticateSession` aktif (ganti password mengakhiri sesi lain), middleware `PastikanMasihBekerja` (pegawai nonaktif langsung ter-logout) |
+| `e331ea7` | **Fix POS servis**: layar POS mengirim `biaya_service` saja padahal server menagih `totalBiaya()` (jasa+part) — kasir bayar sesuai layar lalu ditolak "pembayaran kurang" (150rb vs 550rb). Selain itu servis berstatus **Selesai justru disembunyikan** dari POS; kini hanya *Sudah Diambil* yang dikecualikan, yang *Selesai* di urutan atas, kartu servis menampilkan status (bukan "Stok: 1") |
+| `612ca12` | **Owner mengeluarkan sesi pegawai lain**: kolom Perangkat + tombol Keluarkan Sesi di Akun Pegawai (hapus semua sesi pegawai itu + rotasi `remember_token`; tetap aktif saat 0 perangkat karena cookie recaller hidup lebih lama daripada sesi) |
 
-Kualitas terkunci otomatis: **107 test / 432 assertion**, Larastan bersih, CI GitHub Actions
+Kualitas terkunci otomatis: **114 test / 465 assertion**, Larastan bersih, CI GitHub Actions
 (test+phpstan+audit PHP · npm audit+build), `composer audit` & `npm audit` bersih.
 
 ---
@@ -83,8 +85,6 @@ akuntan lewat `config/redline.php` bagian `akun` bila perlu).
 ### Ide pasca-P3 (dari laporan evaluasi, belum diprioritaskan)
 - Jurnal balik otomatis untuk Void/Refund lintas periode di Ekspor Jurnal Akuntansi
   (sekarang: Void dikecualikan + peringatan di sheet Info; koreksi lintas periode manual).
-- Owner mengeluarkan sesi pegawai LAIN dari halaman Akun Pegawai (sekarang self-service:
-  tiap pegawai hanya mengelola sesinya sendiri; menonaktifkan akun sudah menendang otomatis).
 - Audit aksesibilitas formal + Lighthouse budget.
 - Alpine CSP build untuk portal internal (publik sudah tanpa `unsafe-eval`; internal masih pakai
   karena POS bergantung ekspresi inline Alpine — keputusan sadar, lihat §4).
@@ -94,6 +94,9 @@ akuntan lewat `config/redline.php` bagian `akun` bila perlu).
   Isi via edit produk / ekspor-ubah-impor agar laporan laba bermakna.
 - Pengambilan servis via POS men-set status `SudahDiambil` langsung TANPA menawarkan WA —
   **by design** (customer sedang berdiri di kasir); tombol manual "Kirim Update WA" tetap ada.
+- POS menampilkan **semua servis yang belum diambil**, termasuk yang masih dikerjakan
+  (kartunya diberi label "Belum selesai (…)"). Disengaja: customer bisa membayar & membawa
+  pulang unit sebelum rampung; `PosService` memang tanpa guard transisi di jalur ini.
 - `TrustHosts` nonaktif di `APP_ENV=local` & saat test (perilaku bawaan Laravel) — aktif di produksi.
 - Opsi hardening belum diterapkan: `/sw.js`, `/offline.html`, `/icons/*` statis ikut tersaji di host
   publik (isinya generik, registrasi SW publik sudah diblok CSP `worker-src 'none'`); bila ingin nol
