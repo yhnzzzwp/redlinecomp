@@ -99,6 +99,7 @@ class DatabaseSeeder extends Seeder
             'jumlah' => 1, 'harga' => 5_000_000, 'subtotal' => 5_000_000]);
 
         $perangkat = \App\Models\Perangkat::create([
+            'kode_perangkat' => 'RL-DEV-0001',
             'nama_customer' => 'Budi Santoso',
             'nomor_hp_customer' => '081298765432',
             'merk_model' => 'Laptop Gaming ASUS ROG Strix',

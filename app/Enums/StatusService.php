@@ -28,18 +28,6 @@ enum StatusService: string
         return array_map(fn ($c) => $c->value, self::cases());
     }
 
-    /**
-     * Status yang diizinkan dari status saat ini.
-     *
-     * Aturan:
-     * - Diterima → Dikerjakan
-     * - Dikerjakan → MenungguSparepart, Selesai
-     * - MenungguSparepart → Dikerjakan (mundur), Selesai (lompat)
-     * - Selesai → SudahDiambil (tidak bisa mundur)
-     * - SudahDiambil → (final, tidak bisa berubah)
-     *
-     * @return self[]
-     */
     public function allowedTransitions(): array
     {
         return match ($this) {
