@@ -58,20 +58,20 @@ class DatabaseSeeder extends Seeder
         }
 
         $produk = [
-            ['ROG Zephyrus G14 2024', 'Laptops', 'RL-ASUS-G14-001', 12, 20_000_000, true],
-            ['RTX 4080 Super Founders', 'Graphics Cards', 'RL-NV-4080-FE', 12, 18_500_000, true],
-            ['RTX 4090 Founders Edition', 'Graphics Cards', 'RL-NV-4090-FE', 3, 5_000_000, true],
-            ['LG UltraGear 34"', 'Monitors', 'RL-LG-34GL-G', 8, 5_000_000, true],
-            ['SteelSeries Apex Pro', 'Peripherals', 'RL-SS-APEX', 42, 2_000_000, true],
-            ['Keychron Q1 Pro Wireless', 'Peripherals', 'RL-KC-Q1P-W', 0, 1_000_000, true],
-            ['AMD Ryzen 9 7950X', 'Processors', 'RL-AMD-7950X', 2, 8_500_000, true],
-            ['Samsung 990 Pro 2TB', 'Motherboards', 'RL-SS-990P-2T', 5, 3_200_000, true],
+            ['ROG Zephyrus G14 2024', 'Laptops', 'RL-ASUS-G14-001', true],
+            ['RTX 4080 Super Founders', 'Graphics Cards', 'RL-NV-4080-FE', true],
+            ['RTX 4090 Founders Edition', 'Graphics Cards', 'RL-NV-4090-FE', true],
+            ['LG UltraGear 34"', 'Monitors', 'RL-LG-34GL-G', true],
+            ['SteelSeries Apex Pro', 'Peripherals', 'RL-SS-APEX', true],
+            ['Keychron Q1 Pro Wireless', 'Peripherals', 'RL-KC-Q1P-W', true],
+            ['AMD Ryzen 9 7950X', 'Processors', 'RL-AMD-7950X', true],
+            ['Samsung 990 Pro 2TB', 'Motherboards', 'RL-SS-990P-2T', true],
         ];
         $p = [];
-        foreach ($produk as [$nama, $k, $sku, $stok, $harga, $show]) {
+        foreach ($produk as [$nama, $k, $sku, $show]) {
             $p[$sku] = Produk::create([
                 'kategori_id' => $kat[$k]->id, 'sku' => $sku, 'nama_produk' => $nama,
-                'jumlah_produk' => $stok, 'harga' => $harga, 'show_katalog' => $show,
+                'show_katalog' => $show,
                 'deskripsi_produk' => 'Hardware premium bergaransi resmi Redline Komputer.',
             ]);
         }
@@ -98,10 +98,16 @@ class DatabaseSeeder extends Seeder
             'produk_id' => $p['RL-SS-APEX']->id, 'nama_item' => 'SteelSeries Apex Pro',
             'jumlah' => 1, 'harga' => 5_000_000, 'subtotal' => 5_000_000]);
 
+        $perangkat = \App\Models\Perangkat::create([
+            'nama_customer' => 'Budi Santoso',
+            'nomor_hp_customer' => '081298765432',
+            'merk_model' => 'Laptop Gaming ASUS ROG Strix',
+        ]);
+
         $svc = Service::create([
             'nomor_resi' => 'PK-2026-0001', 'pegawai_id' => $rijal->id,
-            'nama_customer' => 'Budi Santoso', 'nomor_hp_customer' => '081298765432',
-            'nama_barang' => 'Laptop Gaming ASUS ROG Strix', 'masalah' => 'Blue screen saat main game berat, overheating.',
+            'perangkat_id' => $perangkat->id,
+            'keluhan' => 'Blue screen saat main game berat, overheating.',
             'biaya_service' => 450_000, 'status' => StatusService::MenungguSparepart,
             'tanggal_masuk' => '2026-07-12', 'estimasi_selesai' => '2026-07-15',
         ]);

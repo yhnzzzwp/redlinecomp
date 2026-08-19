@@ -27,9 +27,9 @@
             <div class="rl-card p-4 mb-4">
                 <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
                     <div>
-                        <h2 class="rl-title-md mb-1">{{ $service->nama_barang }}</h2>
+                        <h2 class="rl-title-md mb-1">{{ $service->perangkat->merk_model }}</h2>
                         <div class="text-muted rl-text-sm">
-                            <b class="tnum rl-text-red">{{ $service->nomor_resi }}</b> &middot; {{ $service->nama_customer }}
+                            <b class="tnum rl-text-red">{{ $service->nomor_resi }}</b> &middot; {{ $service->perangkat->nama_customer }}
                         </div>
                     </div>
                     <span class="rl-pill {{ $service->status->warna() }} rl-text-sm">{{ $service->status->value }}</span>
@@ -39,8 +39,7 @@
                     $urutan = $statusList;
                     $now = array_search($service->status, $urutan, true);
                 @endphp
-                
-                {{-- Stepper (sama seperti di admin tapi versi publik) --}}
+
                 <div class="rl-step-wrap mb-4" role="list" aria-label="Tahapan servis">
                     @foreach ($urutan as $i => $st)
                         <div class="rl-step {{ $i < $now ? 'done' : ($i === $now ? 'now' : '') }}" role="listitem" @if($i === $now) aria-current="step" @endif>
@@ -76,11 +75,11 @@
                             <tr class="border-top"><td class="fw-bold py-2">Total Biaya</td><td class="fw-bold text-danger tnum fs-6">{{ $rp($service->totalBiaya()) }}</td></tr>
                             <tr>
                                 <td class="text-muted py-2 align-top">Keluhan</td>
-                                <td class="py-2 rl-text-wrap">{{ $service->masalah }}</td>
+                                <td class="py-2 rl-text-wrap">{{ $service->keluhan }}</td>
                             </tr>
                         </table>
                     </div>
-                    
+
                     <div class="col-md-6">
                         <h4 class="rl-section-title mb-3">Riwayat Status</h4>
                         <div class="rl-timeline">
@@ -97,7 +96,7 @@
                     </div>
                 </div>
             </div>
-            
+
             @php
                 $waClean = preg_replace('/[^0-9]/', '', (string) config('redline.wa_number'));
                 if (str_starts_with($waClean, '0')) { $waClean = '62' . substr($waClean, 1); }

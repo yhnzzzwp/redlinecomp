@@ -8,22 +8,19 @@ use App\Enums\StatusService;
 use App\Models\Service;
 use Illuminate\View\View;
 
-/**
- * Menyediakan data servis aktif untuk dropdown pencarian topbar internal —
- * query keluar dari Blade (arsitektur: view bebas logika data).
- */
 final class TopbarSearchComposer
 {
     public function compose(View $view): void
     {
         $view->with('servisAktif', Service::query()
+            ->with('perangkat')
             ->whereNotIn('status', [StatusService::Selesai, StatusService::SudahDiambil])
             ->latest('id')
-            ->get(['id', 'nomor_resi', 'nama_barang', 'status'])
+            ->get(['id', 'nomor_resi', 'perangkat_id', 'status'])
             ->map(fn (Service $s): array => [
                 'id' => $s->id,
                 'resi' => $s->nomor_resi,
-                'barang' => $s->nama_barang,
+                'barang' => $s->perangkat->merk_model ?? '-',
                 'status' => $s->status->value,
             ])
             ->values());

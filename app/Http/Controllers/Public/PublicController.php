@@ -13,24 +13,13 @@ use Illuminate\Http\Request;
 
 final class PublicController extends Controller
 {
-    /**
-     * Beranda = hero + katalog langsung: pengunjung melihat produk
-     * tanpa harus berpindah halaman (permintaan Owner).
-     */
+
     public function landing(Request $request): View
     {
         $query = Produk::query()->where('show_katalog', true)->with('kategori')->latest();
 
         if ($request->filled('kategori')) {
             $query->where('kategori_id', $request->input('kategori'));
-        }
-
-        if ($request->filled('harga_min')) {
-            $query->where('harga', '>=', $request->input('harga_min'));
-        }
-
-        if ($request->filled('harga_max')) {
-            $query->where('harga', '<=', $request->input('harga_max'));
         }
 
         if ($request->filled('cari')) {
@@ -41,8 +30,6 @@ final class PublicController extends Controller
             'produk' => $query->paginate(12)->withQueryString(),
             'kategori' => KategoriProduk::all(),
             'kategori_aktif' => $request->input('kategori'),
-            'harga_min' => $request->input('harga_min'),
-            'harga_max' => $request->input('harga_max'),
             'cari' => $request->input('cari'),
         ]);
     }
@@ -56,7 +43,7 @@ final class PublicController extends Controller
         if (str_starts_with($waNumber, '0')) {
             $waNumber = '62' . substr($waNumber, 1);
         }
-        $pesanWa = urlencode("Halo Redline, saya ingin memesan produk:\n\n*{$produk->nama_produk}*\nSKU: {$produk->sku}\nHarga: Rp " . number_format($produk->harga, 0, ',', '.') . "\n\nApakah stok masih tersedia?");
+        $pesanWa = urlencode("Halo Redline, saya ingin bertanya tentang produk:\n\n*{$produk->nama_produk}*\nSKU: {$produk->sku}");
         $waLink = "https://wa.me/{$waNumber}?text={$pesanWa}";
 
         return view('public.catalogue.show', [
@@ -69,10 +56,10 @@ final class PublicController extends Controller
     {
         $service = null;
         if ($request->filled('resi')) {
-            $service = Service::with(['riwayat', 'parts'])->where('nomor_resi', $request->input('resi'))->first();
+            $service = Service::with(['riwayat', 'parts', 'perangkat'])->where('nomor_resi', $request->input('resi'))->first();
             if ($service) {
-                if ($service->nomor_hp_customer) {
-                    $service->nomor_hp_customer = '****' . substr($service->nomor_hp_customer, -4);
+                if ($service->perangkat && $service->perangkat->nomor_hp_customer) {
+                    $service->perangkat->nomor_hp_customer = '****' . substr($service->perangkat->nomor_hp_customer, -4);
                 }
             } else {
                 session()->flash('error', 'Nomor resi tidak ditemukan.');

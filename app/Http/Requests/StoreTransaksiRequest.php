@@ -25,6 +25,7 @@ final class StoreTransaksiRequest extends FormRequest
             'items.*.produk_id' => ['nullable', 'integer', 'exists:produk,id'],
             'items.*.service_id' => ['nullable', 'integer', 'exists:service,id'],
             'items.*.jumlah' => ['required', 'integer', 'min:1', 'max:9999'],
+            'items.*.harga' => ['required', 'numeric', 'min:0'],
             'metode_bayar' => ['required', Rule::enum(MetodeBayar::class)],
             'bayar' => ['required', 'integer', 'min:0'],
             'kode_promo' => ['nullable', 'string', 'max:50'],
@@ -39,7 +40,8 @@ final class StoreTransaksiRequest extends FormRequest
             static fn (array $r): CartLine => new CartLine(
                 $r['tipe'],
                 (int) ($r['tipe'] === 'service' ? $r['service_id'] : $r['produk_id']),
-                (int) $r['jumlah']
+                (int) $r['jumlah'],
+                (int) $r['harga']
             ),
             $this->validated('items'),
         );

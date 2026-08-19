@@ -20,14 +20,12 @@ final class ServiceTicketService
     public function buat(array $data, Pegawai $pegawai): Service
     {
         return DB::transaction(function () use ($data, $pegawai): Service {
-            // Nomor resi acak bisa bentrok di index unik — ulangi dengan resi baru.
+
             $service = \App\Support\CobaUlang::unik(fn (): Service => Service::query()->create([
                 'nomor_resi' => $this->kodeGenerator->resi(),
                 'pegawai_id' => $pegawai->id,
-                'nama_customer' => $data['nama_customer'],
-                'nomor_hp_customer' => $data['nomor_hp_customer'] ?? null,
-                'nama_barang' => $data['nama_barang'],
-                'masalah' => $data['masalah'],
+                'perangkat_id' => $data['perangkat_id'],
+                'keluhan' => $data['keluhan'],
                 'biaya_service' => $data['biaya_service'] ?? 0,
                 'status' => StatusService::Diterima,
                 'tanggal_masuk' => now(),
@@ -62,9 +60,6 @@ final class ServiceTicketService
                 'catatan' => $catatan,
             ]);
 
-            // Satu sumber template & normalisasi nomor: App\Support\Wa —
-            // jangan merakit pesan/link manual di sini (sempat menduplikasi
-            // dengan template berbeda dari tombol "Kirim Update WA").
             return [$service, \App\Support\Wa::linkStatusServis($service)];
         });
     }
@@ -109,7 +104,7 @@ final class ServiceTicketService
                 'nama_part' => $data['nama_part'],
                 'jumlah' => $jumlah,
                 'harga' => $harga,
-                // Snapshot modal per unit saat part dipasang — dasar HPP jurnal.
+
                 'harga_modal' => $produk !== null ? (int) $produk->harga_modal : null,
                 'subtotal' => $jumlah * $harga,
             ]);

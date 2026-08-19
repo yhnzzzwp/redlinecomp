@@ -7,14 +7,9 @@ namespace App\Support;
 use App\Enums\StatusService;
 use App\Models\Service;
 
-/**
- * Notifikasi WhatsApp via tautan wa.me — tanpa API pihak ketiga (sesuai
- * desain nol-vendor situs ini). Kasir menekan tombol, WhatsApp terbuka
- * dengan pesan yang sudah terisi sesuai status servis terkini.
- */
 final class Wa
 {
-    /** "0856..." / "+62 856-..." → "62856..."; null bila tak ada digit. */
+
     public static function normalisasi(?string $nomor): ?string
     {
         $digit = preg_replace('/[^0-9]/', '', (string) $nomor);
@@ -29,10 +24,9 @@ final class Wa
         return $digit;
     }
 
-    /** Tautan wa.me berisi pesan status terkini; null bila customer tanpa nomor HP. */
     public static function linkStatusServis(Service $servis): ?string
     {
-        $nomor = self::normalisasi($servis->nomor_hp_customer);
+        $nomor = self::normalisasi($servis->perangkat->nomor_hp_customer);
         if ($nomor === null) {
             return null;
         }
@@ -53,8 +47,8 @@ final class Wa
             StatusService::SudahDiambil => "unit Anda telah diambil. Terima kasih telah mempercayakan servis kepada kami!",
         };
 
-        return "Halo {$servis->nama_customer}, dari *{$toko}*.\n\n"
-            . "Servis *{$servis->nama_barang}* (resi {$servis->nomor_resi}): {$inti}\n\n"
+        return "Halo {$servis->perangkat->nama_customer}, dari *{$toko}*.\n\n"
+            . "Servis *{$servis->perangkat->merk_model}* (resi {$servis->nomor_resi}): {$inti}\n\n"
             . "Pantau status kapan saja: {$lacak}";
     }
 }

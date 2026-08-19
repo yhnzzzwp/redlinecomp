@@ -4,10 +4,7 @@
             'id' => 'p_'.$p->id,
             'real_id' => $p->id,
             'nama' => $p->nama_produk,
-            'harga' => (int) $p->harga,
-            'stok' => (int) $p->jumlah_produk,
             'kategori' => $p->kategori?->nama_kategori ?? 'Lainnya',
-            'info' => 'Stok: ' . (int) $p->jumlah_produk,
             'tipe' => 'produk'
         ]);
         $serviceData = $services->map(fn ($s) => [
@@ -18,7 +15,6 @@
             // PosService saat checkout — kalau di sini hanya biaya_service, kasir
             // membayar sesuai layar lalu ditolak "pembayaran kurang".
             'harga' => $s->totalBiaya(),
-            'stok' => 1,
             'kategori' => 'Servis',
             // Kasir harus tahu unit sudah selesai atau belum sebelum menagih —
             // membayar di POS berarti unit dibawa pulang (status → Sudah Diambil).
@@ -28,9 +24,9 @@
             'tipe' => 'service'
         ]);
         $allItemData = $produkData->concat($serviceData)->values();
-        
+
         $kategoriList = $kategori->pluck('nama_kategori')->push('Servis');
-        
+
         $promoData = $promo->map(fn ($pr) => [
             'id' => $pr->id,
             'nama' => $pr->nama_promo,
@@ -72,19 +68,17 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                             </button>
 
-                            {{-- Dropdown pencarian produk --}}
                             <div x-show="openProductDropdown && cariProduk.trim() !== '' && produkSearchDropdown.length > 0" x-cloak class="position-absolute bg-white border rounded-3 shadow-lg py-1 z-3 end-0 mt-1" style="top: 100%; min-width: 320px; max-height: 260px; overflow-y: auto;">
                                 <div class="px-3 py-1 rl-text-xs text-muted fw-bold border-bottom">Hasil Pencarian Menu:</div>
                                 <template x-for="p in produkSearchDropdown" :key="p.id">
-                                    <button type="button" class="dropdown-item d-flex justify-content-between align-items-center px-3 py-2 text-start w-100 border-0 bg-transparent" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'" @click="if(p.stok > 0) { ubah(p, 1); openProductDropdown = false; }">
+                                    <button type="button" class="dropdown-item d-flex justify-content-between align-items-center px-3 py-2 text-start w-100 border-0 bg-transparent" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'" @click="ubah(p, 1); openProductDropdown = false;">
                                         <div>
                                             <div class="fw-semibold rl-text-sm" x-text="p.nama"></div>
-                                            <span class="rl-text-xs text-muted" x-text="`${p.kategori} · ${p.info}`"></span>
+                                            <span class="rl-text-xs text-muted" x-text="p.kategori"></span>
                                         </div>
                                         <div class="text-end ms-2">
-                                            <span class="tnum text-danger fw-bold rl-text-xs d-block" x-text="rp(p.harga)"></span>
-                                            <span class="badge bg-danger text-white rl-text-xs" x-show="p.stok > 0">+ Tambah</span>
-                                            <span class="badge bg-secondary text-white rl-text-xs" x-show="p.stok <= 0">Habis</span>
+                                            <span class="tnum text-danger fw-bold rl-text-xs d-block" x-text="p.tipe === 'service' ? rp(p.harga) : ''"></span>
+                                            <span class="badge bg-danger text-white rl-text-xs">+ Tambah</span>
                                         </div>
                                     </button>
                                 </template>
@@ -99,19 +93,19 @@
                             <div class="rl-card p-3 h-100 d-flex flex-direction-column justify-content-between">
                                 <div>
                                     <div class="fw-bold rl-text-sm mb-1" x-text="p.nama"></div>
-                                    <div class="tnum text-danger fw-bold mb-2" x-text="rp(p.harga)"></div>
+                                    <div class="tnum text-danger fw-bold mb-2" x-text="p.tipe === 'service' ? rp(p.harga) : ''"></div>
                                 </div>
 
                                 <div>
-                                    <div class="rl-text-xs text-muted mb-2" x-text="p.info"></div>
+                                    <div class="rl-text-xs text-muted mb-2" x-text="p.tipe === 'service' ? p.info : p.kategori"></div>
                                     <template x-if="qty(p.id) === 0">
-                                        <button type="button" class="btn-ghost w-100 py-1" :disabled="p.stok === 0" @click="ubah(p, 1)">+ Tambah</button>
+                                        <button type="button" class="btn-ghost w-100 py-1" @click="ubah(p, 1)">+ Tambah</button>
                                     </template>
                                     <template x-if="qty(p.id) > 0">
                                         <div class="d-flex align-items-center justify-content-between border rounded p-1">
                                             <button type="button" class="btn border-0 p-0 text-danger" style="min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Kurangi jumlah" @click="ubah(p, -1)">-</button>
                                             <span class="fw-bold tnum rl-text-sm" x-text="qty(p.id)"></span>
-                                            <button type="button" class="btn border-0 p-0 text-danger" style="min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Tambah jumlah" @click="ubah(p, 1)" :disabled="qty(p.id) >= p.stok">+</button>
+                                            <button type="button" class="btn border-0 p-0 text-danger" style="min-width: 32px; min-height: 32px; display: inline-flex; align-items: center; justify-content: center;" aria-label="Tambah jumlah" @click="ubah(p, 1)">+</button>
                                         </div>
                                     </template>
                                 </div>
@@ -151,6 +145,7 @@
                             <input type="hidden" :name="`items[${line.id}][tipe]`" :value="line.tipe">
                             <input type="hidden" :name="`items[${line.id}][${line.tipe === 'service' ? 'service_id' : 'produk_id'}]`" :value="line.real_id">
                             <input type="hidden" :name="`items[${line.id}][jumlah]`" :value="line.jumlah">
+                            <input type="hidden" :name="`items[${line.id}][harga]`" :value="line.harga">
                         </div>
                     </template>
                 </div>
@@ -159,8 +154,7 @@
                     <div class="position-relative mb-2" @click.outside="openPromoDropdown = false">
                         <label for="kode_promo" class="visually-hidden">Kode Promo</label>
                         <input type="text" id="kode_promo" name="kode_promo" x-model="kodePromo" @focus="openPromoDropdown = true" @input="openPromoDropdown = true" placeholder="Pilih / ketik kode promo (opsional)" class="rl-input w-100" autocomplete="off">
-                        
-                        {{-- Dropdown pilihan kode promo --}}
+
                         <div x-show="openPromoDropdown && filteredPromos.length > 0" x-cloak class="position-absolute bg-white border rounded-3 shadow-lg py-1 z-3 w-100" style="bottom: 100%; left: 0; max-height: 220px; overflow-y: auto; margin-bottom: 6px;">
                             <div class="px-3 py-1 rl-text-xs text-muted fw-bold border-bottom">Pilih Promo Aktif:</div>
                             <template x-for="pr in filteredPromos" :key="pr.id">
@@ -281,9 +275,20 @@
                 qty(id) { return this.cart[id]?.jumlah ?? 0; },
                 ubah(p, delta) {
                     const cur = this.cart[p.id]?.jumlah ?? 0;
-                    const next = Math.min(p.stok, Math.max(0, cur + delta));
+                    const next = Math.max(0, cur + delta);
                     if (next === 0) { delete this.cart[p.id]; }
-                    else { this.cart[p.id] = { id: p.id, real_id: p.real_id, tipe: p.tipe, nama: p.nama, harga: p.harga, jumlah: next }; }
+                    else { 
+                        let harga = p.harga;
+                        if (p.tipe === 'produk' && cur === 0) {
+                            let inputHarga = prompt('Masukkan harga untuk ' + p.nama + ':', '');
+                            if (inputHarga === null || inputHarga.trim() === '') return;
+                            harga = parseInt(inputHarga);
+                            if (isNaN(harga) || harga < 0) { alert('Harga tidak valid!'); return; }
+                        } else if (p.tipe === 'produk' && cur > 0) {
+                            harga = this.cart[p.id].harga;
+                        }
+                        this.cart[p.id] = { id: p.id, real_id: p.real_id, tipe: p.tipe, nama: p.nama, harga: harga, jumlah: next }; 
+                    }
                 },
                 hapus(id) { delete this.cart[id]; },
                 rp(n) {

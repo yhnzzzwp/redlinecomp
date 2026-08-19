@@ -26,9 +26,7 @@ final class PosController extends Controller
     {
         return view('internal.pos', [
             'produk' => Produk::query()->with('kategori')->orderBy('nama_produk')->get(),
-            // Semua servis yang BELUM diambil boleh ditagih — servis berstatus
-            // Selesai justru kasus utamanya (customer datang mengambil unit), jadi
-            // hanya SudahDiambil yang dikecualikan. Yang Selesai ditaruh paling atas.
+
             'services' => \App\Models\Service::query()
                 ->with('parts')
                 ->where('status', '!=', \App\Enums\StatusService::SudahDiambil)
@@ -61,7 +59,6 @@ final class PosController extends Controller
             ->stream("nota-{$transaksi->kode_nota}.pdf");
     }
 
-    /** Struk 80mm untuk printer thermal — dicetak lewat dialog print browser. */
     public function struk(Transaksi $transaksi): ViewInstance|View
     {
         $transaksi->load(['items', 'promo', 'pegawai']);

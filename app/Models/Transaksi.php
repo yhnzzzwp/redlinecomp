@@ -13,7 +13,7 @@ class Transaksi extends Model
     protected $table = 'transaksi';
 
     protected $fillable = [
-        'kode_nota', 'pegawai_id', 'promo_id', 'metode_bayar',
+        'kode_nota', 'local_id', 'pegawai_id', 'promo_id', 'metode_bayar',
         'subtotal', 'diskon', 'total', 'bayar', 'kembalian',
         'nama_pembeli', 'nomor_hp_pembeli', 'status',
     ];

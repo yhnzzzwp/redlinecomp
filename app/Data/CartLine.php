@@ -10,5 +10,6 @@ final readonly class CartLine
         public string $tipe,
         public int $itemId,
         public int $jumlah,
+        public int $harga,
     ) {}
 }

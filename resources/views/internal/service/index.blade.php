@@ -25,7 +25,7 @@
         <table class="rl-table">
             <thead>
                 <tr>
-                    <th>Resi</th><th>Pelanggan &amp; Perangkat</th><th>Masalah</th>
+                    <th>Resi</th><th>Pelanggan &amp; Perangkat</th><th>Keluhan</th>
                     <th>Masuk</th><th>Status</th><th class="text-end">Aksi</th>
                 </tr>
             </thead>
@@ -34,10 +34,10 @@
                     <tr>
                         <td><b class="rl-mono rl-text-sm">{{ $s->nomor_resi }}</b></td>
                         <td>
-                            <div class="fw-semibold rl-text-sm">{{ $s->nama_customer }}</div>
-                            <div class="rl-text-muted rl-text-xs">{{ $s->nama_barang }}</div>
+                            <div class="fw-semibold rl-text-sm">{{ $s->perangkat->nama_customer }}</div>
+                            <div class="rl-text-muted rl-text-xs">{{ $s->perangkat->merk_model }}</div>
                         </td>
-                        <td class="rl-text-muted rl-text-sm">{{ \Illuminate\Support\Str::limit($s->masalah, 48) }}</td>
+                        <td class="rl-text-muted rl-text-sm">{{ \Illuminate\Support\Str::limit($s->keluhan, 48) }}</td>
                         <td class="rl-text-muted tnum rl-text-sm">{{ $s->tanggal_masuk?->format('d M Y') ?? '—' }}</td>
                         <td><span class="rl-pill {{ $s->status->warna() }}">{{ $s->status->value }}</span></td>
                         <td class="text-end">

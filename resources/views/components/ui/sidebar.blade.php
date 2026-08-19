@@ -6,7 +6,6 @@
         ['dashboard', 'Dashboard', route('dashboard'), false, 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z'],
         ['pos', 'POS', route('pos'), false, 'M3 4h18v12H3zM3 20h18'],
         ['produk', 'Produk', route('produk.index'), false, 'M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7'],
-        ['stok', 'Stok', route('stok.opname'), false, 'M9 11l3 3 8-8M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9'],
         ['transaksi', 'Transaksi', route('transaksi.index'), false, 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
         ['analytics', 'Analytics', route('analytics'), true, 'M4 20V10M10 20V4M16 20v-7M22 20H2'],
         ['service', 'Servis', route('service'), false, 'M14 6a4 4 0 005 5l-8 8-3-3 6-6a4 4 0 010-4z'],

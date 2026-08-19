@@ -24,31 +24,28 @@
         <p>Laporan Penjualan (Periode: {{ $dari->format('d M Y') }} - {{ $sampai->format('d M Y') }})</p>
     </div>
 
-    <h3>Pendapatan Berdasarkan Kategori</h3>
+    <h3>Data Item Terjual Berdasarkan Kategori</h3>
     <table>
         <thead>
             <tr>
                 <th>Kategori</th>
-                <th class="text-right">Total Pendapatan</th>
-                <th class="text-right">Total Profit</th>
+                <th class="text-center">Jumlah Terjual</th>
             </tr>
         </thead>
         <tbody>
             @forelse($pendapatanKategori as $kat)
                 <tr>
                     <td>{{ $kat->tipe->value ?? $kat->tipe }}</td>
-                    <td class="text-right">Rp {{ number_format((int)$kat->total_pendapatan, 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ number_format((int)$kat->total_profit, 0, ',', '.') }}</td>
+                    <td class="text-center">{{ (int)$kat->jumlah_terjual }} Item</td>
                 </tr>
             @empty
-                <tr><td colspan="3" class="text-center">Belum ada data</td></tr>
+                <tr><td colspan="2" class="text-center">Belum ada data</td></tr>
             @endforelse
         </tbody>
         <tfoot>
             <tr class="total-row">
                 <th>Total Keseluruhan</th>
-                <th class="text-right">Rp {{ number_format((int)$totalPendapatan, 0, ',', '.') }}</th>
-                <th class="text-right">Rp {{ number_format((int)$totalProfit, 0, ',', '.') }}</th>
+                <th class="text-center">{{ (int)$totalPendapatan }} Item</th>
             </tr>
         </tfoot>
     </table>
@@ -60,7 +57,6 @@
                 <th>No</th>
                 <th>Nama Produk</th>
                 <th class="text-center">Terjual</th>
-                <th class="text-right">Pendapatan</th>
             </tr>
         </thead>
         <tbody>
@@ -69,38 +65,9 @@
                     <td class="text-center">{{ $i + 1 }}</td>
                     <td>{{ $p->nama_item }}</td>
                     <td class="text-center">{{ $p->total_terjual }}</td>
-                    <td class="text-right">Rp {{ number_format((int)$p->total_pendapatan, 0, ',', '.') }}</td>
                 </tr>
             @empty
-                <tr><td colspan="4" class="text-center">Belum ada data</td></tr>
-            @endforelse
-        </tbody>
-    </table>
-
-    <h3>Laba per Produk (estimasi dari harga modal saat ini)</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Nama Produk</th>
-                <th class="text-center">Qty</th>
-                <th class="text-right">Omzet</th>
-                <th class="text-right">Modal</th>
-                <th class="text-right">Laba</th>
-                <th class="text-right">Margin</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($labaProduk as $p)
-                <tr>
-                    <td>{{ $p->nama_item }}</td>
-                    <td class="text-center">{{ $p->qty }}</td>
-                    <td class="text-right">Rp {{ number_format((int) $p->omzet, 0, ',', '.') }}</td>
-                    <td class="text-right">Rp {{ number_format((int) $p->modal, 0, ',', '.') }}</td>
-                    <td class="text-right"><b>Rp {{ number_format((int) $p->laba, 0, ',', '.') }}</b></td>
-                    <td class="text-right">{{ $p->omzet > 0 ? number_format($p->laba / $p->omzet * 100, 1, ',', '.') : 0 }}%</td>
-                </tr>
-            @empty
-                <tr><td colspan="6" class="text-center">Belum ada data</td></tr>
+                <tr><td colspan="3" class="text-center">Belum ada data</td></tr>
             @endforelse
         </tbody>
     </table>

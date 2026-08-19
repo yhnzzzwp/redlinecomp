@@ -39,16 +39,6 @@
             </div>
         </div>
 
-        <div class="row g-3 mb-3">
-            <div class="col-md-4">
-                <x-form.input type="number" name="harga_modal" value="{{ $produk->harga_modal ?? 0 }}" label="Harga Modal / HPP" min="0" />
-            </div>
-            <div class="col-md-4">
-                <x-form.input type="number" name="harga" value="{{ $produk->harga ?? 0 }}" label="Harga Jual (Rp)" min="0" required />
-            </div>
-            <div class="col-md-4">
-                <x-form.input type="number" name="jumlah_produk" value="{{ $produk->jumlah_produk ?? 0 }}" label="Stok" min="0" required />
-            </div>
         </div>
 
         <div class="mb-3">

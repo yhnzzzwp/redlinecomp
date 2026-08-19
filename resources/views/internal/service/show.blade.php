@@ -9,10 +9,10 @@
         <a href="{{ route('service') }}" class="rl-back-link text-decoration-none rl-text-sm">&larr; Semua Servis</a>
         <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mt-2">
             <div>
-                <h1 class="rl-page-title mb-1">{{ $service->nama_barang }}</h1>
+                <h1 class="rl-page-title mb-1">{{ $service->perangkat->merk_model }}</h1>
                 <p class="rl-page-desc mb-0">
                     <b class="rl-mono text-danger">{{ $service->nomor_resi }}</b>
-                    &middot; {{ $service->nama_customer }} @if ($service->nomor_hp_customer) &middot; {{ $service->nomor_hp_customer }} @endif
+                    &middot; {{ $service->perangkat->nama_customer }} @if ($service->perangkat->nomor_hp_customer) &middot; {{ $service->perangkat->nomor_hp_customer }} @endif
                 </p>
             </div>
             <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -27,7 +27,6 @@
         </div>
     </div>
 
-    {{-- Stepper --}}
     <div class="rl-card p-4 mb-3">
         <div class="rl-step-wrap" role="list" aria-label="Tahapan servis">
             @foreach ($urutan as $i => $st)
@@ -40,11 +39,10 @@
     </div>
 
     <div class="row g-3">
-        {{-- Kiri: info + update status --}}
+
         <div class="col-lg-7 d-flex flex-column gap-3">
             @if(session('wa_link'))
-                {{-- data-wa-auto: app.js membuka WhatsApp otomatis saat halaman
-                     dimuat; tombol di bawah = fallback bila popup diblokir. --}}
+
                 <div class="rl-alert rl-alert--success p-3 d-flex align-items-center justify-content-between gap-3"
                      data-wa-auto="{{ session('wa_link') }}">
                     <div>
@@ -68,7 +66,7 @@
                         <span class="fw-bold rl-text-sm">Total Biaya yang Harus Dibayar:</span>
                         <b class="fs-5 text-danger tnum">{{ $rp($service->totalBiaya()) }}</b>
                     </div>
-                    <div class="col-12"><div class="rl-text-muted rl-text-xs">Masalah</div><div>{{ $service->masalah }}</div></div>
+                    <div class="col-12"><div class="rl-text-muted rl-text-xs">Keluhan</div><div>{{ $service->keluhan }}</div></div>
                 </div>
             </div>
 
@@ -93,10 +91,9 @@
                         <label for="catatan" class="rl-label d-block mb-1">Catatan</label>
                         <textarea id="catatan" name="catatan" rows="2" placeholder="Catatan pengerjaan…" class="rl-textarea w-100"></textarea>
                     </div>
-                    @if (\App\Support\Wa::normalisasi($service->nomor_hp_customer) !== null)
+                    @if (\App\Support\Wa::normalisasi($service->perangkat->nomor_hp_customer) !== null)
                         <div class="form-check mb-3">
-                            {{-- Sticky: bila submit gagal validasi, pilihan staf (termasuk
-                                 sengaja TIDAK mencentang) dipertahankan — WA punya efek keluar. --}}
+
                             <input class="form-check-input" type="checkbox" name="kirim_wa" id="kirim_wa" value="1"
                                    @checked(old('kirim_wa', ! session()->hasOldInput()))>
                             <label class="form-check-label rl-text-sm" for="kirim_wa">
@@ -147,9 +144,8 @@
                                 <button type="button" class="dropdown-item d-flex justify-content-between align-items-center px-3 py-2 text-start w-100 border-0 bg-transparent" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'" @click="selectItem(item)">
                                     <div>
                                         <div class="fw-semibold rl-text-sm" x-text="item.nama"></div>
-                                        <span class="rl-text-xs text-muted" x-text="`${item.kategori} · Stok: ${item.stok}`"></span>
+                                        <span class="rl-text-xs text-muted" x-text="item.kategori"></span>
                                     </div>
-                                    <span class="tnum text-danger fw-bold rl-text-xs ms-2" x-text="rp(item.harga)"></span>
                                 </button>
                             </template>
                         </div>
@@ -167,7 +163,6 @@
             </div>
         </div>
 
-        {{-- Kanan: riwayat status --}}
         <div class="col-lg-5">
             <div class="rl-card p-4">
                 <h3 class="rl-section-title mb-3">Riwayat Status</h3>
@@ -204,7 +199,6 @@
 
                 selectItem(item) {
                     this.query = item.nama;
-                    this.harga = item.harga;
                     this.produkId = item.id;
                     this.open = false;
                 },

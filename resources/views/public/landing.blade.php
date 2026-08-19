@@ -28,7 +28,6 @@
         </div>
     </section>
 
-    {{-- Katalog langsung di beranda --}}
     <section id="katalog" class="rl-body rl-container-lg pt-4 pb-5">
         <div class="text-center mb-2" data-reveal>
             <div class="rl-kicker mb-1">Spec-sheet <b>lengkap</b></div>
@@ -37,7 +36,7 @@
         </div>
 
         <div class="row g-4">
-            {{-- Filter (dilipat di layar kecil) --}}
+
             <div class="col-lg-3">
                 <div class="rl-card p-4 rl-filter-sticky">
                     <button type="button" class="btn-ghost rl-filter-toggle" data-filter-toggle
@@ -65,20 +64,11 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="rl-form-group">
-                            <label class="rl-label" for="f-min">Harga Minimum</label>
-                            <input id="f-min" type="number" name="harga_min" value="{{ $harga_min }}" min="0" placeholder="Rp"
-                                   class="rl-input">
-                        </div>
-                        <div class="rl-form-group mb-4">
-                            <label class="rl-label" for="f-max">Harga Maksimum</label>
-                            <input id="f-max" type="number" name="harga_max" value="{{ $harga_max }}" min="0" placeholder="Rp"
-                                   class="rl-input">
-                        </div>
+
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn-redline w-100 py-2">Terapkan Filter</button>
                         </div>
-                        @if ($cari || $kategori_aktif || $harga_min || $harga_max)
+                        @if ($cari || $kategori_aktif)
                             <div class="mt-2 text-center">
                                 <a href="{{ route('landing') }}#katalog" class="rl-text-sm text-decoration-none">Reset Filter</a>
                             </div>
@@ -88,7 +78,6 @@
                 </div>
             </div>
 
-            {{-- Grid produk --}}
             <div class="col-lg-9">
                 <div class="row g-4">
                     @forelse ($produk as $p)
@@ -100,19 +89,16 @@
                                     <p class="rl-text-sm rl-text-muted mb-0">{{ Str::limit($p->deskripsi_produk, 90) ?: 'Belum ada deskripsi untuk produk ini.' }}</p>
 
                                     <div class="mt-auto pt-3">
-                                        <div class="rl-text-total mb-2">{{ $rp($p->harga) }}</div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            @if ($p->jumlah_produk > 5)
-                                                <span class="rl-pill green">Tersedia</span>
-                                                <a href="{{ route('catalogue.show', $p) }}" class="btn-redline rl-btn-sm">Detail</a>
-                                            @elseif ($p->jumlah_produk > 0)
-                                                <span class="rl-pill amber">Stok Terbatas</span>
-                                                <a href="{{ route('catalogue.show', $p) }}" class="btn-redline rl-btn-sm">Detail</a>
-                                            @else
-                                                <span class="rl-pill red">Habis Terjual</span>
-                                                <a href="{{ route('catalogue.show', $p) }}" class="btn-ghost rl-btn-sm">Lihat</a>
-                                            @endif
-                                        </div>
+                                        @php
+                                            $waClean = preg_replace('/[^0-9]/', '', (string) config('redline.wa_number'));
+                                            if (str_starts_with($waClean, '0')) { $waClean = '62' . substr($waClean, 1); }
+                                            $pesanWa = urlencode("Halo Redline, saya ingin bertanya tentang produk:\n\n*{$p->nama_produk}*\nSKU: {$p->sku}");
+                                            $waLink = "https://wa.me/{$waClean}?text={$pesanWa}";
+                                        @endphp
+                                        <a href="{{ $waLink }}" target="_blank" rel="noopener noreferrer" class="btn-redline w-100 d-inline-flex align-items-center justify-content-center gap-2">
+                                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                                            Tanya via WhatsApp
+                                        </a>
                                     </div>
                                 </div>
                             </div>

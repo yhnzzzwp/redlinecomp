@@ -51,33 +51,17 @@ final class TransaksiController extends Controller
         }
 
         DB::transaction(function () use ($transaksi) {
-            // Re-fetch with lock to prevent double-void race condition
+
             $transaksi = Transaksi::query()->lockForUpdate()->findOrFail($transaksi->id);
 
             if ($transaksi->status !== TransaksiStatus::Normal) {
-                return; // Already voided by another request
+                return; 
             }
 
             $transaksi->update(['status' => TransaksiStatus::Void->value]);
-
-            foreach ($transaksi->items as $item) {
-                /** @var \App\Models\ItemTransaksi $item */
-                if ($item->tipe === TipeItem::Produk && $item->produk_id) {
-                    $produk = Produk::query()->lockForUpdate()->find($item->produk_id);
-                    if ($produk) {
-                        $sebelum = (int) $produk->jumlah_produk;
-                        $produk->increment('jumlah_produk', $item->jumlah);
-                        app(\App\Services\StokService::class)->catat(
-                            $produk, $sebelum, $sebelum + $item->jumlah,
-                            \App\Enums\TipeMutasiStok::Void,
-                            'Void nota #' . $transaksi->kode_nota,
-                        );
-                    }
-                }
-            }
         });
 
-        return back()->with('success', "Transaksi {$transaksi->kode_nota} berhasil dibatalkan (Void) dan stok dikembalikan.");
+        return back()->with('success', "Transaksi {$transaksi->kode_nota} berhasil dibatalkan (Void).");
     }
 
     public function exportCsv(Request $request): StreamedResponse
@@ -117,12 +101,11 @@ final class TransaksiController extends Controller
                 fputcsv($file, ['Waktu', 'No Transaksi', 'Kasir', 'Total', 'Status', 'Metode Bayar']);
 
                 foreach ($transaksis as $t) {
-                    /** @var Transaksi $t */
+
                     $created = $t->created_at ? $t->created_at->format('Y-m-d H:i:s') : '-';
                     $statusVal = $t->status->value;
                     $kasir = $t->pegawai instanceof \App\Models\Pegawai ? $t->pegawai->nama_pegawai : '-';
 
-                    /** @var array<int, string|int|float|null> $row */
                     $row = [
                         $created,
                         $t->kode_nota,

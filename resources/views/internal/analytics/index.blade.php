@@ -10,7 +10,6 @@
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('analytics.cetak', ['dari' => request('dari'), 'sampai' => request('sampai')]) }}" class="btn-ghost" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rl-icon-16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> PDF</a>
-            <a href="{{ route('analytics.jurnal', ['dari' => request('dari'), 'sampai' => request('sampai')]) }}" class="btn-ghost" title="Jurnal umum double-entry (.xlsx) siap dipetakan ke software akuntansi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rl-icon-16"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg> Jurnal Akuntansi</a>
             <a href="{{ route('analytics.export', ['dari' => request('dari'), 'sampai' => request('sampai')]) }}" class="btn-redline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rl-icon-16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export CSV</a>
         </div>
     </div>
@@ -30,43 +29,30 @@
         @endif
     </form>
 
-    {{-- KPI --}}
     <div class="row g-3 mb-3">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="rl-card rl-kpi h-100">
-                <div class="rl-kpi__label">Pendapatan Hari Ini</div>
-                <div class="rl-kpi__val tnum">{{ $rp($pendapatanHariIni) }}</div>
+                <div class="rl-kpi__label">Jumlah Transaksi Hari Ini</div>
+                <div class="rl-kpi__val tnum">{{ number_format($jumlahHariIni, 0, ',', '.') }} <span class="rl-text-muted rl-text-sm fw-normal">Nota</span></div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="rl-card rl-kpi h-100">
-                <div class="rl-kpi__label">Pendapatan Periode Ini</div>
-                <div class="rl-kpi__val tnum text-primary">{{ $rp($pendapatanPeriode) }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="rl-card rl-kpi h-100 border-start border-success border-3">
-                <div class="rl-kpi__label">Estimasi Profit Periode Ini</div>
-                <div class="rl-kpi__val tnum text-success">{{ $rp($profitPeriode) }}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="rl-card rl-kpi h-100">
-                <div class="rl-kpi__label">Transaksi Periode Ini</div>
-                <div class="rl-kpi__val tnum">{{ number_format($transaksiPeriode, 0, ',', '.') }} <span class="rl-text-muted rl-text-sm fw-normal">Nota</span></div>
+                <div class="rl-kpi__label">Jumlah Transaksi Periode</div>
+                <div class="rl-kpi__val tnum text-primary">{{ number_format($jumlahPeriode, 0, ',', '.') }} <span class="rl-text-muted rl-text-sm fw-normal">Nota</span></div>
             </div>
         </div>
     </div>
 
     <div class="row g-3">
-        {{-- Trend 7 Hari --}}
+
         <div class="col-lg-8">
             <div class="rl-card p-4 h-100">
                 <h3 class="rl-section-title mb-4">Tren 7 Hari Terakhir</h3>
                 @php $max = max(1, collect($trend)->max('total')); $hasData = collect($trend)->sum('total') > 0; @endphp
                 @if($hasData)
                 <div x-data="{ activeTooltip: null }" class="position-relative mt-4" style="height: 220px; margin-left: 40px;">
-                    <!-- Gridlines & Y-Axis Labels -->
+
                     <div class="position-absolute w-100 h-100 d-flex flex-column justify-content-between pb-4" style="z-index: 1; pointer-events: none;">
                         @foreach([100, 75, 50, 25, 0] as $pct)
                             <div class="w-100 border-top" style="border-top-style: dashed !important; border-top-color: #E9E9EC !important; position: relative;">
@@ -78,7 +64,7 @@
                         @foreach ($trend as $i => $t)
                             <div class="rl-chart-bar position-relative d-flex flex-column justify-content-end h-100" style="flex: 1; padding: 0 4px;">
                                 <div x-show="activeTooltip === {{ $i }}" x-transition class="position-absolute bg-dark text-white rounded px-2 py-1 shadow-sm" style="bottom: {{ max(4, (int)($t['total']/$max*100)) }}%; left: 50%; transform: translate(-50%, -8px); font-size: 11px; white-space: nowrap; z-index: 10; margin-bottom: 4px;">
-                                    Rp {{ number_format($t['total'], 0, ',', '.') }}
+                                    {{ $t['total'] }} Transaksi
                                 </div>
                                 <div class="rl-chart-bar__fill rounded-top w-100" style="height:{{ max(4, (int)($t['total']/$max*100)) }}%; transition: opacity 0.2s, background-color 0.2s; cursor: pointer;" :style="activeTooltip !== null && activeTooltip !== {{ $i }} ? 'opacity: 0.6' : 'opacity: 1'" @mouseenter="activeTooltip = {{ $i }}" @mouseleave="activeTooltip = null" @touchstart="activeTooltip = {{ $i }}"></div>
                                 <small class="rl-chart-bar__label mt-2 text-center d-block">{{ $t['label'] }}</small>
@@ -100,18 +86,17 @@
             </div>
         </div>
 
-        {{-- Pendapatan by Kategori --}}
         <div class="col-lg-4">
             <div class="rl-card p-4 h-100">
                 <h3 class="rl-section-title mb-4">Berdasarkan Jenis (Periode Ini)</h3>
                 <div class="d-flex flex-column gap-3">
-                    @php $totalSemua = max(1, $pendapatanKategori->sum('total_pendapatan')); @endphp
+                    @php $totalSemua = max(1, $pendapatanKategori->sum('jumlah_terjual')); @endphp
                     @foreach ($pendapatanKategori as $kat)
-                        @php $pct = round($kat->total_pendapatan / $totalSemua * 100); @endphp
+                        @php $pct = round($kat->jumlah_terjual / $totalSemua * 100); @endphp
                         <div>
                             <div class="d-flex justify-content-between mb-1 rl-text-sm">
                                 <span>{{ $kat->tipe->value ?? $kat->tipe }}</span>
-                                <b class="tnum">{{ $rp($kat->total_pendapatan) }}</b>
+                                <b class="tnum">{{ $kat->jumlah_terjual }} Item</b>
                             </div>
                             <div class="progress">
                                 <div class="progress-bar {{ $kat->tipe->value === 'Produk' ? 'bg-primary' : 'bg-warning' }}" style="width:{{ $pct }}%"></div>
@@ -126,7 +111,6 @@
         </div>
     </div>
 
-    {{-- Top Products --}}
     <div class="rl-card mt-3 overflow-hidden">
         <div class="p-4 border-bottom rl-divider-light">
             <h3 class="rl-section-title mb-0">Produk Terlaris Periode Ini</h3>
@@ -136,7 +120,6 @@
                 <tr>
                     <th>Nama Produk</th>
                     <th class="text-center">Terjual</th>
-                    <th class="text-end">Pendapatan</th>
                 </tr>
             </thead>
             <tbody>
@@ -144,7 +127,6 @@
                     <tr>
                         <td class="fw-semibold">{{ $p->nama_item }}</td>
                         <td class="text-center tnum">{{ $p->total_terjual }}</td>
-                        <td class="text-end tnum fw-bold">{{ $rp($p->total_pendapatan) }}</td>
                     </tr>
                 @empty
                     <tr><td colspan="3" class="text-center py-5">
@@ -162,37 +144,4 @@
         </table>
     </div>
 
-    {{-- Laba per Produk --}}
-    <div class="rl-card mt-3 overflow-hidden">
-        <div class="p-4 border-bottom rl-divider-light">
-            <h3 class="rl-section-title mb-0">Laba per Produk (Periode Ini)</h3>
-            <p class="rl-text-xs rl-text-muted mb-0 mt-1">Estimasi berdasarkan harga modal produk saat ini &mdash; terurut laba terbesar.</p>
-        </div>
-        <table class="rl-table">
-            <thead>
-                <tr>
-                    <th>Nama Produk</th>
-                    <th class="text-center">Qty</th>
-                    <th class="text-end">Omzet</th>
-                    <th class="text-end">Modal</th>
-                    <th class="text-end">Laba</th>
-                    <th class="text-end">Margin</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($labaProduk as $p)
-                    <tr>
-                        <td class="fw-semibold">{{ $p->nama_item }}</td>
-                        <td class="text-center tnum">{{ $p->qty }}</td>
-                        <td class="text-end tnum">{{ $rp($p->omzet) }}</td>
-                        <td class="text-end tnum rl-text-muted">{{ $rp($p->modal) }}</td>
-                        <td class="text-end tnum fw-bold {{ $p->laba >= 0 ? 'text-success' : 'text-danger' }}">{{ $rp($p->laba) }}</td>
-                        <td class="text-end tnum">{{ $p->omzet > 0 ? number_format($p->laba / $p->omzet * 100, 1, ',', '.') : 0 }}%</td>
-                    </tr>
-                @empty
-                    <tr><td colspan="6" class="text-center py-4 rl-text-sm text-muted">Belum ada penjualan produk periode ini.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
 </x-layouts.app>

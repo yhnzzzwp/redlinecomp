@@ -14,10 +14,6 @@ use App\Http\Controllers\Internal\ServiceController;
 use App\Http\Controllers\Internal\TransaksiController;
 use Illuminate\Support\Facades\Route;
 
-/*
-| robots.txt dinamis: host publik boleh diindeks, subdomain portal tidak.
-| (Header X-Robots-Tag di SecurityHeaders adalah lapisan keduanya.)
-*/
 Route::get('/robots.txt', function () {
     $isPublik = \App\Support\Portal::fromRequest(request()) === \App\Support\Portal::Publik;
 
@@ -25,35 +21,20 @@ Route::get('/robots.txt', function () {
         ->header('Content-Type', 'text/plain');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Zona publik — hanya host utama (config redline.hosts.public)
-|--------------------------------------------------------------------------
-| Diakses lewat host admin/karyawan → dialihkan ke login portal tersebut.
-*/
 Route::middleware('portal:public')->group(function () {
-    // Beranda langsung menampilkan katalog (hero + grid produk).
+
     Route::get('/', [PublicController::class, 'landing'])->name('landing');
     Route::get('/about', [PublicController::class, 'about'])->name('about');
     Route::view('/toko-ikan', 'public.soon', ['judul' => 'Toko Ikan Redline', 'aktif' => 'Toko Ikan'])->name('toko-ikan');
 
-    // Alamat lama /catalogue dialihkan ke beranda (bookmark tetap hidup).
     Route::get('/catalogue', fn (\Illuminate\Http\Request $r) => redirect()->route('landing', $r->query()))->name('catalogue');
     Route::get('/catalogue/{produk}', [PublicController::class, 'detailProduk'])->name('catalogue.show');
 
     Route::get('/cek-servis', [PublicController::class, 'cekServis'])->middleware('throttle:10,1')->name('cek.servis');
 });
 
-/*
-|--------------------------------------------------------------------------
-| Zona internal — hanya subdomain portal (admin.* / karyawan.*)
-|--------------------------------------------------------------------------
-| Dari host publik seluruh route ini 404 (keberadaan portal disembunyikan).
-| Role user wajib cocok dengan portal: Owner ↔ admin, Karyawan ↔ karyawan.
-*/
 Route::middleware('portal:internal')->group(function () {
-    // Manifest PWA: tanpa auth (browser mengambilnya tanpa cookie sesi),
-    // tetap 404 dari host publik karena berada di grup portal:internal.
+
     Route::get('/manifest.webmanifest', [\App\Http\Controllers\Internal\PwaController::class, 'manifest'])->name('pwa.manifest');
 
     Route::middleware('guest')->group(function () {
@@ -72,7 +53,6 @@ Route::middleware('portal:internal')->group(function () {
 
         Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
 
-        // Sesi aktif: semua staf mengelola sesi MILIKNYA sendiri.
         Route::get('/sesi', [\App\Http\Controllers\Internal\SesiController::class, 'index'])->name('sesi');
         Route::delete('/sesi/{id}', [\App\Http\Controllers\Internal\SesiController::class, 'keluarkan'])->where('id', '[A-Za-z0-9]+')->name('sesi.keluarkan');
         Route::post('/sesi/keluarkan-lain', [\App\Http\Controllers\Internal\SesiController::class, 'keluarkanLain'])->name('sesi.keluarkan-lain');
@@ -81,10 +61,6 @@ Route::middleware('portal:internal')->group(function () {
         Route::get('/produk/export-excel', [ProdukController::class, 'export'])->name('produk.export');
         Route::post('/produk/import-excel', [ProdukController::class, 'import'])->name('produk.import');
         Route::resource('produk', ProdukController::class)->except(['show']);
-
-        Route::get('/stok/opname', [\App\Http\Controllers\Internal\StokController::class, 'opname'])->name('stok.opname');
-        Route::post('/stok/opname', [\App\Http\Controllers\Internal\StokController::class, 'simpanOpname'])->name('stok.opname.simpan');
-        Route::get('/stok/mutasi', [\App\Http\Controllers\Internal\StokController::class, 'mutasi'])->name('stok.mutasi');
 
         Route::get('/service', [ServiceController::class, 'index'])->name('service');
         Route::get('/service/create', [ServiceController::class, 'create'])->name('service.create');
@@ -100,10 +76,9 @@ Route::middleware('portal:internal')->group(function () {
             Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics');
             Route::get('/analytics/cetak', [AnalyticsController::class, 'cetak'])->name('analytics.cetak');
             Route::get('/analytics/export-csv', [AnalyticsController::class, 'exportCsv'])->name('analytics.export');
-            Route::get('/analytics/export-jurnal', [AnalyticsController::class, 'exportJurnal'])->name('analytics.jurnal');
             Route::resource('promo', PromoController::class)->except(['show']);
             Route::resource('pegawai', PegawaiController::class)->except(['show']);
-            // Owner memutus akses pegawai lain tanpa menonaktifkan akunnya.
+
             Route::delete('/pegawai/{pegawai}/sesi', [\App\Http\Controllers\Internal\SesiController::class, 'keluarkanPegawai'])->name('pegawai.sesi.keluarkan');
         });
     });

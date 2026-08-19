@@ -21,14 +21,16 @@ final class ServiceController extends Controller
 
     public function index(Request $request): View
     {
-        $query = Service::query()->with('pegawai')->latest();
+        $query = Service::query()->with(['pegawai', 'perangkat'])->latest();
 
         if ($request->filled('cari')) {
             $cari = (string) $request->string('cari');
             $query->where(function ($q) use ($cari): void {
                 $q->where('nomor_resi', 'like', "%{$cari}%")
-                    ->orWhere('nama_customer', 'like', "%{$cari}%")
-                    ->orWhere('nama_barang', 'like', "%{$cari}%");
+                    ->orWhereHas('perangkat', function ($q) use ($cari) {
+                        $q->where('nama_customer', 'like', "%{$cari}%")
+                          ->orWhere('merk_model', 'like', "%{$cari}%");
+                    });
             });
         }
 
@@ -49,6 +51,7 @@ final class ServiceController extends Controller
     {
         return view('internal.service.form', [
             'teknisi' => \App\Models\Pegawai::query()->where('masih_bekerja', true)->get(),
+            'perangkat' => \App\Models\Perangkat::query()->orderBy('nama_customer')->get(),
         ]);
     }
 
@@ -62,7 +65,7 @@ final class ServiceController extends Controller
 
     public function show(Service $service): View
     {
-        $service->load(['pegawai', 'riwayat.pegawai', 'parts', 'teknisi']);
+        $service->load(['pegawai', 'riwayat.pegawai', 'parts', 'teknisi', 'perangkat']);
         $produkList = \App\Models\Produk::query()
             ->with('kategori')
             ->orderBy('nama_produk')
@@ -70,8 +73,6 @@ final class ServiceController extends Controller
             ->map(fn ($p) => [
                 'id' => $p->id,
                 'nama' => $p->nama_produk,
-                'harga' => (int) $p->harga,
-                'stok' => (int) $p->jumlah_produk,
                 'kategori' => $p->kategori instanceof \App\Models\KategoriProduk ? $p->kategori->nama_kategori : 'Produk',
             ]);
 
@@ -92,10 +93,6 @@ final class ServiceController extends Controller
 
         $response = redirect()->route('service.show', $service)->with('success', 'Status servis diperbarui.');
 
-        // Semi-otomatis (keputusan Owner, tanpa API): bila staf mencentang
-        // "kirim WA", halaman tujuan membuka WhatsApp otomatis dengan pesan
-        // status terbaru — banner tombolnya tetap tampil sebagai fallback
-        // saat popup diblokir browser.
         if ($waLink !== null && $request->boolean('kirim_wa')) {
             $response->with('wa_link', $waLink);
         }

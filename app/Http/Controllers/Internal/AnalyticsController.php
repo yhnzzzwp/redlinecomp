@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class AnalyticsController extends Controller
 {
-    public function __construct(private readonly \App\Services\JurnalExcelService $jurnal) {}
+    public function __construct() {}
 
     public function index(Request $request): View
     {
@@ -28,36 +28,20 @@ final class AnalyticsController extends Controller
         $transaksiQuery = Transaksi::whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
         $hariIniQuery = Transaksi::where('created_at', '>=', $hariIni)->where('status', 'Normal');
 
-        $pendapatanPeriode = $transaksiQuery->sum('total');
-        $pendapatanHariIni = $hariIniQuery->sum('total');
-        $transaksiPeriode = $transaksiQuery->count();
+        $jumlahPeriode = $transaksiQuery->count();
+        $jumlahHariIni = $hariIniQuery->count();
 
-        // Profit calculation
-        /** @var object|null $profitData */
-        $profitData = ItemTransaksi::select(
-            DB::raw('SUM(item_transaksi.subtotal - (COALESCE(produk.harga_modal, 0) * item_transaksi.jumlah)) as total_profit')
-        )
-            ->leftJoin('produk', 'item_transaksi.produk_id', '=', 'produk.id')
-            ->whereHas('transaksi', function ($q) use ($dari, $sampai) {
-                $q->whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
-            })
-            ->first();
-
-        $profitPeriode = $profitData && property_exists($profitData, 'total_profit') ? (int) $profitData->total_profit : 0;
-
-        // 7 days trend
         $trend = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i);
-            $total = Transaksi::whereDate('created_at', $date->format('Y-m-d'))->where('status', 'Normal')->sum('total');
+            $total = Transaksi::whereDate('created_at', $date->format('Y-m-d'))->where('status', 'Normal')->count();
             $trend[] = [
                 'label' => $date->format('d M'),
                 'total' => (int) $total,
             ];
         }
 
-        // Top products
-        $produkTerlaris = ItemTransaksi::select('nama_item', DB::raw('SUM(jumlah) as total_terjual'), DB::raw('SUM(subtotal) as total_pendapatan'))
+        $produkTerlaris = ItemTransaksi::select('nama_item', DB::raw('SUM(jumlah) as total_terjual'))
             ->where('item_transaksi.tipe', TipeItem::Produk->value)
             ->whereHas('transaksi', function ($q) use ($dari, $sampai) {
                 $q->whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
@@ -67,8 +51,7 @@ final class AnalyticsController extends Controller
             ->limit(5)
             ->get();
 
-        // Revenue by category
-        $pendapatanKategori = ItemTransaksi::select('item_transaksi.tipe', DB::raw('SUM(item_transaksi.subtotal) as total_pendapatan'))
+        $pendapatanKategori = ItemTransaksi::select('item_transaksi.tipe', DB::raw('COUNT(*) as jumlah_terjual'))
             ->whereHas('transaksi', function ($q) use ($dari, $sampai) {
                 $q->whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
             })
@@ -76,16 +59,14 @@ final class AnalyticsController extends Controller
             ->get();
 
         return view('internal.analytics.index', compact(
-            'pendapatanPeriode',
-            'profitPeriode',
-            'pendapatanHariIni',
-            'transaksiPeriode',
+            'jumlahPeriode',
+            'jumlahHariIni',
             'trend',
             'produkTerlaris',
             'pendapatanKategori',
             'dari',
             'sampai'
-        ) + ['labaProduk' => $this->labaPerProduk($dari, $sampai)]);
+        ));
     }
 
     public function cetak(Request $request): mixed
@@ -93,7 +74,7 @@ final class AnalyticsController extends Controller
         $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->string('dari')->toString())->startOfDay() : now()->startOfMonth();
         $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->string('sampai')->toString())->endOfDay() : now()->endOfMonth();
 
-        $produkTerlaris = ItemTransaksi::select('nama_item', DB::raw('SUM(jumlah) as total_terjual'), DB::raw('SUM(subtotal) as total_pendapatan'))
+        $produkTerlaris = ItemTransaksi::select('nama_item', DB::raw('SUM(jumlah) as total_terjual'))
             ->where('item_transaksi.tipe', TipeItem::Produk->value)
             ->whereHas('transaksi', function ($q) use ($dari, $sampai) {
                 $q->whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
@@ -105,76 +86,21 @@ final class AnalyticsController extends Controller
 
         $pendapatanKategori = ItemTransaksi::select(
             'item_transaksi.tipe',
-            DB::raw('SUM(item_transaksi.subtotal) as total_pendapatan'),
-            DB::raw('SUM(item_transaksi.subtotal - (COALESCE(produk.harga_modal, 0) * item_transaksi.jumlah)) as total_profit')
+            DB::raw('COUNT(*) as jumlah_terjual')
         )
-            ->leftJoin('produk', 'item_transaksi.produk_id', '=', 'produk.id')
             ->whereHas('transaksi', function ($q) use ($dari, $sampai) {
                 $q->whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
             })
             ->groupBy('item_transaksi.tipe')
             ->get();
 
-        $totalPendapatan = $pendapatanKategori->sum('total_pendapatan');
-        $totalProfit = $pendapatanKategori->sum('total_profit');
+        $totalPendapatan = $pendapatanKategori->sum('jumlah_terjual');
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('internal.analytics.pdf', compact(
-            'produkTerlaris', 'pendapatanKategori', 'totalPendapatan', 'totalProfit', 'dari', 'sampai'
-        ) + ['labaProduk' => $this->labaPerProduk($dari, $sampai)]);
+            'produkTerlaris', 'pendapatanKategori', 'totalPendapatan', 'dari', 'sampai'
+        ));
 
         return $pdf->download('Laporan-Penjualan-' . now()->format('Y-m-d') . '.pdf');
-    }
-
-    /**
-     * Laba per produk pada periode: memanfaatkan harga_modal yang sudah ada
-     * di skema — qty, omzet, modal, laba, terurut laba terbesar.
-     *
-     * @return \Illuminate\Support\Collection<int, ItemTransaksi>
-     */
-    private function labaPerProduk(\Carbon\Carbon $dari, \Carbon\Carbon $sampai): \Illuminate\Support\Collection
-    {
-        return ItemTransaksi::select(
-            'nama_item',
-            DB::raw('SUM(item_transaksi.jumlah) as qty'),
-            DB::raw('SUM(item_transaksi.subtotal) as omzet'),
-            DB::raw('SUM(COALESCE(produk.harga_modal, 0) * item_transaksi.jumlah) as modal'),
-            DB::raw('SUM(item_transaksi.subtotal - (COALESCE(produk.harga_modal, 0) * item_transaksi.jumlah)) as laba'),
-        )
-            ->leftJoin('produk', 'item_transaksi.produk_id', '=', 'produk.id')
-            ->where('item_transaksi.tipe', TipeItem::Produk->value)
-            ->whereHas('transaksi', function ($q) use ($dari, $sampai) {
-                $q->whereBetween('created_at', [$dari, $sampai])->where('status', 'Normal');
-            })
-            ->groupBy('nama_item')
-            ->orderByDesc('laba')
-            ->limit(10)
-            ->get();
-    }
-
-    /**
-     * Ekspor Jurnal Akuntansi (.xlsx): jurnal umum double-entry per transaksi
-     * pada periode terpilih — lihat JurnalExcelService untuk pemetaan akun.
-     */
-    public function exportJurnal(Request $request): StreamedResponse|\Illuminate\Http\RedirectResponse
-    {
-        // Tanggal tak valid → kembali dengan galat (bukan 500); periode dibatasi
-        // 1 tahun karena seluruh workbook dibangun di memori (PhpSpreadsheet).
-        $request->validate(['dari' => ['nullable', 'date'], 'sampai' => ['nullable', 'date']]);
-
-        $dari = $request->filled('dari') ? \Carbon\Carbon::parse($request->string('dari')->toString())->startOfDay() : now()->startOfMonth();
-        $sampai = $request->filled('sampai') ? \Carbon\Carbon::parse($request->string('sampai')->toString())->endOfDay() : now()->endOfMonth();
-
-        if ($dari->diffInDays($sampai, true) > 366) {
-            return redirect()->route('analytics', $request->only(['dari', 'sampai']))
-                ->with('error', 'Periode Jurnal Akuntansi maksimal 1 tahun — persempit rentang tanggal lalu ekspor lagi.');
-        }
-
-        $spreadsheet = $this->jurnal->ekspor($dari, $sampai);
-        $nama = 'Jurnal-Akuntansi-'.$dari->format('Ymd').'-'.$sampai->format('Ymd').'.xlsx';
-
-        return response()->streamDownload(function () use ($spreadsheet): void {
-            (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
-        }, $nama, ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
     }
 
     public function exportCsv(Request $request): StreamedResponse
@@ -197,16 +123,10 @@ final class AnalyticsController extends Controller
         $callback = function () use ($items): void {
             $file = fopen('php://output', 'w');
             if ($file !== false) {
-                fputcsv($file, ['Tanggal', 'No Transaksi', 'Kasir', 'Tipe', 'Item', 'Qty', 'Harga Satuan', 'Subtotal', 'HPP', 'Profit']);
+                fputcsv($file, ['Tanggal', 'No Transaksi', 'Kasir', 'Tipe', 'Item', 'Qty', 'Harga Satuan', 'Subtotal']);
 
                 foreach ($items as $item) {
-                    /** @var Produk|null $produk */
-                    $produk = $item->produk;
-                    $hargaModal = $produk ? (int) $produk->harga_modal : 0;
-                    $hpp = $item->tipe === TipeItem::Produk && $produk ? $hargaModal : 0;
-                    $profit = $item->subtotal - ($hpp * $item->jumlah);
 
-                    /** @var Transaksi|null $trx */
                     $trx = $item->transaksi;
                     $tanggal = $trx && $trx->created_at ? $trx->created_at->format('Y-m-d H:i:s') : '-';
                     $kodeNota = $trx ? $trx->kode_nota : '-';
@@ -214,7 +134,6 @@ final class AnalyticsController extends Controller
                     $kasir = $pegawai instanceof \App\Models\Pegawai ? $pegawai->nama_pegawai : '-';
                     $tipeVal = $item->tipe->value;
 
-                    /** @var array<int, string|int|float|null> $row */
                     $row = [
                         $tanggal,
                         $kodeNota,
@@ -224,8 +143,6 @@ final class AnalyticsController extends Controller
                         $item->jumlah,
                         $item->harga,
                         $item->subtotal,
-                        $hpp,
-                        $profit,
                     ];
 
                     fputcsv($file, $row);

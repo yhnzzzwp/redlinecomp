@@ -81,7 +81,7 @@
                             <a href="{{ route('pos.struk', $t) }}" target="_blank" class="btn-ghost btn-sm" aria-label="Cetak struk thermal #{{ $t->kode_nota }}">Struk</a>
                             @if($t->status === 'Normal' && auth()->user()->isOwner())
                                 <form method="POST" action="{{ route('transaksi.void', $t) }}" class="d-inline"
-                                      x-data @submit.prevent="if (confirm('Void transaksi ini? Stok produk akan dikembalikan.')) $el.submit()">
+                                      x-data @submit.prevent="if (confirm('Void transaksi ini?')) $el.submit()">
                                     @csrf
                                     <button type="submit" class="btn-ghost btn-sm text-danger" aria-label="Void transaksi #{{ $t->kode_nota }}">Void</button>
                                 </form>

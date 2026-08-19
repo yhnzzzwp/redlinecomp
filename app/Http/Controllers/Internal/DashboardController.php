@@ -15,10 +15,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalSales = (int) Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)->sum('total');
+        $totalSales = (int) Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)->count();
         $todaySales = (int) Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)
             ->whereDate('created_at', Carbon::today())
-            ->sum('total');
+            ->count();
         $todayCount = Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)
             ->whereDate('created_at', Carbon::today())
             ->count();
@@ -28,12 +28,6 @@ class DashboardController extends Controller
         ])->count();
         $totalProducts = Produk::count();
 
-        $criticalStock = Produk::with('kategori')
-            ->where('jumlah_produk', '<=', config('redline.stok_kritis', 5))
-            ->orderBy('jumlah_produk')
-            ->limit(6)
-            ->get();
-
         $recent = Transaksi::with('pegawai')->latest()->limit(5)->get();
 
         $trend = collect(range(6, 0))->map(function ($d) {
@@ -42,7 +36,7 @@ class DashboardController extends Controller
                 'label' => $day->translatedFormat('d M'),
                 'total' => (int) Transaksi::where('status', \App\Enums\TransaksiStatus::Normal)
                     ->whereDate('created_at', $day)
-                    ->sum('total'),
+                    ->count(),
             ];
         });
 
@@ -52,7 +46,6 @@ class DashboardController extends Controller
             'todayCount',
             'activeServices',
             'totalProducts',
-            'criticalStock',
             'recent',
             'trend'
         ));
