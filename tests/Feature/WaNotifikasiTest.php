@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Enums\StatusService;
 use App\Models\Pegawai;
+use App\Models\Perangkat;
 use App\Models\Service;
 use App\Support\Wa;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,10 +24,21 @@ final class WaNotifikasiTest extends TestCase
             ['nama_pegawai' => 'Karyawan', 'email' => 'kar@uji.test', 'password' => Hash::make('password'), 'role' => 'Karyawan', 'masih_bekerja' => true],
         );
 
+        $perangkat = Perangkat::create([
+            'kode_perangkat'    => 'DEV-' . fake()->unique()->numerify('####'),
+            'nama_customer'     => 'Budi',
+            'nomor_hp_customer' => $hp,
+            'merk_model'        => 'Laptop ASUS',
+        ]);
+
         return Service::create([
-            'nomor_resi' => 'PK-2026-'.fake()->unique()->numerify('####'), 'pegawai_id' => $pegawai->id,
-            'nama_customer' => 'Budi', 'nomor_hp_customer' => $hp, 'nama_barang' => 'Laptop ASUS',
-            'masalah' => 'Mati total', 'biaya_service' => 150_000, 'status' => $status, 'tanggal_masuk' => now(),
+            'nomor_resi'       => 'PK-2026-'.fake()->unique()->numerify('####'),
+            'pegawai_id'       => $pegawai->id,
+            'perangkat_id'     => $perangkat->id,
+            'keluhan'          => 'Mati total',
+            'biaya_service'    => 150_000,
+            'status'           => $status,
+            'tanggal_masuk'    => now(),
         ]);
     }
 

@@ -43,4 +43,23 @@ class Pegawai extends Authenticatable
     {
         return $this->hasMany(Service::class, 'pegawai_id');
     }
+
+    public function apiTokens(): HasMany
+    {
+        return $this->hasMany(ApiToken::class, 'pegawai_id');
+    }
+
+    public function createApiToken(string $name = 'default', ?array $abilities = ['*'], ?\DateTimeInterface $expiresAt = null): string
+    {
+        $plainToken = 'rl_tok_' . \Illuminate\Support\Str::random(40) . '_' . dechex((int) microtime(true));
+
+        $this->apiTokens()->create([
+            'name' => $name,
+            'token' => hash('sha256', $plainToken),
+            'abilities' => $abilities,
+            'expires_at' => $expiresAt,
+        ]);
+
+        return $plainToken;
+    }
 }

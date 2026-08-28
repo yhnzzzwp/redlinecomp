@@ -39,6 +39,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'owner' => \App\Http\Middleware\EnsureOwner::class,
             'portal' => \App\Http\Middleware\EnsurePortal::class,
+            'auth.api' => \App\Http\Middleware\EnsureApiAuthenticated::class,
+            'owner.api' => \App\Http\Middleware\EnsureApiOwner::class,
         ]);
 
         $middleware->prependToPriorityList(
