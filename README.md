@@ -1,37 +1,67 @@
-# Redline Komputer — Sistem Informasi (SIRC)
+# Redline Komputer — Backend & Sistem Informasi (SIRC)
 
-Platform web penjualan (POS), servis/reparasi, dan manajemen stok Toko Redline Komputer.
-Dibangun sesuai **SRS Kelompok 5 · RPL** dengan pola **MVC (Laravel)**.
+Platform Backend REST API dan Sistem Informasi Manajemen Penjualan (POS), Servis/Reparasi Komputer, dan Katalog Produk untuk Toko Redline Komputer Salatiga.
 
-## Stack
-- **Laravel 13** (PHP 8.3) · Blade · Bootstrap 5 · Alpine.js
-- **MySQL 8** (via Docker)
-- **laravel-dompdf** — nota digital PDF
-- Autentikasi sesi (bcrypt) · enforcement role di server
-- **Tiga portal terpisah per subdomain** — publik, karyawan, admin (sesi terisolasi per host)
-- Design system "Instrument Panel" — Barlow/Barlow Condensed + IBM Plex Mono (self-hosted)
+Dapat digunakan secara mandiri (Full-Stack MVC Laravel) ataupun sebagai **Backend REST API (Headless API)** untuk frontend modern seperti **Next.js**, React, Vue, atau Mobile App.
 
-## Menjalankan (Docker — direkomendasikan)
+---
+
+## 🚀 Menjalankan Server di Laptop / Komputer Baru
+
+Jika Anda meng-clone project ini di laptop lain, cukup ikuti 3 langkah berikut:
+
+### 1. Prasyarat
+- **Docker** & **Docker Compose** sudah terpasang di laptop.
+
+### 2. Setup Environment
 ```bash
-cp .env.example .env         # lalu isi APP_KEY: php artisan key:generate
-docker compose up -d --build            # PHP-FPM + Nginx + MySQL 8 + Adminer
+git clone https://github.com/yhnzzzwp/redlinecomp.git
+cd redlinecomp
+
+# Salin template env
+cp .env.example .env
+```
+
+### 3. Jalankan Docker Container
+```bash
+# Jalankan container (DB MariaDB, App PHP-FPM, Web Nginx, Adminer)
+docker compose up -d --build
+
+# Generate App Key & Jalankan Migrasi + Seeder
+docker compose exec app php artisan key:generate
 docker compose exec app php artisan migrate --seed
 ```
 
-| Portal | URL | Untuk |
-|--------|-----|-------|
-| Situs publik | http://localhost:8080 | Customer (beranda = katalog langsung, lacak servis) |
-| Portal Karyawan | http://karyawan.localhost:8080 | Login karyawan (POS, produk, servis) |
-| Admin Console | http://admin.localhost:8080 | Login owner (semua + analytics, promo, pegawai) |
+Server backend sudah aktif dan siap melayani request! 🎉
 
-- Adminer (GUI DB): http://localhost:8081  (server: `db`, user: `redline`, pass: `redline_secret`)
-- `/login` sengaja **404 di host publik** — gerbang masuk hanya lewat subdomain portal.
+---
 
-## Kredensial demo
-| Peran | Portal login | Username | Password |
-|-------|--------------|----------|----------|
-| Owner | admin.localhost:8080 | `owner`  | `password` |
-| Karyawan | karyawan.localhost:8080 | `rijal` | `password` |
+## 🌐 Daftar Endpoint & Port Lokal
 
-## Dokumentasi
-Lihat folder [`docs/`](docs/) — arsitektur, ERD, setup, keamanan, panduan fitur.
+| Service | Port / URL | Keterangan |
+|---|---|---|
+| **REST API Base** | `http://localhost:8000/api/v1` | Base URL seluruh REST API |
+| **API Health Check** | `http://localhost:8000/api/v1/health` | Status kesehatan backend |
+| **API Katalog** | `http://localhost:8000/api/v1/katalog` | Katalog produk publik |
+| **API Login** | `http://localhost:8000/api/v1/auth/login` | Login pegawai & terbitkan token |
+| **Adminer (Database GUI)** | `http://localhost:8081` | Server: `db`, User: `redline`, Pass: `redline_secret`, DB: `redline` |
+
+---
+
+## 🔗 Menghubungkan Backend ke Frontend (Next.js / Vercel)
+
+1. **Jalankan Tunnel Publik (Cloudflare / Ngrok / Localtunnel):**
+   ```bash
+   # Contoh quick tunnel cloudflared
+   docker run --rm --net=host cloudflare/cloudflared:latest tunnel --url http://localhost:8000
+   ```
+2. **Set Environment Variable di Frontend (Vercel):**
+   - **Key**: `NEXT_PUBLIC_API_BASE_URL`
+   - **Value**: `https://<subdomain-tunnel-anda>/api/v1`
+   - Lakukan **Redeploy** di Vercel.
+
+---
+
+## 📚 Dokumentasi Lengkap
+- [Panduan Lengkap REST API v1](docs/10-api-backend.md)
+- [Panduan Deploy, Cloudflare Tunnel, dan Integrasi Vercel](docs/11-panduan-deploy-dan-koneksi.md)
