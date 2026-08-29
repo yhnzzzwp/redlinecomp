@@ -98,7 +98,7 @@ class ApiServiceController extends Controller
                 'serial_number' => $perangkat->serial_number,
                 'tahun' => $perangkat->tahun,
                 'spesifikasi' => $perangkat->spesifikasi,
-                'services' => $perangkat->services->map(fn ($s) => [
+                'services' => $perangkat->services->map(fn (Service $s) => [
                     'id' => $s->id,
                     'nomor_resi' => $s->nomor_resi,
                     'status' => $s->status->value,
@@ -108,7 +108,7 @@ class ApiServiceController extends Controller
                     'tanggal_masuk' => $s->tanggal_masuk?->format('Y-m-d'),
                     'tanggal_selesai' => $s->tanggal_selesai?->format('Y-m-d'),
                     'total_biaya' => $s->totalBiaya(),
-                    'parts' => $s->parts->map(fn ($p) => [
+                    'parts' => $s->parts->map(fn (\App\Models\PartService $p) => [
                         'nama_part' => $p->nama_part,
                         'jumlah' => $p->jumlah,
                         'harga' => $p->harga,

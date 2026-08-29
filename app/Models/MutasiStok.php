@@ -24,11 +24,13 @@ class MutasiStok extends Model
         'jumlah_sesudah' => 'integer',
     ];
 
+    /** @return BelongsTo<Produk, $this> */
     public function produk(): BelongsTo
     {
         return $this->belongsTo(Produk::class, 'produk_id');
     }
 
+    /** @return BelongsTo<Pegawai, $this> */
     public function pegawai(): BelongsTo
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_id');

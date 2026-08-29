@@ -23,7 +23,10 @@ class ItemTransaksi extends Model
         'jumlah' => 'integer', 'harga' => 'integer', 'subtotal' => 'integer',
     ];
 
+    /** @return BelongsTo<Transaksi, $this> */
     public function transaksi(): BelongsTo { return $this->belongsTo(Transaksi::class, 'transaksi_id'); }
+    /** @return BelongsTo<Produk, $this> */
     public function produk(): BelongsTo { return $this->belongsTo(Produk::class, 'produk_id'); }
+    /** @return BelongsTo<Service, $this> */
     public function service(): BelongsTo { return $this->belongsTo(Service::class, 'service_id'); }
 }

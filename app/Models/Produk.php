@@ -20,6 +20,7 @@ class Produk extends Model
         'show_katalog' => 'boolean',
     ];
 
+    /** @return BelongsTo<KategoriProduk, $this> */
     public function kategori(): BelongsTo
     {
         return $this->belongsTo(KategoriProduk::class, 'kategori_id');

@@ -11,7 +11,6 @@ use App\Enums\TipeItem;
 use App\Enums\TipePromo;
 use App\Exceptions\PembayaranKurangException;
 use App\Exceptions\PromoTidakValidException;
-use App\Exceptions\StokTidakCukupException;
 use App\Models\Pegawai;
 use App\Models\Produk;
 use App\Models\Promo;
@@ -38,39 +37,49 @@ final class PosCheckoutTest extends TestCase
         ]);
     }
 
-    private function produk(int $stok, int $harga): Produk
+    /**
+     * Kolom harga dan jumlah_produk sudah dihapus dari tabel produk
+     * (migrasi 2026_08_20_000003), jadi harga jual ditentukan kasir saat
+     * transaksi dan diteruskan lewat CartLine.
+     */
+    private function produk(): Produk
     {
         return Produk::create([
-            'nama_produk' => 'Uji Produk', 'jumlah_produk' => $stok, 'harga' => $harga, 'show_katalog' => true,
+            'nama_produk' => 'Uji Produk', 'show_katalog' => true,
         ]);
     }
 
-    public function test_checkout_menghitung_total_dan_mengurangi_stok(): void
+    public function test_checkout_menghitung_total(): void
     {
-        $produk = $this->produk(5, 1_000_000);
+        $produk = $this->produk();
 
         $trx = $this->pos->checkout(new CheckoutData(
-            items: [new CartLine(TipeItem::Produk->value, $produk->id, 2)],
+            items: [new CartLine(TipeItem::Produk->value, $produk->id, 2, 1_000_000)],
             metodeBayar: MetodeBayar::Tunai,
             bayar: 2_000_000,
         ), $this->kasir);
 
         $this->assertSame(2_000_000, $trx->total);
         $this->assertSame(0, $trx->kembalian);
-        $this->assertSame(3, $produk->fresh()->jumlah_produk);
         $this->assertCount(1, $trx->items);
         $this->assertDatabaseHas('transaksi', ['kode_nota' => $trx->kode_nota, 'total' => 2_000_000]);
     }
 
     public function test_checkout_servis_mencatat_riwayat_status_diambil(): void
     {
-        $servis = app(\App\Services\ServiceTicketService::class)->buat([
-            'nama_customer' => 'Budi', 'nama_barang' => 'Laptop Uji', 'masalah' => 'Mati total',
-        ], $this->kasir);
-        $servis->update(['biaya_service' => 100_000]);
+        $servis = app(\App\Services\ServiceTicketService::class)->buat($this->dataServis('Budi', 'Laptop Uji', 'Mati total'), $this->kasir);
+        // Servis harus SELESAI sebelum boleh ditandai diambil — guard
+        // StatusService::canTransitionTo kini ditegakkan juga di jalur POS,
+        // bukan hanya di ServiceTicketService.
+        $servis->update([
+            'biaya_service' => 100_000,
+            'status' => \App\Enums\StatusService::Selesai,
+        ]);
 
         $trx = $this->pos->checkout(new CheckoutData(
-            items: [new CartLine(TipeItem::Servis->value, $servis->id, 1)],
+            // Harga servis diabaikan server dan diambil dari Service::totalBiaya();
+            // lihat IntegritasKeuanganTest untuk pembuktiannya.
+            items: [new CartLine(TipeItem::Servis->value, $servis->id, 1, 100_000)],
             metodeBayar: MetodeBayar::Tunai,
             bayar: 100_000,
         ), $this->kasir);
@@ -84,26 +93,10 @@ final class PosCheckoutTest extends TestCase
         ]);
     }
 
-    public function test_checkout_menolak_saat_stok_tidak_cukup(): void
-    {
-        $produk = $this->produk(1, 1_000_000);
-
-        try {
-            $this->pos->checkout(new CheckoutData(
-                items: [new CartLine(TipeItem::Produk->value, $produk->id, 2)],
-                metodeBayar: MetodeBayar::Tunai,
-                bayar: 2_000_000,
-            ), $this->kasir);
-            $this->fail('Seharusnya menolak stok tidak cukup.');
-        } catch (StokTidakCukupException) {
-            $this->assertSame(1, $produk->fresh()->jumlah_produk);
-            $this->assertDatabaseCount('transaksi', 0);
-        }
-    }
 
     public function test_checkout_menerapkan_promo_persen_dengan_batas_maksimal(): void
     {
-        $produk = $this->produk(10, 25_000_000);
+        $produk = $this->produk();
         Promo::create([
             'nama_promo' => 'Uji', 'kode_promo' => 'GAMING40', 'tipe_promo' => TipePromo::Persen,
             'besar_promo' => 40, 'minimal_transaksi' => 5_000_000, 'maksimal_diskon' => 2_000_000,
@@ -111,7 +104,7 @@ final class PosCheckoutTest extends TestCase
         ]);
 
         $trx = $this->pos->checkout(new CheckoutData(
-            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1)],
+            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1, 25_000_000)],
             metodeBayar: MetodeBayar::QRIS,
             bayar: 23_000_000,
             kodePromo: 'GAMING40',
@@ -123,7 +116,7 @@ final class PosCheckoutTest extends TestCase
 
     public function test_checkout_menolak_promo_di_bawah_minimal_transaksi(): void
     {
-        $produk = $this->produk(10, 1_000_000);
+        $produk = $this->produk();
         Promo::create([
             'nama_promo' => 'Uji', 'kode_promo' => 'BIG', 'tipe_promo' => TipePromo::Persen,
             'besar_promo' => 10, 'minimal_transaksi' => 5_000_000,
@@ -132,7 +125,7 @@ final class PosCheckoutTest extends TestCase
 
         $this->expectException(PromoTidakValidException::class);
         $this->pos->checkout(new CheckoutData(
-            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1)],
+            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1, 1_000_000)],
             metodeBayar: MetodeBayar::Tunai,
             bayar: 1_000_000,
             kodePromo: 'BIG',
@@ -141,11 +134,11 @@ final class PosCheckoutTest extends TestCase
 
     public function test_checkout_menolak_pembayaran_kurang(): void
     {
-        $produk = $this->produk(10, 5_000_000);
+        $produk = $this->produk();
 
         $this->expectException(PembayaranKurangException::class);
         $this->pos->checkout(new CheckoutData(
-            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1)],
+            items: [new CartLine(TipeItem::Produk->value, $produk->id, 1, 5_000_000)],
             metodeBayar: MetodeBayar::Tunai,
             bayar: 1_000_000,
         ), $this->kasir);

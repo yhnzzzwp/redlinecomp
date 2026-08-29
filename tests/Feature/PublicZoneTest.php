@@ -49,9 +49,16 @@ final class PublicZoneTest extends TestCase
         $pegawai = \App\Models\Pegawai::create([
             'nama_pegawai' => 'Test', 'username' => 'test', 'email' => 'test@uji.test', 'password' => 'pass', 'role' => 'Karyawan', 'masih_bekerja' => true
         ]);
+        // Identitas pelanggan & perangkat kini di tabel terpisah.
+        $perangkat = \App\Models\Perangkat::create([
+            'kode_perangkat' => 'PK-UJI-CEK', 'nama_customer' => 'Budi',
+            'nomor_hp_customer' => '081234567890', 'merk_model' => 'Laptop',
+        ]);
+
         $service = Service::create([
-            'nomor_resi' => 'PK-1234-5678', 'pegawai_id' => $pegawai->id, 'nama_customer' => 'Budi', 'nama_barang' => 'Laptop',
-            'masalah' => 'Rusak', 'biaya_service' => 0, 'status' => StatusService::Diterima, 'tanggal_masuk' => now()
+            'nomor_resi' => 'PK-1234-5678', 'pegawai_id' => $pegawai->id,
+            'perangkat_id' => $perangkat->id, 'keluhan' => 'Rusak',
+            'biaya_service' => 0, 'status' => StatusService::Diterima, 'tanggal_masuk' => now(),
         ]);
 
         $this->get(route('cek.servis', ['resi' => 'PK-1234-5678']))

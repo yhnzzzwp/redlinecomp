@@ -14,7 +14,10 @@ class EnsureApiOwner
     {
         $user = $request->user();
 
-        if (! $user || ! method_exists($user, 'isOwner') || ! $user->isOwner()) {
+        // method_exists() dihapus: $user sudah bertipe Pegawai yang selalu
+        // punya isOwner(), sehingga pemeriksaan itu tidak pernah bernilai false
+        // dan hanya menyamarkan maksud kodenya.
+        if (! $user instanceof \App\Models\Pegawai || ! $user->isOwner()) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Akses ditolak: Fitur ini hanya dapat diakses oleh Owner / Admin.',

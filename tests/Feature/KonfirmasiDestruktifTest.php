@@ -145,8 +145,24 @@ final class KonfirmasiDestruktifTest extends TestCase
 
     public function test_tidak_ada_lagi_inline_onsubmit_di_seluruh_view(): void
     {
-        $berkas = glob(resource_path('views/**/*.blade.php'), GLOB_BRACE) ?: [];
-        $berkas = array_merge($berkas, glob(resource_path('views/*/*/*.blade.php')) ?: []);
+        // GLOB_BRACE adalah ekstensi GNU dan TIDAK tersedia di musl libc
+        // (image php:8.3-fpm-alpine yang dipakai proyek ini), sehingga tes ini
+        // selalu gagal dengan "Undefined constant GLOB_BRACE". Polanya pun
+        // tidak memakai kurung kurawal, jadi flag itu memang tidak diperlukan.
+        // Iterator rekursif sekaligus menjangkau SEMUA kedalaman, bukan hanya
+        // dua dan tiga level seperti pasangan glob sebelumnya.
+        $berkas = [];
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator(resource_path('views'), \FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $item) {
+            if ($item->isFile() && str_ends_with($item->getFilename(), '.blade.php')) {
+                $berkas[] = $item->getPathname();
+            }
+        }
+
+        $this->assertNotEmpty($berkas, 'Tidak ada berkas blade yang terbaca.');
 
         foreach ($berkas as $file) {
             $this->assertStringNotContainsString(

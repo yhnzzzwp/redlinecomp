@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\MetodeBayar;
 use App\Enums\TransaksiStatus;
 use App\Http\Controllers\Controller;
+use App\Models\ItemTransaksi;
 use App\Models\Promo;
 use App\Models\Transaksi;
 use Illuminate\Http\JsonResponse;
@@ -124,8 +125,8 @@ class ApiTransaksiController extends Controller
             'id'               => $t->id,
             'kode_nota'        => $t->kode_nota,
             'local_id'         => $t->local_id,
-            'status'           => $t->status->value ?? (string) $t->status,
-            'metode_bayar'     => $t->metode_bayar->value ?? (string) $t->metode_bayar,
+            'status'           => $t->status->value,
+            'metode_bayar'     => $t->metode_bayar->value,
             'subtotal'         => (int) $t->subtotal,
             'diskon'           => (int) $t->diskon,
             'total'            => (int) $t->total,
@@ -143,9 +144,9 @@ class ApiTransaksiController extends Controller
                 'kode_promo'   => $t->promo->kode_promo,
                 'nama_promo'   => $t->promo->nama_promo,
             ] : null,
-            'items'            => $t->items->map(fn ($item) => [
+            'items'            => $t->items->map(fn (ItemTransaksi $item) => [
                 'id'           => $item->id,
-                'tipe'         => $item->tipe->value ?? (string) $item->tipe,
+                'tipe'         => $item->tipe->value,
                 'produk_id'    => $item->produk_id,
                 'service_id'   => $item->service_id,
                 'nama_item'    => $item->nama_item,

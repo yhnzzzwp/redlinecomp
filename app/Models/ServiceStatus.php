@@ -16,6 +16,8 @@ class ServiceStatus extends Model
 
     protected $casts = ['status' => StatusService::class];
 
+    /** @return BelongsTo<Service, $this> */
     public function service(): BelongsTo { return $this->belongsTo(Service::class, 'service_id'); }
+    /** @return BelongsTo<Pegawai, $this> */
     public function pegawai(): BelongsTo { return $this->belongsTo(Pegawai::class, 'pegawai_id'); }
 }

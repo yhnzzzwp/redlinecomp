@@ -35,7 +35,11 @@ final class AnalyticsTest extends TestCase
         $this->actingAs($this->owner)->get(route('analytics'))
             ->assertOk()
             ->assertSee('Analisis Penjualan')
-            ->assertSee('Laba per Produk');
+            // Bagian "Laba per Produk" dihapus bersama kolom harga_modal
+            // (migrasi 2026_08_20_000003) — tanpa harga modal, laba tidak bisa
+            // dihitung. Yang tersisa adalah ringkasan penjualan.
+            ->assertSee('Produk Terlaris Periode Ini')
+            ->assertSee('Jumlah Transaksi Periode');
     }
 
     public function test_owner_bisa_cetak_laporan(): void

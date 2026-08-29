@@ -15,6 +15,7 @@ class KategoriProduk extends Model
 
     protected $casts = ['tampil_filter' => 'boolean'];
 
+    /** @return HasMany<Produk, $this> */
     public function produk(): HasMany
     {
         return $this->hasMany(Produk::class, 'kategori_id');

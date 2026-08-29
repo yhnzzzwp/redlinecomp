@@ -27,6 +27,7 @@ class Promo extends Model
         'terpakai' => 'integer',
     ];
 
+    /** @return HasMany<Transaksi, $this> */
     public function transaksi(): HasMany
     {
         return $this->hasMany(Transaksi::class, 'promo_id');

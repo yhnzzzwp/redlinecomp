@@ -217,7 +217,7 @@ class ApiPegawaiController extends Controller
             'nama_pegawai'   => $p->nama_pegawai,
             'username'       => $p->username,
             'email'          => $p->email,
-            'role'           => $p->role->value ?? (string) $p->role,
+            'role'           => $p->role->value,
             'nomor_hp'       => $p->nomor_hp,
             'alamat_pegawai' => $p->alamat_pegawai,
             'tanggal_masuk'  => $p->tanggal_masuk?->format('Y-m-d'),

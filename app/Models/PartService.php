@@ -16,6 +16,8 @@ class PartService extends Model
 
     protected $casts = ['jumlah' => 'integer', 'harga' => 'integer', 'subtotal' => 'integer'];
 
+    /** @return BelongsTo<Service, $this> */
     public function service(): BelongsTo { return $this->belongsTo(Service::class, 'service_id'); }
+    /** @return BelongsTo<Produk, $this> */
     public function produk(): BelongsTo { return $this->belongsTo(Produk::class, 'produk_id'); }
 }

@@ -16,6 +16,7 @@ class Perangkat extends Model
         'merk_model', 'serial_number', 'tahun', 'spesifikasi',
     ];
 
+    /** @return HasMany<Service, $this> */
     public function services(): HasMany
     {
         return $this->hasMany(Service::class, 'perangkat_id')->latest('tanggal_masuk');

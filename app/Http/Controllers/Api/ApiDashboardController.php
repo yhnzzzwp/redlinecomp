@@ -57,8 +57,8 @@ class ApiDashboardController extends Controller
                 'kode_nota'    => $t->kode_nota,
                 'nama_pembeli' => $t->nama_pembeli,
                 'total'        => (int) $t->total,
-                'metode_bayar' => $t->metode_bayar->value ?? (string) $t->metode_bayar,
-                'status'       => $t->status->value ?? (string) $t->status,
+                'metode_bayar' => $t->metode_bayar->value,
+                'status'       => $t->status->value,
                 'kasir'        => $t->pegawai?->nama_pegawai,
                 'waktu'        => $t->created_at?->format('Y-m-d H:i'),
             ]);
@@ -122,7 +122,7 @@ class ApiDashboardController extends Controller
 
         // Pendapatan per metode bayar
         $metodeBayarBreakdown = [];
-        foreach ($transaksi->groupBy(fn ($t) => $t->metode_bayar->value ?? (string) $t->metode_bayar) as $metode => $group) {
+        foreach ($transaksi->groupBy(fn (Transaksi $t) => $t->metode_bayar->value) as $metode => $group) {
             $metodeBayarBreakdown[] = [
                 'metode'     => $metode,
                 'total'      => (int) $group->sum('total'),

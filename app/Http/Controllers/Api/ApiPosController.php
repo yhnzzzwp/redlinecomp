@@ -62,7 +62,10 @@ class ApiPosController extends Controller
                 'id'            => $s->id,
                 'tipe'          => 'service',
                 'nomor_resi'    => $s->nomor_resi,
-                'nama'          => 'Servis: ' . ($s->perangkat?->merk_model ?? 'Unit #' . $s->nomor_resi),
+                // perangkat_id nullable (nullOnDelete), jadi relasinya bisa kosong.
+                'nama'          => 'Servis: ' . ($s->perangkat !== null
+                    ? $s->perangkat->merk_model
+                    : 'Unit #' . $s->nomor_resi),
                 'nama_customer' => $s->perangkat?->nama_customer,
                 'status'        => $s->status->value,
                 'status_warna'  => $s->status->warna(),
@@ -309,7 +312,7 @@ class ApiPosController extends Controller
                     $kembalian = $bayar - $total;
 
                     $transaksi = \App\Support\CobaUlang::unik(fn (): Transaksi => Transaksi::create([
-                        'kode_nota'        => (new KodeGenerator())->nota(),
+                        'kode_nota'        => $this->kodeGenerator->nota(),
                         'local_id'         => $trxData['local_id'],
                         'pegawai_id'       => $kasirId,
                         'promo_id'         => $promoId,
@@ -417,8 +420,8 @@ class ApiPosController extends Controller
             'id'               => $t->id,
             'kode_nota'        => $t->kode_nota,
             'local_id'         => $t->local_id,
-            'status'           => $t->status->value ?? (string) $t->status,
-            'metode_bayar'     => $t->metode_bayar->value ?? (string) $t->metode_bayar,
+            'status'           => $t->status->value,
+            'metode_bayar'     => $t->metode_bayar->value,
             'subtotal'         => (int) $t->subtotal,
             'diskon'           => (int) $t->diskon,
             'total'            => (int) $t->total,
@@ -438,7 +441,7 @@ class ApiPosController extends Controller
             ] : null,
             'items'            => $t->items->map(fn ($item) => [
                 'id'           => $item->id,
-                'tipe'         => $item->tipe->value ?? (string) $item->tipe,
+                'tipe'         => $item->tipe->value,
                 'produk_id'    => $item->produk_id,
                 'service_id'   => $item->service_id,
                 'nama_item'    => $item->nama_item,
@@ -475,8 +478,8 @@ class ApiPosController extends Controller
             'status' => 'success',
             'data'   => [
                 'kode_nota'    => $transaksi->kode_nota,
-                'status'       => $transaksi->status->value ?? (string) $transaksi->status,
-                'metode_bayar' => $transaksi->metode_bayar->value ?? (string) $transaksi->metode_bayar,
+                'status'       => $transaksi->status->value,
+                'metode_bayar' => $transaksi->metode_bayar->value,
                 'nama_pembeli' => \App\Support\Privasi::namaSingkat($transaksi->nama_pembeli),
                 'subtotal'     => (int) $transaksi->subtotal,
                 'diskon'       => (int) $transaksi->diskon,
@@ -489,7 +492,7 @@ class ApiPosController extends Controller
                     'jumlah'    => (int) $item->jumlah,
                     'harga'     => (int) $item->harga,
                     'subtotal'  => (int) $item->subtotal,
-                    'tipe'      => $item->tipe->value ?? (string) $item->tipe,
+                    'tipe'      => $item->tipe->value,
                 ]),
             ],
         ]);

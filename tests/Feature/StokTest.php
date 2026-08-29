@@ -25,6 +25,16 @@ final class StokTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->markTestSkipped(
+            'Fitur mutasi stok sudah dihapus: migrasi 2026_08_20_000008 men-drop '
+            .'tabel mutasi_stok, migrasi 2026_08_20_000003 menghapus kolom '
+            .'harga/jumlah_produk dari produk, rute stok.* tidak lagi terdaftar, '
+            .'dan StokService kini kelas kosong. Tes ini sengaja dipertahankan '
+            .'sebagai catatan perilaku lama. Hidupkan kembali bila fitur stok '
+            .'dikembalikan, atau hapus berkas ini beserta StokController, '
+            .'StokService, dan JurnalExcelService yang sudah tidak terpakai.'
+        );
+
         $this->usePortal('staff');
         $this->staff = Pegawai::create([
             'nama_pegawai' => 'Staff Uji', 'username' => 'staff', 'email' => 'staff@uji.test',
@@ -149,9 +159,7 @@ final class StokTest extends TestCase
     {
         $produk = Produk::create(['nama_produk' => 'PSU Part', 'sku' => 'PSU-1', 'harga' => 800_000, 'harga_modal' => 650_000, 'jumlah_produk' => 4]);
         $svc = app(\App\Services\ServiceTicketService::class);
-        $servis = $svc->buat([
-            'nama_customer' => 'Andi', 'nama_barang' => 'PC Rakitan', 'masalah' => 'PSU mati',
-        ], $this->staff);
+        $servis = $svc->buat($this->dataServis('Andi', 'PC Rakitan', 'PSU mati'), $this->staff);
 
         $part = $svc->tambahPart($servis, ['produk_id' => $produk->id, 'nama_part' => 'PSU Part', 'jumlah' => 2, 'harga' => 800_000]);
 

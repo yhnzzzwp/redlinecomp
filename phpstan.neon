@@ -5,3 +5,16 @@ parameters:
     tmpDir: .phpstan-cache
     paths:
         - app
+    # Berkas berikut TIDAK TERJANGKAU: StokController tidak punya rute
+    # terdaftar, JurnalExcelService tidak direferensikan dari mana pun, dan
+    # StokService kini kelas kosong. Semuanya sisa fitur stok & jurnal yang
+    # dihapus migrasi 2026_08_20_000003 dan 2026_08_20_000008.
+    #
+    # Dikecualikan, BUKAN diperbaiki: kodenya tidak bisa dibuat benar tanpa
+    # memutuskan lebih dulu apakah fitur stok/jurnal dihidupkan kembali atau
+    # dihapus seluruhnya. Hapus baris-baris ini begitu keputusan itu diambil.
+    excludePaths:
+        analyse:
+            - app/Http/Controllers/Internal/StokController.php
+            - app/Services/JurnalExcelService.php
+            - app/Services/StokService.php

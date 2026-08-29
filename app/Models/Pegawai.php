@@ -34,16 +34,19 @@ class Pegawai extends Authenticatable
         return $this->role === RolePegawai::Owner;
     }
 
+    /** @return HasMany<Transaksi, $this> */
     public function transaksi(): HasMany
     {
         return $this->hasMany(Transaksi::class, 'pegawai_id');
     }
 
+    /** @return HasMany<Service, $this> */
     public function service(): HasMany
     {
         return $this->hasMany(Service::class, 'pegawai_id');
     }
 
+    /** @return HasMany<ApiToken, $this> */
     public function apiTokens(): HasMany
     {
         return $this->hasMany(ApiToken::class, 'pegawai_id');

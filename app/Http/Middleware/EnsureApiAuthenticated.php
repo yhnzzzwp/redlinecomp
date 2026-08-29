@@ -56,7 +56,7 @@ class EnsureApiAuthenticated
 
         // Check roles if specified
         if (! empty($roles)) {
-            $userRole = strtolower($pegawai->role->value ?? (string) $pegawai->role);
+            $userRole = strtolower($pegawai->role->value);
             $allowed = array_map('strtolower', $roles);
             if (! in_array($userRole, $allowed, true)) {
                 return response()->json([

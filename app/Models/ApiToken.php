@@ -26,6 +26,7 @@ class ApiToken extends Model
         'expires_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Pegawai, $this> */
     public function pegawai(): BelongsTo
     {
         return $this->belongsTo(Pegawai::class, 'pegawai_id');

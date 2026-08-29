@@ -42,9 +42,7 @@ final class PosDaftarServisTest extends TestCase
 
     private function servis(string $barang, int $jasa, StatusService $status = StatusService::Selesai): Service
     {
-        $servis = app(ServiceTicketService::class)->buat([
-            'nama_customer' => 'Budi', 'nama_barang' => $barang, 'masalah' => 'Mati total',
-        ], $this->kasir);
+        $servis = app(ServiceTicketService::class)->buat($this->dataServis('Budi', $barang, 'Mati total'), $this->kasir);
 
         $servis->update(['biaya_service' => $jasa, 'status' => $status]);
 
@@ -96,7 +94,10 @@ final class PosDaftarServisTest extends TestCase
 
         // Kasir membayar persis angka di layar → harus diterima, kembalian 0.
         $trx = app(PosService::class)->checkout(new CheckoutData(
-            items: [new CartLine(TipeItem::Servis->value, $servis->id, 1)],
+            // Harga pada CartLine sengaja diisi 0: server WAJIB memakai
+            // Service::totalBiaya(), bukan angka dari klien. Assertion di bawah
+            // membuktikannya.
+            items: [new CartLine(TipeItem::Servis->value, $servis->id, 1, 0)],
             metodeBayar: MetodeBayar::Tunai,
             bayar: (int) $baris['harga'],
         ), $this->kasir);

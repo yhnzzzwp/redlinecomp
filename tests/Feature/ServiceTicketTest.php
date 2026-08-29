@@ -30,9 +30,7 @@ final class ServiceTicketTest extends TestCase
 
     public function test_membuat_tiket_menghasilkan_resi_dan_riwayat_awal(): void
     {
-        $service = app(ServiceTicketService::class)->buat([
-            'nama_customer' => 'Budi', 'nama_barang' => 'Laptop Asus', 'masalah' => 'Mati total',
-        ], $this->staff);
+        $service = app(ServiceTicketService::class)->buat($this->dataServis('Budi', 'Laptop Asus', 'Mati total'), $this->staff);
 
         $this->assertMatchesRegularExpression('/^PK-\d{4}-[A-Z0-9]{6}$/', $service->nomor_resi);
         $this->assertSame(StatusService::Diterima, $service->status);
@@ -44,9 +42,7 @@ final class ServiceTicketTest extends TestCase
 
     public function test_update_status_menambah_riwayat_tanpa_menimpa(): void
     {
-        $service = app(ServiceTicketService::class)->buat([
-            'nama_customer' => 'Budi', 'nama_barang' => 'Laptop', 'masalah' => 'Rusak',
-        ], $this->staff);
+        $service = app(ServiceTicketService::class)->buat($this->dataServis('Budi', 'Laptop', 'Rusak'), $this->staff);
 
         // Diterima → Dikerjakan (transisi valid)
         $this->actingAs($this->staff)->post(route('service.status', $service), [
@@ -60,15 +56,15 @@ final class ServiceTicketTest extends TestCase
     public function test_validasi_store_menolak_data_kosong(): void
     {
         $this->actingAs($this->staff)->post(route('service.store'), [])
-            ->assertSessionHasErrors(['nama_customer', 'nama_barang', 'masalah']);
+            // Identitas pelanggan pindah ke tabel perangkat (migrasi
+            // 2026_08_20_000002), jadi kunci galatnya kini perangkat_id + keluhan.
+            ->assertSessionHasErrors(['perangkat_id', 'keluhan']);
         $this->assertDatabaseCount('service', 0);
     }
 
     public function test_tambah_sparepart_menghitung_subtotal(): void
     {
-        $service = app(ServiceTicketService::class)->buat([
-            'nama_customer' => 'A', 'nama_barang' => 'B', 'masalah' => 'C',
-        ], $this->staff);
+        $service = app(ServiceTicketService::class)->buat($this->dataServis('A', 'B', 'C'), $this->staff);
 
         $this->actingAs($this->staff)->post(route('service.part', $service), [
             'nama_part' => 'Thermal Paste', 'jumlah' => 2, 'harga' => 75_000,
@@ -79,33 +75,23 @@ final class ServiceTicketTest extends TestCase
         ]);
     }
 
-    public function test_tambah_sparepart_mengurangi_stok_produk_otomatis(): void
+    public function test_hapus_sparepart_menghapus_barisnya(): void
     {
-        $produk = \App\Models\Produk::create([
-            'nama_produk' => 'yohanes',
-            'sku' => 'RL-YOHANES',
-            'harga' => 150_000,
-            'jumlah_produk' => 15,
-        ]);
-
-        $service = app(ServiceTicketService::class)->buat([
-            'nama_customer' => 'Pelanggan X', 'nama_barang' => 'PC', 'masalah' => 'Upgrade',
-        ], $this->staff);
+        $service = app(ServiceTicketService::class)->buat($this->dataServis('Pelanggan X', 'PC', 'Upgrade'), $this->staff);
 
         $this->actingAs($this->staff)->post(route('service.part', $service), [
-            'produk_id' => $produk->id,
             'nama_part' => 'yohanes',
             'jumlah' => 1,
             'harga' => 150_000,
         ])->assertRedirect();
 
-        $this->assertSame(14, $produk->fresh()->jumlah_produk);
+        $part = \App\Models\PartService::where('service_id', $service->id)->firstOrFail();
+        $this->assertSame(150_000, (int) $part->subtotal);
 
-        $part = \App\Models\PartService::where('service_id', $service->id)->first();
         $this->actingAs($this->staff)->delete(route('service.part.destroy', [$service, $part]))
             ->assertRedirect();
 
-        $this->assertSame(15, $produk->fresh()->jumlah_produk);
+        $this->assertDatabaseCount('part_service', 0);
     }
 
     public function test_tamu_tidak_bisa_akses_servis(): void
@@ -172,9 +158,7 @@ final class ServiceTicketTest extends TestCase
 
     public function test_diterima_tidak_bisa_langsung_ke_selesai(): void
     {
-        $svc = app(ServiceTicketService::class)->buat([
-            'nama_customer' => 'X', 'nama_barang' => 'Y', 'masalah' => 'Z',
-        ], $this->staff);
+        $svc = app(ServiceTicketService::class)->buat($this->dataServis('X', 'Y', 'Z'), $this->staff);
 
         $this->actingAs($this->staff)->post(route('service.status', $svc), [
             'status' => StatusService::Selesai->value,
@@ -189,9 +173,7 @@ final class ServiceTicketTest extends TestCase
     private function buatDanMajuKe(StatusService $target): Service
     {
         $ticketService = app(ServiceTicketService::class);
-        $svc = $ticketService->buat([
-            'nama_customer' => 'Test', 'nama_barang' => 'Laptop', 'masalah' => 'Rusak',
-        ], $this->staff);
+        $svc = $ticketService->buat($this->dataServis('Test', 'Laptop', 'Rusak'), $this->staff);
 
         // Alur valid: Diterima → Dikerjakan → MenungguSparepart → Dikerjakan → Selesai → SudahDiambil
         $chain = [
