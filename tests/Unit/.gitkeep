@@ -1,0 +1,8 @@
+Direktori ini WAJIB ada di repositori.
+
+phpunit.xml mendeklarasikan testsuite "Unit" yang menunjuk ke tests/Unit.
+Git tidak melacak direktori kosong, sehingga tanpa berkas ini direktorinya
+tidak ikut ter-commit — dan pada checkout bersih (CI) PHPUnit berhenti dengan
+"Test directory not found" SEBELUM menjalankan satu tes pun.
+
+Hapus berkas ini hanya jika testsuite Unit juga dihapus dari phpunit.xml.
