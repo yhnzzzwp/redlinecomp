@@ -8,6 +8,21 @@ use Illuminate\Support\Facades\URL;
 
 abstract class TestCase extends BaseTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Nonaktifkan Vite selama pengujian.
+        //
+        // public/build/ di-gitignore, dan job CI "test" tidak menjalankan
+        // `npm run build` (itu job "frontend" yang terpisah). Tanpa ini, setiap
+        // tes yang merender layout Blade gagal dengan ViteManifestNotFoundException
+        // pada checkout bersih — meski lulus di mesin pengembang yang kebetulan
+        // punya hasil build. Tes memang tidak seharusnya bergantung pada aset
+        // frontend yang sudah dikompilasi.
+        $this->withoutVite();
+    }
+
     /**
      * Arahkan pembuatan URL (route()) ke host portal tertentu sehingga
      * request test mendarat di subdomain yang benar: 'public' | 'staff' | 'admin'.

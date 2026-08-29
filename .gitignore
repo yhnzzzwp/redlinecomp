@@ -38,3 +38,6 @@ Thumbs.db
 
 # Hasil backup database (jangan di-commit)
 /backups/
+
+# Direktori simulasi CI (klon sementara untuk menguji checkout bersih)
+/.ci-sim
