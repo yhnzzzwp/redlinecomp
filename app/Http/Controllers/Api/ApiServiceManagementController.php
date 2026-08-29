@@ -361,6 +361,27 @@ class ApiServiceManagementController extends Controller
         ], 201);
     }
 
+    /**
+     * Riwayat unit berdasarkan kode pada stiker QR.
+     *
+     * Endpoint publik /api/v1/perangkat/{kode} menyamarkan nama dan nomor HP
+     * pelanggan; pemindai staf membutuhkan data utuh, dan jalur ini sudah
+     * berada di balik auth.api.
+     */
+    public function perangkatShowByKode(string $kode): JsonResponse
+    {
+        $perangkat = Perangkat::query()->where('kode_perangkat', $kode)->first();
+
+        if (! $perangkat) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Unit dengan kode tersebut tidak terdaftar.',
+            ], 404);
+        }
+
+        return $this->perangkatShow($perangkat);
+    }
+
     public function perangkatShow(Perangkat $perangkat): JsonResponse
     {
         $perangkat->load(['services.parts', 'services.riwayat']);

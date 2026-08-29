@@ -99,6 +99,11 @@ Route::prefix('v1')->group(function (): void {
 
         Route::get('/admin/perangkat', [ApiServiceManagementController::class, 'perangkatIndex']);
         Route::post('/admin/perangkat', [ApiServiceManagementController::class, 'perangkatStore']);
+        // Harus didaftarkan SEBELUM '/admin/perangkat/{perangkat}': tanpa itu
+        // segmen 'kode' tertangkap sebagai id perangkat dan tidak pernah sampai
+        // ke sini. Dipakai pemindai QR staf, yang hanya memegang kode unit.
+        Route::get('/admin/perangkat/kode/{kode}', [ApiServiceManagementController::class, 'perangkatShowByKode'])
+            ->where('kode', '[A-Za-z0-9._-]+');
         Route::get('/admin/perangkat/{perangkat}', [ApiServiceManagementController::class, 'perangkatShow']);
         Route::put('/admin/perangkat/{perangkat}', [ApiServiceManagementController::class, 'perangkatUpdate']);
         Route::patch('/admin/perangkat/{perangkat}', [ApiServiceManagementController::class, 'perangkatUpdate']);
