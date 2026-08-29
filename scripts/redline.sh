@@ -11,9 +11,28 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-APP_URL="http://localhost:${APP_PORT:-8000}"
+
+# Nilai .env dibaca satu per satu; skrip ini sengaja tidak meng-export seluruh
+# isi .env (ada kredensial di dalamnya).
+env_get() { sed -n "s/^$1=//p" .env 2>/dev/null | tail -1 | tr -d '"'"'"'"'; }
+
+APP_PORT="${APP_PORT:-$(env_get APP_PORT)}"
+APP_PORT="${APP_PORT:-8000}"
+APP_URL="http://localhost:${APP_PORT}"
+
+# Alamat publik backend (lewat Cloudflare Tunnel). Kosongkan bila belum ada.
+PUBLIC_API_URL="$(env_get REDLINE_PUBLIC_API_URL)"
 
 warna() { printf '\033[%sm%s\033[0m\n' "$1" "$2"; }
+
+# Kode HTTP sebuah URL, atau 000 bila tidak dapat dihubungi. curl sudah
+# mencetak "000" saat gagal, jadi jangan tambahkan '|| echo 000' — hasilnya
+# jadi "000000" dan tidak pernah cocok dengan perbandingan mana pun.
+kode_http() {
+  local kode
+  kode=$(curl -s -o /dev/null -w '%{http_code}' --max-time "${2:-5}" "$1" || true)
+  printf '%s' "${kode:-000}"
+}
 ok()    { warna '0;32' "  ✔ $1"; }
 gagal() { warna '0;31' "  ✘ $1"; }
 info()  { warna '0;36' "$1"; }
@@ -21,7 +40,7 @@ info()  { warna '0;36' "$1"; }
 tunggu_sehat() {
   info "Menunggu backend siap…"
   for i in $(seq 1 40); do
-    kode=$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "$APP_URL/api/v1/health" || true)
+    kode=$(kode_http "$APP_URL/api/v1/health" 3)
     if [ "$kode" = "200" ]; then
       ok "API sehat ($APP_URL/api/v1/health)"
       return 0
@@ -39,10 +58,36 @@ status() {
 
   echo
   info "Kesehatan:"
-  kode=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$APP_URL/api/v1/health" || echo 000)
+  kode=$(kode_http "$APP_URL/api/v1/health")
   [ "$kode" = "200" ] && ok "API  $APP_URL/api/v1/health" || gagal "API tidak merespons (kode $kode)"
 
-  kode=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://localhost:3000/ || echo 000)
+  # Akses dari mesin LAIN di jaringan yang sama. Container mengikat 0.0.0.0,
+  # jadi kegagalan di sini biasanya firewall host (ufw), bukan aplikasi.
+  lan=$(hostname -I 2>/dev/null | awk '{print $1}')
+  if [ -n "${lan:-}" ]; then
+    kode=$(kode_http "http://$lan:${APP_PORT}/api/v1/health")
+    [ "$kode" = "200" ] && ok "LAN  http://$lan:${APP_PORT}/api/v1" \
+      || gagal "LAN http://$lan:${APP_PORT} tidak merespons (kode $kode) — cek 'sudo ufw status'"
+  fi
+
+  # Akses dari INTERNET. Paling sering rusak setelah server dipindah ke
+  # jaringan lain: ingress Cloudflare Tunnel masih menunjuk IP LAN yang lama.
+  # Service URL di dashboard harus http://host.docker.internal:8000, bukan IP.
+  if [ -n "${PUBLIC_API_URL:-}" ]; then
+    kode=$(kode_http "${PUBLIC_API_URL%/}/health" 10)
+    if [ "$kode" = "200" ]; then
+      ok "Publik $PUBLIC_API_URL"
+    else
+      gagal "Publik $PUBLIC_API_URL tidak merespons (kode $kode)"
+      echo "     IP LAN host sekarang: ${lan:-tidak diketahui}"
+      echo "     Cek ingress tunnel: docker logs --tail=20 \$(docker ps -qf name=cloudflared)"
+      echo "     Bila lognya 'dial tcp <ip-lama>:8000: i/o timeout', ubah Service URL"
+      echo "     public hostname di dashboard Cloudflare menjadi http://host.docker.internal:8000"
+      echo "     (lihat docs/11-panduan-deploy-dan-koneksi.md bagian 3)."
+    fi
+  fi
+
+  kode=$(kode_http http://localhost:3000/)
   [ "$kode" = "200" ] && ok "Frontend localhost:3000" \
     || echo "  · Frontend tidak jalan — jalankan: cd ../FE-redline && npm run dev"
 

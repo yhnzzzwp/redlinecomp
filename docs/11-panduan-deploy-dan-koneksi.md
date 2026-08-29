@@ -14,7 +14,7 @@ Dokumen ini merangkum seluruh langkah teknis yang telah dikerjakan untuk membang
 |                    (Frontend Next.js on Vercel)                   |
 +-------------------------------------------------------------------+
                                   |
-                                  | fetch API: NEXT_PUBLIC_API_BASE_URL
+                                  | fetch API (server-side): API_BASE_URL
                                   v
 +-------------------------------------------------------------------+
 |                     CLOUDFLARE ZERO TRUST TUNNEL                  |
@@ -80,8 +80,34 @@ Agar backend lokal dapat diakses secara publik dan aman via HTTPS:
    - **Domain**: `yohaneswp.sbs`
    - **Path**: *(dikosongkan)*
    - **Type**: `HTTP`
-   - **Service URL**: `http://192.168.0.107:8000` *(atau IP lokal host komputer Anda)*
+   - **Service URL**: `http://host.docker.internal:8000`
 3. Endpoint publik aktif di: **`https://api-redline.yohaneswp.sbs/api/v1`**
+
+> ### ⚠️ JANGAN isi Service URL dengan IP lokal (mis. `http://192.168.0.107:8000`)
+>
+> IP lokal host berubah setiap kali server dinyalakan di jaringan lain
+> (pindah tempat, ganti WiFi, sewa DHCP baru). Begitu IP berubah, ingress
+> tunnel masih menunjuk IP lama sehingga backend **mati total dari luar**
+> walaupun container-nya sehat. Gejalanya di `docker logs` cloudflared:
+>
+> ```
+> ERR Unable to reach the origin service ... dial tcp 192.168.0.107:8000: i/o timeout
+>     originService=http://192.168.0.107:8000
+> ```
+>
+> `host.docker.internal` diterjemahkan Docker ke alamat gateway bridge saat
+> container start, jadi selalu benar berapa pun IP LAN host. Syaratnya container
+> cloudflared dijalankan dengan pemetaan berikut (sudah disetel di
+> `~/personal-server/compose.cloudflare.yml`):
+>
+> ```yaml
+> extra_hosts:
+>   - "host.docker.internal:host-gateway"
+> ```
+>
+> Alternatif bila cloudflared dijalankan di dalam compose Redline sendiri
+> (`docker compose --profile tunnel up -d tunnel`): pakai nama service
+> `http://web:80` — sama-sama bebas IP karena memakai DNS jaringan Docker.
 
 ---
 
@@ -90,7 +116,12 @@ Agar backend lokal dapat diakses secara publik dan aman via HTTPS:
 1. Buka **Vercel Dashboard** → Pilih project `redline-frontend`.
 2. Masuk ke **Settings** → **Environment Variables**.
 3. Tambahkan variabel lingkungan:
-   - **Key**: `NEXT_PUBLIC_API_BASE_URL`
+   - **Key**: `API_BASE_URL` — **tanpa** awalan `NEXT_PUBLIC_`. Frontend
+     memanggil backend dari sisi server (BFF `/api/backend`), dan kodenya
+     membaca `process.env.API_BASE_URL`. Memakai nama `NEXT_PUBLIC_API_BASE_URL`
+     membuat variabel itu tidak pernah terbaca, lalu fetch server jatuh ke
+     nilai bawaan `http://localhost:8080/api/v1` — yang di Vercel berarti
+     backend tidak dapat dihubungi sama sekali.
    - **Value**: `https://api-redline.yohaneswp.sbs/api/v1`
    - **Environment**: Centang **Production**, **Preview**, dan **Development**.
 4. Masuk ke menu **Deployments** → Klik titik tiga (`...`) pada deployment terbaru → Klik **Redeploy**.

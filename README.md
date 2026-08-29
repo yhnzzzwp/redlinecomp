@@ -56,7 +56,8 @@ Server backend sudah aktif dan siap melayani request! 🎉
    docker run --rm --net=host cloudflare/cloudflared:latest tunnel --url http://localhost:8000
    ```
 2. **Set Environment Variable di Frontend (Vercel):**
-   - **Key**: `NEXT_PUBLIC_API_BASE_URL`
+   - **Key**: `API_BASE_URL` (tanpa awalan `NEXT_PUBLIC_` — dibaca hanya di
+     sisi server Next.js, lihat `src/lib/server/backend.ts`)
    - **Value**: `https://<subdomain-tunnel-anda>/api/v1`
    - Lakukan **Redeploy** di Vercel.
 
