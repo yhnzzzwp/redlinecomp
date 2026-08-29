@@ -61,10 +61,19 @@ services:
       retries: 30
     networks: [redline]
 
+  # TIDAK ikut menyala pada `docker compose up -d`.
+  #
+  # Tanpa CLOUDFLARE_TUNNEL_TOKEN, command bawaannya membuat "quick tunnel"
+  # yang membuka backend ini ke internet di URL trycloudflare.com acak TANPA
+  # autentikasi apa pun. Itu pernah terjadi tanpa disengaja.
+  #
+  # Jalankan hanya bila memang diinginkan, dan hanya setelah token diisi:
+  #   docker compose --profile tunnel up -d tunnel
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: redline-tunnel
     restart: unless-stopped
+    profiles: [tunnel]
     command: ${CLOUDFLARE_TUNNEL_COMMAND:-tunnel --no-autoupdate --url http://web:80}
     environment:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
