@@ -91,8 +91,13 @@ status() {
   [ "$kode" = "200" ] && ok "Frontend localhost:3000" \
     || echo "  · Frontend tidak jalan — jalankan: cd ../FE-redline && npm run dev"
 
-  if docker ps --format '{{.Names}}' | grep -qi cloudflared; then
-    ok "Tunnel Cloudflare aktif (dikelola compose project terpisah)"
+  if docker ps --format '{{.Names}}' | grep -q '^redline-tunnel$'; then
+    ok "Tunnel Cloudflare aktif (redline-tunnel, milik stack ini)"
+  elif docker ps --format '{{.Names}}' | grep -qi cloudflared; then
+    ok "Tunnel Cloudflare aktif — TAPI dikelola compose project lain"
+    echo "     Stack ini menumpang connector project tersebut. Agar Redline"
+    echo "     berdiri sendiri: isi CLOUDFLARE_TUNNEL_TOKEN di .env lalu"
+    echo "     ./scripts/redline.sh tunnel (lihat docs/11 bagian 3)."
   else
     echo "  · Tunnel tidak jalan — situs tidak dapat diakses dari internet"
   fi
@@ -130,12 +135,14 @@ case "${1:-}" in
   tunnel)
     if ! grep -q '^CLOUDFLARE_TUNNEL_TOKEN=.\+' .env 2>/dev/null; then
       gagal "CLOUDFLARE_TUNNEL_TOKEN belum diisi di .env."
-      echo "     Tanpa token, cloudflared membuka QUICK TUNNEL: URL trycloudflare.com"
-      echo "     acak yang mengekspos backend ini ke internet TANPA autentikasi."
+      echo "     Ambil token connector di Cloudflare Zero Trust → Networks → Tunnels,"
+      echo "     lalu tempel ke .env. Tanpa token cloudflared langsung berhenti."
       exit 1
     fi
     docker compose --profile tunnel up -d tunnel
     ok "Tunnel dijalankan. Log: ./scripts/redline.sh logs tunnel"
+    echo "  Pastikan Service URL public hostname di dashboard = http://web:80"
+    echo "  (nama service di jaringan compose ini, bukan IP LAN host)."
     ;;
 
   tools)

@@ -63,20 +63,35 @@ services:
 
   # TIDAK ikut menyala pada `docker compose up -d`.
   #
-  # Tanpa CLOUDFLARE_TUNNEL_TOKEN, command bawaannya membuat "quick tunnel"
-  # yang membuka backend ini ke internet di URL trycloudflare.com acak TANPA
-  # autentikasi apa pun. Itu pernah terjadi tanpa disengaja.
+  # Jalankan setelah token diisi:  ./scripts/redline.sh tunnel
   #
-  # Jalankan hanya bila memang diinginkan, dan hanya setelah token diisi:
-  #   docker compose --profile tunnel up -d tunnel
+  # Command bawaannya `tunnel run` (tunnel remote-managed, ingress diatur di
+  # dashboard Cloudflare). Tanpa TUNNEL_TOKEN container ini berhenti dengan
+  # error — disengaja. Sebelumnya bawaannya `--url http://web:80`, yang tanpa
+  # token membuat "quick tunnel": backend ini terbuka ke internet di URL
+  # trycloudflare.com acak TANPA autentikasi apa pun. Itu pernah terjadi tanpa
+  # disengaja, jadi mode gagal yang aman lebih diutamakan daripada kemudahan.
+  #
+  # Service URL public hostname di dashboard: http://web:80 — nama service di
+  # jaringan compose ini. Jangan IP LAN host: IP itu berubah setiap server
+  # dinyalakan di jaringan lain dan tunnel langsung mati dari luar.
   tunnel:
     image: cloudflare/cloudflared:latest
     container_name: redline-tunnel
     restart: unless-stopped
     profiles: [tunnel]
-    command: ${CLOUDFLARE_TUNNEL_COMMAND:-tunnel --no-autoupdate --url http://web:80}
+    command: ${CLOUDFLARE_TUNNEL_COMMAND:-tunnel --no-autoupdate run}
     environment:
+      # Sengaja `:-` dan bukan `:?`: Compose menginterpolasi SELURUH berkas
+      # meski profil tunnel tidak aktif, sehingga `:?` membuat `docker compose
+      # up -d` biasa ikut gagal hanya karena token belum diisi. Penjagaannya
+      # ada di ./scripts/redline.sh tunnel, dan cloudflared sendiri berhenti
+      # dengan error bila token kosong.
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+      # QUIC (bawaan cloudflared) butuh UDP/7844 keluar, yang lazim diblokir
+      # di WiFi kantor, kampus, dan hotel. http2 lewat TCP/443 hampir selalu
+      # lolos. Setel TUNNEL_PROTOCOL=quic bila jaringannya bersahabat.
+      TUNNEL_TRANSPORT_PROTOCOL: ${TUNNEL_PROTOCOL:-http2}
     depends_on: [web]
     networks: [redline]
 
