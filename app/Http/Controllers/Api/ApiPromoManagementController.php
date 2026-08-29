@@ -61,8 +61,12 @@ class ApiPromoManagementController extends Controller
                     : 'max:100000000000'],
             'minimal_transaksi' => ['nullable', 'integer', 'min:0'],
             'maksimal_diskon'   => ['nullable', 'integer', 'min:0'],
-            'waktu_mulai'       => ['nullable', 'date'],
-            'waktu_berakhir'    => ['nullable', 'date', 'after_or_equal:waktu_mulai'],
+            // Kolomnya NOT NULL di basis data. Dengan 'nullable' di sini,
+            // permintaan tanpa tanggal lolos validasi lalu gagal di lapisan SQL
+            // — pemanggil menerima 500 alih-alih 422 yang menjelaskan apa yang
+            // kurang.
+            'waktu_mulai'       => ['required', 'date'],
+            'waktu_berakhir'    => ['required', 'date', 'after_or_equal:waktu_mulai'],
             'kuota'             => ['nullable', 'integer', 'min:1'],
             'aktif'             => ['nullable', 'boolean'],
         ]);
@@ -119,8 +123,12 @@ class ApiPromoManagementController extends Controller
                     : 'max:100000000000'],
             'minimal_transaksi' => ['nullable', 'integer', 'min:0'],
             'maksimal_diskon'   => ['nullable', 'integer', 'min:0'],
-            'waktu_mulai'       => ['nullable', 'date'],
-            'waktu_berakhir'    => ['nullable', 'date', 'after_or_equal:waktu_mulai'],
+            // Kolomnya NOT NULL di basis data. Dengan 'nullable' di sini,
+            // permintaan tanpa tanggal lolos validasi lalu gagal di lapisan SQL
+            // — pemanggil menerima 500 alih-alih 422 yang menjelaskan apa yang
+            // kurang.
+            'waktu_mulai'       => ['required', 'date'],
+            'waktu_berakhir'    => ['required', 'date', 'after_or_equal:waktu_mulai'],
             'kuota'             => ['nullable', 'integer', 'min:1'],
             'aktif'             => ['nullable', 'boolean'],
         ]);
