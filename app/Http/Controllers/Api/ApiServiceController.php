@@ -14,7 +14,11 @@ class ApiServiceController extends Controller
 {
     public function cek(Request $request): JsonResponse
     {
-        $resi = trim((string) $request->query('resi'));
+        // Frontend Next.js mengirim 'nomor_resi', dokumentasi API menyebut
+        // 'resi'. Ketidakcocokan itu membuat pelacakan dari situs SELALU gagal
+        // dengan 422 walau resinya benar. Keduanya diterima supaya klien lama
+        // yang sudah ter-deploy tetap bekerja tanpa menunggu redeploy.
+        $resi = trim((string) ($request->query('resi') ?? $request->query('nomor_resi')));
 
         if ($resi === '') {
             return response()->json([
@@ -25,7 +29,7 @@ class ApiServiceController extends Controller
 
         $service = Service::query()
             ->with(['perangkat', 'parts', 'riwayat.pegawai'])
-            ->where('nomor_resi', $resi)
+            ->resiSetara($resi)
             ->first();
 
         if (! $service) {

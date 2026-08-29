@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\StatusService;
+use App\Support\Resi;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -26,6 +28,29 @@ class Service extends Model
         'estimasi_selesai' => 'date',
         'tanggal_selesai' => 'date',
     ];
+
+    /**
+     * Cari tiket berdasarkan nomor resi yang diketik ulang manusia.
+     *
+     * Cocokkan persis lebih dulu supaya indeks kolom terpakai untuk kasus
+     * normal; perbandingan kanonik hanya dipakai sebagai jaring pengaman bagi
+     * masukan yang pemisahnya berbeda ("PK 2026 00 01", "pk20260001").
+     *
+     * @param  Builder<Service>  $query
+     * @return Builder<Service>
+     */
+    public function scopeResiSetara(Builder $query, string $resi): Builder
+    {
+        $kanonik = Resi::kanonik($resi);
+
+        return $query->where(function (Builder $query) use ($resi, $kanonik): void {
+            $query->where('nomor_resi', $resi)
+                ->orWhereRaw(
+                    "UPPER(REPLACE(REPLACE(REPLACE(REPLACE(nomor_resi, '-', ''), ' ', ''), '_', ''), '.', '')) = ?",
+                    [$kanonik],
+                );
+        });
+    }
 
     // Anotasi generic dibutuhkan larastan untuk mengetahui model terkait;
     // tanpa ini setiap akses seperti $service->perangkat->merk_model dianggap

@@ -56,7 +56,9 @@ final class PublicController extends Controller
     {
         $service = null;
         if ($request->filled('resi')) {
-            $service = Service::with(['riwayat', 'parts', 'perangkat'])->where('nomor_resi', $request->input('resi'))->first();
+            $service = Service::with(['riwayat', 'parts', 'perangkat'])
+                ->resiSetara(trim((string) $request->input('resi')))
+                ->first();
             if ($service) {
                 if ($service->perangkat && $service->perangkat->nomor_hp_customer) {
                     $service->perangkat->nomor_hp_customer = '****' . substr($service->perangkat->nomor_hp_customer, -4);
