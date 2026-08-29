@@ -147,15 +147,27 @@ class ApiPegawaiController extends Controller
             'masih_bekerja'  => $request->has('masih_bekerja') ? $request->boolean('masih_bekerja') : $pegawai->masih_bekerja,
         ];
 
-        if ($request->filled('password')) {
+        $gantiPassword = $request->filled('password');
+        if ($gantiPassword) {
             $data['password'] = (string) $request->input('password');
         }
 
         $pegawai->update($data);
 
+        // Sama seperti jalur web: mengganti password harus mencabut sesi lama,
+        // kalau tidak kredensial yang sudah bocor tetap berlaku.
+        if ($gantiPassword) {
+            $pegawai->apiTokens()->delete();
+            \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', $pegawai->id)->delete();
+            $pegawai->setRememberToken(\Illuminate\Support\Str::random(60));
+            $pegawai->save();
+        }
+
         return response()->json([
             'status'  => 'success',
-            'message' => 'Data pegawai berhasil diperbarui.',
+            'message' => $gantiPassword
+                ? 'Data pegawai diperbarui. Password diganti dan seluruh sesi pegawai itu dicabut.'
+                : 'Data pegawai berhasil diperbarui.',
             'data'    => $this->formatPegawai($pegawai),
         ]);
     }

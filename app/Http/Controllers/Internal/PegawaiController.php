@@ -74,13 +74,29 @@ final class PegawaiController extends Controller
         }
 
         // Hanya ubah password bila diisi
-        if (empty($data['password'])) {
+        $gantiPassword = ! empty($data['password']);
+        if (! $gantiPassword) {
             unset($data['password']);
         }
 
         $pegawai->update($data);
 
-        return redirect()->route('pegawai.index')->with('success', 'Data pegawai berhasil diperbarui.');
+        // Reset password oleh Owner biasanya dilakukan justru karena akunnya
+        // dicurigai bocor. Tanpa pencabutan ini, sesi web dan token API lama
+        // pegawai tersebut tetap hidup dan password barunya tidak menolong.
+        if ($gantiPassword) {
+            $pegawai->apiTokens()->delete();
+            \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', $pegawai->id)->delete();
+            $pegawai->setRememberToken(\Illuminate\Support\Str::random(60));
+            $pegawai->save();
+        }
+
+        return redirect()->route('pegawai.index')->with(
+            'success',
+            $gantiPassword
+                ? 'Data pegawai diperbarui. Password diganti, seluruh sesi dan token pegawai itu dicabut.'
+                : 'Data pegawai berhasil diperbarui.'
+        );
     }
 
     public function destroy(Pegawai $pegawai): RedirectResponse

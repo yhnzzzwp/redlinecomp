@@ -25,6 +25,7 @@ final class PrivasiDanSesiTest extends TestCase
 {
     use RefreshDatabase;
 
+    private Pegawai $owner;
     private Pegawai $karyawan;
     private Pegawai $lain;
     private string $token;
@@ -32,6 +33,12 @@ final class PrivasiDanSesiTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->owner = Pegawai::create([
+            'nama_pegawai' => 'Pemilik', 'username' => 'pemilik', 'email' => 'pemilik@uji.test',
+            'password' => Hash::make('password123'), 'role' => RolePegawai::Owner,
+            'masih_bekerja' => true, 'tanggal_masuk' => now(),
+        ]);
 
         $this->karyawan = Pegawai::create([
             'nama_pegawai' => 'Kasir Satu', 'username' => 'kasir1', 'email' => 'kasir1@uji.test',
@@ -183,5 +190,52 @@ final class PrivasiDanSesiTest extends TestCase
             ->assertJsonPath('data.dikeluarkan', 2);
 
         $this->assertSame(1, $this->karyawan->apiTokens()->count());
+    }
+
+    // ─── Rotasi kredensial ─────────────────────────────────────────
+
+    public function test_perintah_ganti_password_mencabut_token_dan_sesi(): void
+    {
+        $lama = $this->karyawan->password;
+        $this->assertSame(1, $this->karyawan->apiTokens()->count());
+
+        $this->artisan('redline:ganti-password', ['username' => 'kasir1'])
+            ->assertSuccessful();
+
+        $segar = $this->karyawan->fresh();
+
+        $this->assertNotSame($lama, $segar->password, 'Password harus berganti.');
+        $this->assertFalse(
+            Hash::check('password123', $segar->password),
+            'Password lama tidak boleh berlaku lagi.'
+        );
+        $this->assertSame(0, $segar->apiTokens()->count(), 'Token API harus dicabut.');
+    }
+
+    public function test_perintah_menolak_tanpa_username_dan_tanpa_semua(): void
+    {
+        $this->artisan('redline:ganti-password')->assertFailed();
+    }
+
+    public function test_owner_mereset_password_pegawai_ikut_mencabut_token_pegawai_itu(): void
+    {
+        $tokenKaryawan = $this->token; // milik kasir1
+        $tokenOwner = $this->owner->createApiToken('Perangkat Owner');
+
+        $this->withHeaders(['Authorization' => 'Bearer ' . $tokenOwner])
+            ->putJson('/api/v1/admin/pegawai/' . $this->karyawan->id, [
+                'nama_pegawai' => 'Kasir Satu',
+                'username'     => 'kasir1',
+                'email'        => 'kasir1@uji.test',
+                'role'         => 'Karyawan',
+                'password'     => 'PasswordBaru123',
+            ])->assertStatus(200);
+
+        // Token karyawan itu harus mati; token Owner tetap hidup.
+        $this->withHeaders(['Authorization' => 'Bearer ' . $tokenKaryawan])
+            ->getJson('/api/v1/auth/me')->assertStatus(401);
+
+        $this->withHeaders(['Authorization' => 'Bearer ' . $tokenOwner])
+            ->getJson('/api/v1/auth/me')->assertStatus(200);
     }
 }
