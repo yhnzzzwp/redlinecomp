@@ -29,7 +29,7 @@
                     <div>
                         <h2 class="rl-title-md mb-1">{{ $service->perangkat->merk_model }}</h2>
                         <div class="text-muted rl-text-sm">
-                            <b class="tnum rl-text-red">{{ $service->nomor_resi }}</b> &middot; {{ $service->perangkat->nama_customer }}
+                            <b class="tnum rl-text-red">{{ $service->nomor_resi }}</b> &middot; {{ \App\Support\Privasi::namaSingkat($service->perangkat->nama_customer) }}
                         </div>
                     </div>
                     <span class="rl-pill {{ $service->status->warna() }} rl-text-sm">{{ $service->status->value }}</span>

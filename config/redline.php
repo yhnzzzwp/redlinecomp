@@ -13,6 +13,10 @@ return [
 
     'wa_number' => env('REDLINE_WA_NUMBER', '6285640203069'),
 
+    // Masa berlaku token API (hari). Token tanpa kedaluwarsa berarti satu
+    // kebocoran = akses selamanya.
+    'token_ttl_days' => (int) env('REDLINE_TOKEN_TTL_DAYS', 30),
+
     'metode_bayar' => ['Tunai', 'Transfer', 'QRIS'],
 
     'prefix_nota' => '',

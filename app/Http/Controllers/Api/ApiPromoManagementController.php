@@ -51,7 +51,14 @@ class ApiPromoManagementController extends Controller
             'nama_promo'        => ['required', 'string', 'max:255'],
             'kode_promo'        => ['required', 'string', 'max:50', 'unique:promo,kode_promo'],
             'tipe_promo'        => ['required', Rule::enum(TipePromo::class)],
-            'besar_promo'       => ['required', 'integer', 'min:1'],
+            // Batas 100 untuk tipe Persen ada di StorePromoRequest (form web)
+            // tetapi hilang di API — lewat sini promo 'persen' bisa dibuat
+            // dengan besaran 1000, dan diskonnya dipangkas jadi seluruh
+            // subtotal: barang terbawa pulang gratis.
+            'besar_promo'       => ['required', 'integer', 'min:1',
+                $request->input('tipe_promo') === \App\Enums\TipePromo::Persen->value
+                    ? 'max:100'
+                    : 'max:100000000000'],
             'minimal_transaksi' => ['nullable', 'integer', 'min:0'],
             'maksimal_diskon'   => ['nullable', 'integer', 'min:0'],
             'waktu_mulai'       => ['nullable', 'date'],
@@ -102,7 +109,14 @@ class ApiPromoManagementController extends Controller
             'nama_promo'        => ['required', 'string', 'max:255'],
             'kode_promo'        => ['required', 'string', 'max:50', Rule::unique('promo', 'kode_promo')->ignore($promo->id)],
             'tipe_promo'        => ['required', Rule::enum(TipePromo::class)],
-            'besar_promo'       => ['required', 'integer', 'min:1'],
+            // Batas 100 untuk tipe Persen ada di StorePromoRequest (form web)
+            // tetapi hilang di API — lewat sini promo 'persen' bisa dibuat
+            // dengan besaran 1000, dan diskonnya dipangkas jadi seluruh
+            // subtotal: barang terbawa pulang gratis.
+            'besar_promo'       => ['required', 'integer', 'min:1',
+                $request->input('tipe_promo') === \App\Enums\TipePromo::Persen->value
+                    ? 'max:100'
+                    : 'max:100000000000'],
             'minimal_transaksi' => ['nullable', 'integer', 'min:0'],
             'maksimal_diskon'   => ['nullable', 'integer', 'min:0'],
             'waktu_mulai'       => ['nullable', 'date'],

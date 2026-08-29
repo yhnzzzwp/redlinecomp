@@ -53,11 +53,15 @@ class Pegawai extends Authenticatable
     {
         $plainToken = 'rl_tok_' . \Illuminate\Support\Str::random(40) . '_' . dechex((int) microtime(true));
 
+        // Token WAJIB punya masa berlaku. Sebelumnya $expiresAt default null
+        // dan tidak ada pemanggil yang mengisinya, sehingga setiap token yang
+        // pernah diterbitkan berlaku selamanya — satu kebocoran berarti akses
+        // permanen. EnsureApiAuthenticated sudah memeriksa isExpired().
         $this->apiTokens()->create([
             'name' => $name,
             'token' => hash('sha256', $plainToken),
             'abilities' => $abilities,
-            'expires_at' => $expiresAt,
+            'expires_at' => $expiresAt ?? now()->addDays((int) config('redline.token_ttl_days', 30)),
         ]);
 
         return $plainToken;

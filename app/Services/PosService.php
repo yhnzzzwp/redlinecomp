@@ -55,7 +55,15 @@ final class PosService
                 } else {
                     $service = \App\Models\Service::query()->lockForUpdate()->findOrFail($itemId);
 
-                    $harga = $item['harga']; 
+                    // Harga servis TIDAK boleh datang dari klien: server punya
+                    // angka yang sah (biaya_service + seluruh part). Sebelumnya
+                    // kasir bisa menutup servis Rp 2 juta dengan harga Rp 0 dan
+                    // tetap menandai unitnya sudah diambil.
+                    //
+                    // Berbeda dengan produk: kolom harga produk sudah dihapus
+                    // dari skema (migrasi 2026_08_20_000003), jadi harga produk
+                    // memang diisi kasir. Servis punya harga di server.
+                    $harga = $service->totalBiaya();
                     $sub = $harga * $jumlah;
                     $subtotal += $sub;
                     $baris[] = ['tipe' => TipeItem::Servis, 'model' => $service, 'jumlah' => $jumlah, 'harga' => $harga, 'sub' => $sub];
@@ -63,7 +71,7 @@ final class PosService
             }
 
             $promo = $data->kodePromo !== null
-                ? $this->promoService->hitung($data->kodePromo, $subtotal)
+                ? $this->promoService->hitung($data->kodePromo, $subtotal, kunci: true)
                 : null;
 
             $diskon = $promo !== null ? $promo->diskon : 0;
@@ -103,6 +111,19 @@ final class PosService
                 } else {
 
                     $sebelumnya = $b['model']->status;
+
+                    // Guard transisi status ada di StatusService::canTransitionTo
+                    // dan ditegakkan ServiceTicketService, tetapi jalur POS ini
+                    // melewatinya: unit yang baru diterima dan belum dikerjakan
+                    // bisa langsung dilompatkan ke "Sudah Diambil".
+                    if ($sebelumnya !== \App\Enums\StatusService::SudahDiambil
+                        && ! $sebelumnya->canTransitionTo(\App\Enums\StatusService::SudahDiambil)) {
+                        throw new \App\Exceptions\ServisBelumSelesaiException(
+                            (string) $b['model']->nomor_resi,
+                            $sebelumnya->value
+                        );
+                    }
+
                     $b['model']->update(['status' => \App\Enums\StatusService::SudahDiambil]);
                     if ($sebelumnya !== \App\Enums\StatusService::SudahDiambil) {
                         $b['model']->riwayat()->create([

@@ -8,6 +8,7 @@ use App\Enums\TipeItem;
 use App\Enums\TransaksiStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Produk;
+use App\Models\Promo;
 use App\Models\Transaksi;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -59,6 +60,18 @@ final class TransaksiController extends Controller
             }
 
             $transaksi->update(['status' => TransaksiStatus::Void->value]);
+
+            // Void mengembalikan kuota promo: penjualannya batal, jadi
+            // pemakaiannya tidak boleh ikut terhitung. Jalur API sudah
+            // melakukan ini sejak awal, jalur web tidak — akibatnya sisa kuota
+            // promo bergantung pada lewat mana transaksi kebetulan dibatalkan.
+            // Syarat terpakai > 0 mencegah hitungan jatuh ke angka negatif.
+            if ($transaksi->promo_id) {
+                Promo::query()
+                    ->where('id', $transaksi->promo_id)
+                    ->where('terpakai', '>', 0)
+                    ->decrement('terpakai');
+            }
         });
 
         return back()->with('success', "Transaksi {$transaksi->kode_nota} berhasil dibatalkan (Void).");
@@ -115,7 +128,7 @@ final class TransaksiController extends Controller
                         $t->metode_bayar ?? '-',
                     ];
 
-                    fputcsv($file, $row);
+                    fputcsv($file, \App\Support\Csv::baris($row));
                 }
                 fclose($file);
             }

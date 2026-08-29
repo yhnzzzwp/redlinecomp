@@ -145,7 +145,7 @@ final class AnalyticsController extends Controller
                         $item->subtotal,
                     ];
 
-                    fputcsv($file, $row);
+                    fputcsv($file, \App\Support\Csv::baris($row));
                 }
                 fclose($file);
             }

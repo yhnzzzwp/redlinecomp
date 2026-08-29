@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\MetodeBayar;
 use App\Enums\TransaksiStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Promo;
 use App\Models\Transaksi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -77,14 +78,37 @@ class ApiTransaksiController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($transaksi) {
-            $transaksi->update(['status' => TransaksiStatus::Void]);
+        $berhasil = DB::transaction(function () use ($transaksi): bool {
+            // Kunci barisnya DAN periksa ulang di dalam transaksi. Pemeriksaan
+            // di luar memakai model hasil route-binding yang sudah basi:
+            // dua permintaan void bersamaan sama-sama lolos, lalu 'terpakai'
+            // dikurangi dua kali — kuota promo bertambah dari udara.
+            $terkunci = Transaksi::query()->lockForUpdate()->findOrFail($transaksi->id);
 
-            if ($transaksi->promo_id) {
-                $transaksi->promo?->decrement('terpakai');
+            if ($terkunci->status !== TransaksiStatus::Normal) {
+                return false;
             }
+
+            $terkunci->update(['status' => TransaksiStatus::Void]);
+
+            if ($terkunci->promo_id) {
+                Promo::query()
+                    ->where('id', $terkunci->promo_id)
+                    ->where('terpakai', '>', 0)
+                    ->decrement('terpakai');
+            }
+
+            return true;
         });
 
+        if (! $berhasil) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Hanya transaksi berstatus Normal yang bisa dibatalkan (void).',
+            ], 422);
+        }
+
+        $transaksi->refresh();
         $transaksi->load(['pegawai', 'promo', 'items']);
 
         return response()->json([

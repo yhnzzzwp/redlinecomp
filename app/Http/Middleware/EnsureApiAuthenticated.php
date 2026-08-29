@@ -16,10 +16,11 @@ class EnsureApiAuthenticated
         $header = $request->header('Authorization', '');
         $token = null;
 
+        // Hanya menerima token lewat header Authorization. Token pada query
+        // string / body ikut tercatat di access log nginx, log Cloudflare,
+        // header Referer, dan riwayat browser.
         if (str_starts_with($header, 'Bearer ')) {
             $token = substr($header, 7);
-        } elseif ($request->filled('token')) {
-            $token = (string) $request->input('token');
         }
 
         if (empty($token)) {
@@ -29,17 +30,14 @@ class EnsureApiAuthenticated
             ], 401);
         }
 
+        // Pegawai::createApiToken() HANYA menyimpan hash sha256, jadi
+        // pencarian token mentah tidak pernah cocok untuk token yang sah —
+        // fallback lama justru membuat isi tabel api_tokens bisa langsung
+        // dipakai ulang sebagai kredensial bila database bocor.
         $hashed = hash('sha256', $token);
         $apiToken = ApiToken::with('pegawai')
             ->where('token', $hashed)
             ->first();
-
-        // Also fallback to plain token check
-        if (! $apiToken) {
-            $apiToken = ApiToken::with('pegawai')
-                ->where('token', $token)
-                ->first();
-        }
 
         if (! $apiToken || $apiToken->isExpired()) {
             return response()->json([
@@ -70,6 +68,10 @@ class EnsureApiAuthenticated
 
         // Update token last used time
         $apiToken->updateQuietly(['last_used_at' => now()]);
+
+        // Id token yang sedang dipakai, supaya halaman "Sesi Aktif" bisa
+        // menandai perangkat ini dan tidak mengeluarkan dirinya sendiri.
+        $request->attributes->set('api_token_id', $apiToken->id);
 
         // Authenticate user for the request
         auth()->setUser($pegawai);

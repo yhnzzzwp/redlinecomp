@@ -35,8 +35,7 @@ class ApiServiceController extends Controller
             ], 404);
         }
 
-        $customerPhone = $service->perangkat?->nomor_hp_customer;
-        $maskedPhone = $customerPhone ? '****' . substr($customerPhone, -4) : null;
+        $maskedPhone = \App\Support\Privasi::nomorHp($service->perangkat?->nomor_hp_customer);
 
         return response()->json([
             'status' => 'success',
@@ -45,7 +44,7 @@ class ApiServiceController extends Controller
                 'status' => $service->status->value,
                 'status_warna' => $service->status->warna(),
                 'merk_model' => $service->perangkat?->merk_model,
-                'nama_customer' => $service->perangkat?->nama_customer,
+                'nama_customer' => \App\Support\Privasi::namaSingkat($service->perangkat?->nama_customer),
                 'nomor_hp_customer' => $maskedPhone,
                 'keluhan' => $service->keluhan,
                 'catatan_solusi' => $service->catatan_solusi,
@@ -90,8 +89,11 @@ class ApiServiceController extends Controller
             'data' => [
                 'id' => $perangkat->id,
                 'kode_perangkat' => $perangkat->kode_perangkat,
-                'nama_customer' => $perangkat->nama_customer,
-                'nomor_hp_customer' => $perangkat->nomor_hp_customer,
+                // Endpoint ini publik — nama dan nomor pelanggan disamarkan
+                // supaya kode perangkat yang bocor/ditebak tidak berubah
+                // menjadi alat pemanen daftar pelanggan.
+                'nama_customer' => \App\Support\Privasi::namaSingkat($perangkat->nama_customer),
+                'nomor_hp_customer' => \App\Support\Privasi::nomorHp($perangkat->nomor_hp_customer),
                 'merk_model' => $perangkat->merk_model,
                 'serial_number' => $perangkat->serial_number,
                 'tahun' => $perangkat->tahun,

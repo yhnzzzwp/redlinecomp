@@ -11,9 +11,24 @@ use App\Models\Promo;
 
 final class PromoService
 {
-    public function hitung(string $kode, int $subtotal): PromoResult
+    /**
+     * @param  bool  $kunci  Kunci baris promo (lockForUpdate) selama transaksi
+     *                       berjalan. WAJIB true pada jalur checkout: tanpa itu
+     *                       pemeriksaan kuota dan penambahan `terpakai` terpisah
+     *                       oleh jeda, sehingga dua checkout bersamaan pada sisa
+     *                       kuota terakhir sama-sama lolos dan promo terpakai
+     *                       melebihi kuotanya. Jalur cek publik tidak perlu
+     *                       mengunci baris.
+     */
+    public function hitung(string $kode, int $subtotal, bool $kunci = false): PromoResult
     {
-        $promo = Promo::query()->where('kode_promo', $kode)->first();
+        $query = Promo::query()->where('kode_promo', $kode);
+
+        if ($kunci) {
+            $query->lockForUpdate();
+        }
+
+        $promo = $query->first();
 
         if ($promo === null || ! $promo->sedangBerlaku()) {
             throw new PromoTidakValidException($kode);

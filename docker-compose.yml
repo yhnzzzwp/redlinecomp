@@ -47,8 +47,11 @@ services:
       MYSQL_USER: ${DB_USERNAME:-redline}
       MYSQL_PASSWORD: ${DB_PASSWORD:-redline_secret}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret}
+    # Hanya dapat diakses dari host ini (mis. lewat SSH tunnel).
+    # Sebelumnya "3307:3306" berarti 0.0.0.0 — MariaDB terbuka ke seluruh
+    # jaringan lokal, padahal kredensialnya ada di repo publik.
     ports:
-      - "3307:3306"
+      - "127.0.0.1:3307:3306"
     volumes:
       - dbdata:/var/lib/mysql
     healthcheck:
@@ -68,25 +71,31 @@ services:
     depends_on: [web]
     networks: [redline]
 
+  # GUI database hanya untuk pemeliharaan. Dijalankan eksplisit dengan:
+  #   docker compose --profile tools up -d adminer
   adminer:
     image: adminer:4
     container_name: redline-adminer
     restart: unless-stopped
+    profiles: [tools]
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8081:8080"
     depends_on: [db]
     networks: [redline]
 
+  # Idem adminer:
+  #   docker compose --profile tools up -d phpmyadmin
   phpmyadmin:
     image: phpmyadmin:5
     container_name: redline-phpmyadmin
     restart: unless-stopped
+    profiles: [tools]
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
       UPLOAD_LIMIT: 64M
     ports:
-      - "8082:80"
+      - "127.0.0.1:8082:80"
     depends_on:
       db:
         condition: service_healthy

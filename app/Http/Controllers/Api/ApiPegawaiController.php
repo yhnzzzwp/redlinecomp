@@ -18,7 +18,17 @@ class ApiPegawaiController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $query = Pegawai::query()->withCount(['transaksi', 'service']);
+        // apiTokens dihitung hanya yang masih berlaku, supaya angka
+        // "perangkat aktif" di layar Akun Pegawai mencerminkan sesi yang
+        // benar-benar bisa dipakai.
+        $query = Pegawai::query()
+            ->withCount([
+                'transaksi',
+                'service',
+                'apiTokens as sesi_count' => fn ($q) => $q->where(
+                    fn ($w) => $w->whereNull('expires_at')->orWhere('expires_at', '>', now())
+                ),
+            ]);
 
         if ($request->filled('role')) {
             $query->where('role', $request->input('role'));
@@ -202,6 +212,7 @@ class ApiPegawaiController extends Controller
             'masih_bekerja'  => (bool) $p->masih_bekerja,
             'is_owner'       => $p->isOwner(),
             'total_transaksi'=> $p->transaksi_count ?? 0,
+            'sesi_count'    => (int) ($p->sesi_count ?? 0),
             'total_servis'   => $p->service_count ?? 0,
             'created_at'     => $p->created_at?->format('Y-m-d H:i:s'),
         ];

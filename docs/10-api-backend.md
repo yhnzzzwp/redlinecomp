@@ -54,7 +54,7 @@ API RESTful lengkap untuk integrasi website publik, POS kasir, dashboard staf, d
 | **POST** | `/promo/cek` | Publik | Cek & validasi kode promo terhadap subtotal |
 | **GET** | `/service/cek?resi=...` | Publik | Lacak status perbaikan servis via nomor resi |
 | **GET** | `/perangkat/{kode}` | Publik | Cek data & riwayat perangkat via kode QR |
-| **POST** | `/pos/sync` | Publik/POS | Sinkronisasi transaksi offline (batch/idempotent) |
+| **POST** | `/pos/sync` | Staff/Owner | Sinkronisasi transaksi offline (batch/idempotent) — **wajib Bearer token** |
 | **GET** | `/pos/items` | Staff/Owner | Data master produk & servis siap diambil untuk POS |
 | **POST** | `/pos/checkout` | Staff/Owner | Transaksi POS kasir (produk & servis + promo) |
 | **GET** | `/pos/nota/{transaksi}` | Staff/Owner | Data invoice / nota digital |

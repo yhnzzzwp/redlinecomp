@@ -120,8 +120,7 @@ class ApiAuthController extends Controller
         }
 
         if ($token) {
-            $hashed = hash('sha256', $token);
-            ApiToken::where('token', $hashed)->orWhere('token', $token)->delete();
+            ApiToken::where('token', hash('sha256', $token))->delete();
         }
 
         return response()->json([
@@ -205,9 +204,18 @@ class ApiAuthController extends Controller
             'password' => (string) $request->input('password'),
         ]);
 
+        // Ganti password HARUS mencabut sesi API lama. Tanpa ini, token yang
+        // sudah terlanjur bocor tetap berlaku selamanya meski passwordnya sudah
+        // diganti — korban mengira dirinya sudah aman padahal tidak.
+        $user->apiTokens()->delete();
+        $tokenBaru = $user->createApiToken('Sesi setelah ganti password');
+
         return response()->json([
             'status' => 'success',
-            'message' => 'Password berhasil diubah.',
+            'message' => 'Password berhasil diubah. Semua sesi API lain telah dikeluarkan.',
+            'data' => [
+                'token' => $tokenBaru,
+            ],
         ]);
     }
 
@@ -218,6 +226,88 @@ class ApiAuthController extends Controller
             'service'   => 'Redline Backend API',
             'version'   => '1.1.0',
             'timestamp' => now()->toIso8601String(),
+        ]);
+    }
+
+    // ─── Sesi aktif (token API milik sendiri) ──────────────────────
+
+    /**
+     * Daftar perangkat yang punya token aktif untuk akun ini.
+     *
+     * Untuk klien API, "sesi" adalah baris api_tokens — bukan tabel sessions
+     * yang dipakai portal web Blade.
+     */
+    public function sesiIndex(Request $request): JsonResponse
+    {
+        /** @var Pegawai $user */
+        $user = $request->user();
+        $sekarang = $request->attributes->get('api_token_id');
+
+        $sesi = $user->apiTokens()
+            ->orderByDesc('last_used_at')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn (ApiToken $t) => [
+                'id' => $t->id,
+                'nama_perangkat' => $t->name,
+                'terakhir_dipakai' => $t->last_used_at?->toIso8601String(),
+                'dibuat' => $t->created_at?->toIso8601String(),
+                'kedaluwarsa' => $t->expires_at?->toIso8601String(),
+                'perangkat_ini' => $t->id === $sekarang,
+            ]);
+
+        return response()->json(['status' => 'success', 'data' => $sesi]);
+    }
+
+    /** Keluarkan satu perangkat. */
+    public function sesiDestroy(Request $request, int $token): JsonResponse
+    {
+        /** @var Pegawai $user */
+        $user = $request->user();
+
+        // Dibatasi ke token milik pengguna ini: tanpa penyaringan pemilik,
+        // id token milik pegawai lain bisa dihapus hanya dengan menebak angka.
+        $baris = $user->apiTokens()->whereKey($token)->first();
+
+        if (! $baris) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Sesi tidak ditemukan.',
+            ], 404);
+        }
+
+        if ($baris->id === $request->attributes->get('api_token_id')) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Gunakan Logout untuk mengakhiri sesi perangkat ini.',
+            ], 422);
+        }
+
+        $baris->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Perangkat berhasil dikeluarkan.',
+        ]);
+    }
+
+    /** Keluarkan semua perangkat lain, sisakan yang sedang dipakai. */
+    public function sesiKeluarkanLain(Request $request): JsonResponse
+    {
+        /** @var Pegawai $user */
+        $user = $request->user();
+        $sekarang = $request->attributes->get('api_token_id');
+
+        $jumlah = $user->apiTokens()
+            ->when($sekarang !== null, fn ($q) => $q->whereKeyNot($sekarang))
+            ->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $jumlah > 0
+                ? "{$jumlah} perangkat lain dikeluarkan."
+                : 'Tidak ada perangkat lain yang aktif.',
+            'data' => ['dikeluarkan' => $jumlah],
         ]);
     }
 }

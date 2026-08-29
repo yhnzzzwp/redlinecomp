@@ -91,12 +91,24 @@ final class SesiController extends Controller
 
         $jumlah = DB::table('sessions')->where('user_id', $pegawai->id)->delete();
 
+        // Sesi web dan token API adalah dua kanal terpisah. Menghapus baris
+        // sessions saja membuat token API pegawai itu tetap hidup, sehingga
+        // perangkat yang "dikeluarkan" masih bisa memakai seluruh /api/v1 —
+        // justru skenario yang fitur ini ada untuk mencegahnya (HP hilang).
+        $jumlahToken = $pegawai->apiTokens()->delete();
+
         $pegawai->setRememberToken(Str::random(60));
         $pegawai->save();
 
-        return back()->with('success', $jumlah > 0
+        $rincian = $jumlah > 0
             ? "{$jumlah} perangkat {$pegawai->nama_pegawai} dikeluarkan."
-            : "Tidak ada sesi aktif milik {$pegawai->nama_pegawai}; cookie \"Ingat perangkat\"-nya tetap dicabut.");
+            : "Tidak ada sesi aktif milik {$pegawai->nama_pegawai}; cookie \"Ingat perangkat\"-nya tetap dicabut.";
+
+        if ($jumlahToken > 0) {
+            $rincian .= " {$jumlahToken} token API juga dicabut.";
+        }
+
+        return back()->with('success', $rincian);
     }
 
     /**

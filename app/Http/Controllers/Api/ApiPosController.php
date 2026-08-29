@@ -194,13 +194,16 @@ class ApiPosController extends Controller
             ? $payload['transaksi']
             : [$payload];
 
+        // Kasir diambil dari token, bukan dari body. Sebelumnya pemanggil bisa
+        // mengatasnamakan transaksi ke pegawai mana pun.
+        $kasirId = $request->user()?->id;
+
         $synced = [];
         $errors = [];
 
         foreach ($transactions as $idx => $trxData) {
             $validator = Validator::make($trxData, [
                 'local_id'         => ['required', 'string', 'max:255'],
-                'pegawai_id'       => ['nullable', 'exists:pegawai,id'],
                 'kode_promo'       => ['nullable', 'string', 'exists:promo,kode_promo'],
                 'metode_bayar'     => ['required', 'string'],
                 'nama_pembeli'     => ['nullable', 'string', 'max:255'],
@@ -211,8 +214,8 @@ class ApiPosController extends Controller
                 'items.*.produk_id' => ['nullable', 'exists:produk,id'],
                 'items.*.service_id'=> ['nullable', 'exists:service,id'],
                 'items.*.nama_item' => ['required', 'string', 'max:255'],
-                'items.*.jumlah'    => ['required', 'integer', 'min:1'],
-                'items.*.harga'     => ['required', 'integer', 'min:0'],
+                'items.*.jumlah'    => ['required', 'integer', 'min:1', 'max:9999'],
+                'items.*.harga'     => ['required', 'integer', 'min:0', 'max:100000000000'],
             ]);
 
             if ($validator->fails()) {
@@ -235,16 +238,48 @@ class ApiPosController extends Controller
             }
 
             try {
-                $record = DB::transaction(function () use ($trxData) {
-                    $subtotal = 0;
+                $record = DB::transaction(function () use ($trxData, $kasirId) {
+                    // Normalisasi baris SEKALI, dengan harga servis diambil dari
+                    // SERVER. Sebelumnya harga servis dipercaya dari klien,
+                    // sehingga perangkat kasir bisa membukukan servis Rp 2 juta
+                    // sebagai Rp 0 lalu menandai unitnya sudah diambil.
+                    // (Harga produk memang dari kasir: kolomnya sudah dihapus
+                    // dari skema pada migrasi 2026_08_20_000003.)
+                    $baris = [];
                     foreach ($trxData['items'] as $item) {
-                        $subtotal += ((int) $item['harga']) * ((int) $item['jumlah']);
+                        $isService = in_array(strtolower((string) $item['tipe']), ['service', 'servis'], true);
+                        $jumlah = (int) $item['jumlah'];
+                        $harga = (int) $item['harga'];
+                        $servis = null;
+
+                        if ($isService && ! empty($item['service_id'])) {
+                            $servis = Service::query()->lockForUpdate()->find($item['service_id']);
+                            if ($servis !== null) {
+                                $harga = $servis->totalBiaya();
+                            }
+                        }
+
+                        $baris[] = [
+                            'isService' => $isService,
+                            'servis'    => $servis,
+                            'item'      => $item,
+                            'jumlah'    => $jumlah,
+                            'harga'     => $harga,
+                            'subtotal'  => $harga * $jumlah,
+                        ];
                     }
+
+                    $subtotal = (int) array_sum(array_column($baris, 'subtotal'));
 
                     $diskon = 0;
                     $promoId = null;
                     if (! empty($trxData['kode_promo'])) {
-                        $promo = Promo::where('kode_promo', $trxData['kode_promo'])->first();
+                        // lockForUpdate: tanpa ini, pemeriksaan kuota dan
+                        // penambahan 'terpakai' terpisah oleh jeda, sehingga dua
+                        // sync bersamaan bisa memakai sisa kuota terakhir dua kali.
+                        $promo = Promo::where('kode_promo', $trxData['kode_promo'])
+                            ->lockForUpdate()
+                            ->first();
                         if ($promo && $promo->sedangBerlaku() && $subtotal >= (int) $promo->minimal_transaksi) {
                             $diskon = match ($promo->tipe_promo) {
                                 \App\Enums\TipePromo::Persen => intdiv($subtotal * (int) $promo->besar_promo, 100),
@@ -261,12 +296,22 @@ class ApiPosController extends Controller
 
                     $total = max(0, $subtotal - $diskon);
                     $bayar = (int) $trxData['bayar'];
-                    $kembalian = max(0, $bayar - $total);
 
-                    $transaksi = Transaksi::create([
+                    // Disamakan dengan PosService::checkout: transaksi tidak boleh
+                    // tercatat sebagai lunas bila uang yang dibayarkan kurang dari
+                    // total. Sebelumnya jalur sync menerima bayar = 0 dan tetap
+                    // membukukan penjualan penuh — pembukuan toko jadi tidak cocok
+                    // dengan uang yang benar-benar masuk.
+                    if ($bayar < $total) {
+                        throw new \App\Exceptions\PembayaranKurangException($total, $bayar);
+                    }
+
+                    $kembalian = $bayar - $total;
+
+                    $transaksi = \App\Support\CobaUlang::unik(fn (): Transaksi => Transaksi::create([
                         'kode_nota'        => (new KodeGenerator())->nota(),
                         'local_id'         => $trxData['local_id'],
-                        'pegawai_id'       => $trxData['pegawai_id'] ?? null,
+                        'pegawai_id'       => $kasirId,
                         'promo_id'         => $promoId,
                         'metode_bayar'     => MetodeBayar::tryFrom($trxData['metode_bayar']) ?? MetodeBayar::Tunai,
                         'subtotal'         => $subtotal,
@@ -277,31 +322,40 @@ class ApiPosController extends Controller
                         'nama_pembeli'     => $trxData['nama_pembeli'] ?? 'Umum',
                         'nomor_hp_pembeli' => $trxData['nomor_hp_pembeli'] ?? null,
                         'status'           => TransaksiStatus::Normal,
-                    ]);
+                    ]));
 
-                    foreach ($trxData['items'] as $item) {
-                        $isService = strtolower($item['tipe']) === 'service' || strtolower($item['tipe']) === 'servis';
+                    foreach ($baris as $b) {
+                        $item = $b['item'];
+
                         ItemTransaksi::create([
                             'transaksi_id' => $transaksi->id,
-                            'tipe'         => $isService ? TipeItem::Servis : TipeItem::Produk,
-                            'produk_id'    => ! $isService ? ($item['produk_id'] ?? null) : null,
-                            'service_id'   => $isService ? ($item['service_id'] ?? null) : null,
+                            'tipe'         => $b['isService'] ? TipeItem::Servis : TipeItem::Produk,
+                            'produk_id'    => ! $b['isService'] ? ($item['produk_id'] ?? null) : null,
+                            'service_id'   => $b['isService'] ? ($item['service_id'] ?? null) : null,
                             'nama_item'    => $item['nama_item'],
-                            'jumlah'       => (int) $item['jumlah'],
-                            'harga'        => (int) $item['harga'],
-                            'subtotal'     => ((int) $item['harga']) * ((int) $item['jumlah']),
+                            'jumlah'       => $b['jumlah'],
+                            'harga'        => $b['harga'],
+                            'subtotal'     => $b['subtotal'],
                         ]);
 
-                        if ($isService && ! empty($item['service_id'])) {
-                            $srv = Service::find($item['service_id']);
-                            if ($srv && $srv->status !== StatusService::SudahDiambil) {
-                                $srv->update(['status' => StatusService::SudahDiambil]);
-                                $srv->riwayat()->create([
-                                    'pegawai_id' => $transaksi->pegawai_id,
-                                    'status'     => StatusService::SudahDiambil,
-                                    'catatan'    => 'Dibayar & diambil via POS — Nota #' . $transaksi->kode_nota,
-                                ]);
+                        $srv = $b['servis'];
+                        if ($srv !== null && $srv->status !== StatusService::SudahDiambil) {
+                            // Guard transisi yang ditegakkan ServiceTicketService
+                            // sebelumnya dilewati di sini: unit yang baru diterima
+                            // bisa langsung dilompatkan ke "Sudah Diambil".
+                            if (! $srv->status->canTransitionTo(StatusService::SudahDiambil)) {
+                                throw new \App\Exceptions\ServisBelumSelesaiException(
+                                    (string) $srv->nomor_resi,
+                                    $srv->status->value
+                                );
                             }
+
+                            $srv->update(['status' => StatusService::SudahDiambil]);
+                            $srv->riwayat()->create([
+                                'pegawai_id' => $transaksi->pegawai_id,
+                                'status'     => StatusService::SudahDiambil,
+                                'catatan'    => 'Dibayar & diambil via POS — Nota #' . $transaksi->kode_nota,
+                            ]);
                         }
                     }
 
@@ -393,5 +447,51 @@ class ApiPosController extends Controller
                 'subtotal'     => (int) $item->subtotal,
             ]),
         ];
+    }
+
+    /**
+     * Nota versi PUBLIK — dipakai halaman /nota/{kode} di frontend.
+     *
+     * Kode nota hanya 6 digit sehingga bisa ditebak; karena itu identitas
+     * pembeli disamarkan dan nomor teleponnya tidak dikirim sama sekali.
+     * Yang tersisa cukup bagi pemegang struk untuk mencocokkan pembeliannya,
+     * tidak cukup bagi orang lain untuk memanen data pelanggan.
+     */
+    public function notaPublik(string $kode): JsonResponse
+    {
+        $transaksi = Transaksi::query()
+            ->with(['items', 'promo'])
+            ->where('kode_nota', $kode)
+            ->first();
+
+        if (! $transaksi) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Nota tidak ditemukan.',
+            ], 404);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data'   => [
+                'kode_nota'    => $transaksi->kode_nota,
+                'status'       => $transaksi->status->value ?? (string) $transaksi->status,
+                'metode_bayar' => $transaksi->metode_bayar->value ?? (string) $transaksi->metode_bayar,
+                'nama_pembeli' => \App\Support\Privasi::namaSingkat($transaksi->nama_pembeli),
+                'subtotal'     => (int) $transaksi->subtotal,
+                'diskon'       => (int) $transaksi->diskon,
+                'total'        => (int) $transaksi->total,
+                'bayar'        => (int) $transaksi->bayar,
+                'kembalian'    => (int) $transaksi->kembalian,
+                'created_at'   => $transaksi->created_at?->format('Y-m-d H:i:s'),
+                'items'        => $transaksi->items->map(fn ($item) => [
+                    'nama_item' => $item->nama_item,
+                    'jumlah'    => (int) $item->jumlah,
+                    'harga'     => (int) $item->harga,
+                    'subtotal'  => (int) $item->subtotal,
+                    'tipe'      => $item->tipe->value ?? (string) $item->tipe,
+                ]),
+            ],
+        ]);
     }
 }

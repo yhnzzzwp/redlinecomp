@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     // --- Public API Routes ---
     Route::get('/health', [ApiAuthController::class, 'health']);
-    Route::post('/auth/login', [ApiAuthController::class, 'login']);
+    Route::post('/auth/login', [ApiAuthController::class, 'login'])->middleware('throttle:login-api');
 
     // Public Katalog & Kategori
     Route::get('/katalog', [ApiKatalogController::class, 'index']);
@@ -29,20 +29,35 @@ Route::prefix('v1')->group(function (): void {
     Route::get('/promo', [ApiPromoController::class, 'index']);
     Route::post('/promo/cek', [ApiPromoController::class, 'cek']);
 
+    // Nota publik: kode nota hanya 6 digit sehingga bisa ditebak — dibatasi
+    // laju dan datanya sudah disamarkan di controller.
+    Route::get('/nota/{kode}', [ApiPosController::class, 'notaPublik'])
+        ->middleware('throttle:20,1')
+        ->where('kode', '[A-Za-z0-9-]+');
+
     // Public Servis & Perangkat Tracking
     Route::get('/service/cek', [ApiServiceController::class, 'cek']);
     Route::get('/perangkat/{kode}', [ApiServiceController::class, 'perangkat']);
 
-    // Offline POS Sync
-    Route::post('/pos/sync', [ApiPosController::class, 'sync']);
-
     // --- Authenticated Staff & Admin API Routes ---
     Route::middleware('auth.api')->group(function (): void {
+        // Offline POS Sync — WAJIB terautentikasi. Endpoint ini membuat
+        // transaksi, menaikkan pemakaian promo, dan menandai servis sebagai
+        // "sudah diambil"; sebelumnya bisa dipanggil siapa pun dari internet.
+        Route::post('/pos/sync', [ApiPosController::class, 'sync']);
+
         // Current User Profile & Session
         Route::get('/auth/me', [ApiAuthController::class, 'me']);
         Route::post('/auth/logout', [ApiAuthController::class, 'logout']);
         Route::put('/auth/profile', [ApiAuthController::class, 'updateProfile']);
         Route::put('/auth/password', [ApiAuthController::class, 'updatePassword']);
+
+        // Perangkat yang punya token aktif untuk akun ini. Sengaja bukan
+        // Owner-only: setiap pegawai berhak melihat dan mengeluarkan
+        // perangkatnya sendiri.
+        Route::get('/auth/sesi', [ApiAuthController::class, 'sesiIndex']);
+        Route::post('/auth/sesi/keluarkan-lain', [ApiAuthController::class, 'sesiKeluarkanLain']);
+        Route::delete('/auth/sesi/{token}', [ApiAuthController::class, 'sesiDestroy'])->whereNumber('token');
 
         // POS (Point of Sale)
         Route::get('/pos/items', [ApiPosController::class, 'items']);
