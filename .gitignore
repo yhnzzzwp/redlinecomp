@@ -1,6 +1,10 @@
 *.log
 .DS_Store
 .env
+# Pola berbintang: cadangan .env apa pun berisi APP_KEY dan password
+# database, jadi tidak boleh pernah ter-commit.
+.env.*
+!.env.example
 .env.backup
 .env.production
 .phpactor.json
