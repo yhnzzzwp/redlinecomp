@@ -27,10 +27,23 @@ class Service extends Model
         'tanggal_selesai' => 'date',
     ];
 
+    // Anotasi generic dibutuhkan larastan untuk mengetahui model terkait;
+    // tanpa ini setiap akses seperti $service->perangkat->merk_model dianggap
+    // properti tak dikenal pada Eloquent\Model.
+
+    /** @return BelongsTo<Perangkat, $this> */
     public function perangkat(): BelongsTo { return $this->belongsTo(Perangkat::class, 'perangkat_id'); }
+
+    /** @return BelongsTo<Pegawai, $this> */
     public function pegawai(): BelongsTo { return $this->belongsTo(Pegawai::class, 'pegawai_id'); }
+
+    /** @return BelongsTo<Pegawai, $this> */
     public function teknisi(): BelongsTo { return $this->belongsTo(Pegawai::class, 'teknisi_id'); }
+
+    /** @return HasMany<PartService, $this> */
     public function parts(): HasMany { return $this->hasMany(PartService::class, 'service_id'); }
+
+    /** @return HasMany<ServiceStatus, $this> */
     public function riwayat(): HasMany { return $this->hasMany(ServiceStatus::class, 'service_id')->latest(); }
 
     public function totalBiaya(): int

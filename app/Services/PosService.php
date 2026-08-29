@@ -51,7 +51,7 @@ final class PosService
 
                     $sub = $harga * $jumlah;
                     $subtotal += $sub;
-                    $baris[] = ['tipe' => TipeItem::Produk, 'model' => $produk, 'jumlah' => $jumlah, 'harga' => $harga, 'sub' => $sub];
+                    $baris[] = ['tipe' => TipeItem::Produk, 'model' => $produk, 'nama' => (string) $produk->nama_produk, 'jumlah' => $jumlah, 'harga' => $harga, 'sub' => $sub];
                 } else {
                     $service = \App\Models\Service::query()->lockForUpdate()->findOrFail($itemId);
 
@@ -66,7 +66,19 @@ final class PosService
                     $harga = $service->totalBiaya();
                     $sub = $harga * $jumlah;
                     $subtotal += $sub;
-                    $baris[] = ['tipe' => TipeItem::Servis, 'model' => $service, 'jumlah' => $jumlah, 'harga' => $harga, 'sub' => $sub];
+                    // Nama baris dihitung di sini, selagi tipenya masih Service.
+                    // Sebelumnya memakai $b['model']->nama_barang — properti yang
+                    // tidak ada pada model Service, sehingga baris servis pada
+                    // nota tersimpan sebagai "Servis: " tanpa nama sama sekali.
+                    // perangkat_id nullable (nullOnDelete), jadi relasinya memang
+                    // bisa kosong. Ditulis eksplisit agar benar sekaligus terbaca
+                    // jelas oleh analisis statis.
+                    $perangkat = $service->perangkat;
+                    $namaServis = 'Servis: '.($perangkat !== null
+                        ? $perangkat->merk_model
+                        : 'Unit #'.$service->nomor_resi);
+
+                    $baris[] = ['tipe' => TipeItem::Servis, 'model' => $service, 'nama' => $namaServis, 'jumlah' => $jumlah, 'harga' => $harga, 'sub' => $sub];
                 }
             }
 
@@ -100,7 +112,7 @@ final class PosService
                     'tipe' => $b['tipe'],
                     'produk_id' => $b['tipe'] === TipeItem::Produk ? $b['model']->id : null,
                     'service_id' => $b['tipe'] === TipeItem::Servis ? $b['model']->id : null,
-                    'nama_item' => $b['tipe'] === TipeItem::Produk ? $b['model']->nama_produk : 'Servis: ' . $b['model']->nama_barang,
+                    'nama_item' => $b['nama'],
                     'jumlah' => $b['jumlah'],
                     'harga' => $b['harga'],
                     'subtotal' => $b['sub'],

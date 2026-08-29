@@ -74,7 +74,7 @@ final class GantiPasswordPegawai extends Command
 
             $baris[] = [
                 $pegawai->username,
-                $pegawai->role->value ?? (string) $pegawai->role,
+                $pegawai->role->value,
                 $password,
                 $jumlahToken,
                 $jumlahSesi,
