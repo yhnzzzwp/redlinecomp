@@ -105,6 +105,13 @@ final class PosService
                 'kembalian' => $data->bayar - $total,
                 'nama_pembeli' => $data->namaPembeli,
                 'nomor_hp_pembeli' => $data->nomorHpPembeli,
+                // Kolom status punya default 'Normal' di database, tetapi model
+                // hasil create() tidak memuat nilai default itu — atributnya
+                // null di memori. Respons API lalu membaca $t->status->value
+                // pada null; sebelumnya tertutup fallback "?? (string) $t->status"
+                // sehingga field status pada nota API selalu string kosong.
+                // Disamakan dengan jalur sync yang memang menyetelnya eksplisit.
+                'status' => \App\Enums\TransaksiStatus::Normal,
             ]));
 
             foreach ($baris as $b) {
