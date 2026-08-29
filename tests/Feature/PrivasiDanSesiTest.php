@@ -238,4 +238,23 @@ final class PrivasiDanSesiTest extends TestCase
         $this->withHeaders(['Authorization' => 'Bearer ' . $tokenOwner])
             ->getJson('/api/v1/auth/me')->assertStatus(200);
     }
+
+    // ─── Lupa password ─────────────────────────────────────────────
+
+    public function test_lupa_password_tidak_membocorkan_akun_mana_yang_ada(): void
+    {
+        $ada = $this->postJson('/api/v1/auth/lupa-password', ['username' => 'kasir1'])
+            ->assertStatus(200);
+
+        $tidakAda = $this->postJson('/api/v1/auth/lupa-password', ['username' => 'hantu-xyz'])
+            ->assertStatus(200);
+
+        // Respons wajib identik: beda respons = alat enumerasi username.
+        $this->assertSame($ada->json(), $tidakAda->json());
+    }
+
+    public function test_lupa_password_menolak_username_kosong(): void
+    {
+        $this->postJson('/api/v1/auth/lupa-password', [])->assertStatus(422);
+    }
 }

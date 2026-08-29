@@ -20,6 +20,11 @@ Route::prefix('v1')->group(function (): void {
     Route::get('/health', [ApiAuthController::class, 'health']);
     Route::post('/auth/login', [ApiAuthController::class, 'login'])->middleware('throttle:login-api');
 
+    // Permintaan atur ulang password. Dibatasi ketat: endpoint publik yang
+    // menerima username adalah sasaran empuk untuk enumerasi dan spam.
+    Route::post('/auth/lupa-password', [ApiAuthController::class, 'lupaPassword'])
+        ->middleware('throttle:5,1');
+
     // Public Katalog & Kategori
     Route::get('/katalog', [ApiKatalogController::class, 'index']);
     Route::get('/katalog/{produk}', [ApiKatalogController::class, 'show']);

@@ -10,6 +10,7 @@ use App\Models\Pegawai;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 
@@ -308,6 +309,54 @@ class ApiAuthController extends Controller
                 ? "{$jumlah} perangkat lain dikeluarkan."
                 : 'Tidak ada perangkat lain yang aktif.',
             'data' => ['dikeluarkan' => $jumlah],
+        ]);
+    }
+
+    /**
+     * Permintaan atur ulang password.
+     *
+     * Sengaja TIDAK memakai tautan reset lewat email: MAIL_MAILER pada
+     * deployment ini adalah "log", jadi email tidak pernah benar-benar
+     * terkirim dan tombolnya hanya akan tampak bekerja. Untuk toko dengan
+     * lima akun dan Owner yang hadir di tempat, jalur yang jujur adalah
+     * mencatat permintaan lalu mengarahkan pegawai ke Owner, yang mengatur
+     * ulang lewat halaman Akun Pegawai atau redline:ganti-password.
+     *
+     * Respons SELALU sama, akun ada maupun tidak, supaya endpoint ini tidak
+     * bisa dipakai memetakan username yang valid (enumerasi akun).
+     */
+    public function lupaPassword(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'username' => ['required', 'string', 'max:100'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Username atau email wajib diisi.',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $diminta = trim((string) $request->input('username'));
+
+        $pegawai = Pegawai::query()
+            ->where('username', $diminta)
+            ->orWhere('email', $diminta)
+            ->first();
+
+        Log::info('Permintaan atur ulang password', [
+            'diminta_untuk' => $diminta,
+            'akun_ada'      => $pegawai !== null,
+            'pegawai_id'    => $pegawai?->id,
+            'ip'            => $request->ip(),
+            'waktu'         => now()->toIso8601String(),
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Permintaan Anda sudah dicatat. Hubungi Owner toko untuk mengatur ulang password.',
         ]);
     }
 }

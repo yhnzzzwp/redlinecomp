@@ -17,20 +17,47 @@ use App\Models\ServiceStatus;
 use App\Models\Transaksi;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Password awal setiap akun.
+     *
+     * Sebelumnya seluruh akun di-seed dengan Hash::make('password'). Karena
+     * repositori ini publik, kombinasi username/password itu ikut terbit —
+     * siapa pun bisa membacanya lalu mencobanya ke instalasi mana pun yang
+     * di-seed dengan berkas ini.
+     *
+     * Sekarang: diambil dari SEED_PASSWORD bila disetel (berguna untuk CI dan
+     * pengujian otomatis), selain itu dibuat acak per akun dan dicetak sekali
+     * ke konsol.
+     *
+     * @var array<string, string>
+     */
+    private array $kredensial = [];
+
+    private function passwordAwal(string $username): string
+    {
+        $dariEnv = (string) env('SEED_PASSWORD', '');
+        $password = $dariEnv !== '' ? $dariEnv : Str::password(16, symbols: false);
+
+        $this->kredensial[$username] = $password;
+
+        return $password;
+    }
+
     public function run(): void
     {
 
         $owner = Pegawai::create([
             'nama_pegawai' => 'Adi Kusumo', 'username' => 'owner', 'email' => 'owner@redline.tech',
-            'password' => Hash::make('password'), 'role' => 'Owner', 'nomor_hp' => '081200000001',
+            'password' => Hash::make($this->passwordAwal('owner')), 'role' => 'Owner', 'nomor_hp' => '081200000001',
             'tanggal_masuk' => '2016-03-01', 'masih_bekerja' => true,
         ]);
         $rijal = Pegawai::create([
             'nama_pegawai' => 'Yth. Rijal', 'username' => 'rijal', 'email' => 'rijal@redline.tech',
-            'password' => Hash::make('password'), 'role' => 'Karyawan', 'nomor_hp' => '081200000002',
+            'password' => Hash::make($this->passwordAwal('rijal')), 'role' => 'Karyawan', 'nomor_hp' => '081200000002',
             'tanggal_masuk' => '2022-01-10', 'masih_bekerja' => true,
         ]);
         foreach ([
@@ -40,7 +67,7 @@ class DatabaseSeeder extends Seeder
         ] as [$nama, $u, $mail]) {
             Pegawai::create([
                 'nama_pegawai' => $nama, 'username' => $u, 'email' => $mail,
-                'password' => Hash::make('password'), 'role' => 'Karyawan', 'masih_bekerja' => true,
+                'password' => Hash::make($this->passwordAwal($u)), 'role' => 'Karyawan', 'masih_bekerja' => true,
                 'tanggal_masuk' => '2023-06-01',
             ]);
         }
@@ -119,5 +146,35 @@ class DatabaseSeeder extends Seeder
         ] as [$st, $cat]) {
             ServiceStatus::create(['service_id' => $svc->id, 'pegawai_id' => $rijal->id, 'status' => $st, 'catatan' => $cat]);
         }
+
+        $this->tampilkanKredensial();
+    }
+
+    /** Cetak sekali ke konsol; tidak disimpan di berkas mana pun. */
+    private function tampilkanKredensial(): void
+    {
+        $cmd = $this->command;
+
+        if ($cmd === null || $this->kredensial === []) {
+            return;
+        }
+
+        if (env('SEED_PASSWORD', '') !== '') {
+            $cmd->warn('Akun di-seed memakai SEED_PASSWORD dari environment.');
+
+            return;
+        }
+
+        $cmd->newLine();
+        $cmd->table(
+            ['Username', 'Password Awal'],
+            array_map(
+                static fn (string $u, string $p): array => [$u, $p],
+                array_keys($this->kredensial),
+                array_values($this->kredensial)
+            )
+        );
+        $cmd->warn('Catat sekarang — password ini tidak disimpan di mana pun.');
+        $cmd->line('Ganti kapan saja dengan: php artisan redline:ganti-password --semua');
     }
 }
